@@ -5,6 +5,8 @@ use App\Http\Controllers\BankSampahController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\TransaksiController;
+use App\Http\Controllers\SetorSampahController;
+use App\Http\Controllers\JenisSampahController;
 
 
 // ================= TEST =================
@@ -21,11 +23,25 @@ Route::get('/bank-sampahs',[BankSampahController::class, 'index']);
 
 
 //transaksi buat nasabah
-    Route::post('/transaksi', [TransaksiController::class, 'store']);
+Route::post('/transaksi', [TransaksiController::class, 'store']);
 
+//setor sampah buat nasabah
+Route::post('/setor-sampah',[SetorSampahController::class,'store']);
+Route::get('/setor-sampah', [SetorSampahController::class, 'index']);
+
+
+
+//jenis sampah buat bank sampah
+Route::apiResource('jenis-sampah',JenisSampahController::class);
+// Route::get('/jenis-sampahs', [JenisSampahController::class, 'index']);
+// Route::post('/jenis-sampahs', [JenisSampahController::class, 'store']);
+// Route::get('/jenis-sampahs/{id}', [JenisSampahController::class, 'show']);
+Route::put('/jenis-sampahs/{id}', [JenisSampahController::class, 'update']);
+Route::delete('/jenis-sampahs/{id}', [JenisSampahController::class, 'destroy']);
 
 // ================= PROTECTED =================
 Route::middleware('auth:sanctum')->group(function () {
+
 
 // ================= NASABAH Transaksi=================
     
