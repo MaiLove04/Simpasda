@@ -8,77 +8,252 @@ use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-    // 🔹 REGISTER
-    public function register(Request $request)
-    {
+    // ================= REGISTER =================
+    public function register(
+        Request $request
+    ) {
+
         $request->validate([
-            'name' => 'required',
-            'email' => 'required|email|unique:users',
-            'password' => 'required|min:6|confirmed',
-            'alamat' => 'required',
-            'no_hp' => 'required|unique:users'
+
+            'name' =>
+                'required',
+
+            'email' =>
+                'required|email|unique:users',
+
+            'password' =>
+                'required|min:6|confirmed',
+
+            'alamat' =>
+                'required',
+
+            'no_hp' =>
+                'required|unique:users',
+
+            'foto' =>
+                'nullable|image',
+
+            'bank_sampah_id' =>
+                'required|exists:bank_sampahs,id',
         ]);
+
+
+        $foto = null;
+
+
+        if (
+            $request->hasFile(
+                'foto'
+            )
+        ) {
+
+            $file =
+                $request->file(
+                    'foto'
+                );
+
+
+            $fileName =
+
+                time() .
+
+                '_' .
+
+                $file
+                    ->getClientOriginalName();
+
+
+            $file->move(
+
+                public_path(
+                    'uploads/users'
+                ),
+
+                $fileName,
+            );
+
+
+            $foto =
+
+                'uploads/users/' .
+
+                $fileName;
+        }
+
 
         $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => bcrypt($request->password),
-            'alamat' => $request->alamat,
-            'no_hp' => $request->no_hp,
-            'role' => 'nasabah',
 
-            // 🔥 UBAH INI BIAR BISA LOGIN
-            'status' => 'pending'
+            'name' =>
+                $request->name,
+
+            'email' =>
+                $request->email,
+
+            'password' =>
+                bcrypt(
+                    $request->password
+                ),
+
+            'alamat' =>
+                $request->alamat,
+
+            'no_hp' =>
+                $request->no_hp,
+
+            'role' =>
+                'nasabah',
+
+            'status' =>
+                'pending',
+
+            'foto' =>
+                $foto,
+
+            'bank_sampah_id' =>
+                $request->bank_sampah_id,
         ]);
 
+
         return response()->json([
-            'message' => 'Register berhasil',
-            'user' => $user
+
+            'message' =>
+                'Register berhasil',
+
+            'user' =>
+                $user,
+
         ], 201);
     }
 
-    // 🔹 LOGIN
-    public function login(Request $request)
-    {
-        // 🔥 VALIDASI
+
+
+    // ================= LOGIN =================
+    public function login(
+        Request $request
+    ) {
+
         $request->validate([
-            'email' => 'required|email',
-            'password' => 'required'
+
+            'email' =>
+                'required|email',
+
+            'password' =>
+                'required',
         ]);
 
-        $user = User::where('email', $request->email)->first();
 
-        // 🔥 CEK USER & PASSWORD
-        if (!$user || !Hash::check($request->password, $user->password)) {
+        $user = User::where(
+            'email',
+            $request->email,
+        )->first();
+
+
+        if (
+
+            !$user ||
+
+            !Hash::check(
+                $request->password,
+                $user->password,
+            )
+
+        ) {
+
             return response()->json([
-                'message' => 'Email atau password salah'
+
+                'message' =>
+                    'Email atau password salah',
+
             ], 401);
         }
 
-        // 🔥 CEK STATUS
-        if ($user->status != 'aktif') {
-        return response()->json([
-            'message' => 'Akun menunggu verifikasi bank sampah'
-        ], 403);
-    }
 
-        // 🔥 BUAT TOKEN
-        $token = $user->createToken('auth_token')->plainTextToken;
+        if (
+
+            $user->status !=
+            'aktif'
+
+        ) {
+
+            return response()->json([
+
+                'message' =>
+                    'Akun belum disetujui admin',
+
+            ], 403);
+        }
+
+
+        $token =
+
+            $user
+
+                ->createToken(
+                    'auth_token'
+                )
+
+                ->plainTextToken;
+
 
         return response()->json([
-            'message' => 'Login berhasil',
-            'token' => $token,
-            'user' => $user
+
+            'message' =>
+                'Login berhasil',
+
+            'token' =>
+                $token,
+
+            'user' => [
+
+                'id' =>
+                    $user->id,
+
+                'name' =>
+                    $user->name,
+
+                'email' =>
+                    $user->email,
+
+                'role' =>
+                    $user->role,
+
+                'foto' =>
+
+                    $user->foto
+
+                    ?
+
+                    asset(
+                        $user->foto
+                    )
+
+                    :
+
+                    null,
+            ],
         ]);
     }
 
-    // 🔹 LOGOUT
-    public function logout(Request $request)
-    {
-        $request->user()->tokens()->delete();
+
+
+    // ================= LOGOUT =================
+    public function logout(
+        Request $request
+    ) {
+
+        $request
+
+            ->user()
+
+            ->tokens()
+
+            ->delete();
+
 
         return response()->json([
-            'message' => 'Logout berhasil'
+
+            'message' =>
+                'Logout berhasil',
         ]);
     }
 }

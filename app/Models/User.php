@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+// use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\JadwalPenjemputan;
 
 
 class User extends Authenticatable
@@ -17,9 +19,11 @@ class User extends Authenticatable
         'email',
         'password',
         'alamat',
+        'foto',
         'no_hp',
         'role',
-        'status'
+        'status',
+        'bank_sampah_id',
     ];
 
     protected $hidden = [
@@ -38,5 +42,22 @@ class User extends Authenticatable
     public function bankSampah()
     {
         return $this->belongsTo(\App\Models\BankSampah::class);
+    }
+
+    // Relasi dengan JadwalPenjemputan sebagai nasabah
+    public function jadwalNasabah(): HasMany
+    {
+        return $this->hasMany(
+            JadwalPenjemputan::class,
+            'nasabah_id'
+        );
+    }
+
+    public function jadwalKurir(): HasMany
+    {
+        return $this->hasMany(
+            JadwalPenjemputan::class,
+            'kurir_id'
+        );
     }
 }
