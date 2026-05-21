@@ -9,6 +9,9 @@ use App\Http\Controllers\SetorSampahController;
 use App\Http\Controllers\JenisSampahController;
 use App\Http\Controllers\KurirController;
 use App\Http\Controllers\JadwalPenjemputanController;
+use App\Http\Controllers\JenisSampahWebController;
+
+
 
 // ================= TEST =================
 Route::get('/test', function () {
@@ -20,6 +23,8 @@ Route::get('/test', function () {
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout']);
+Route::post('/create-admin',[AuthController::class, 'createAdmin']);
+Route::get('/nasabah/qrcode/{kode}',[UserController::class, 'scanQr']);
 
 
 //data bank sampah
@@ -34,8 +39,13 @@ Route::post('/setor-sampah',[SetorSampahController::class,'store']);
 Route::get('/setor-sampah', [SetorSampahController::class, 'index']);
 
 //kurir
-    Route::get('/dashboard-kurir', [KurirController::class, 'dashboard_kurir']);
+    // Route::get('/dashboard-kurir', [KurirController::class, 'dashboard_kurir']);
+    Route::get('/kurir/jadwal/{id}', [JadwalPenjemputanController::class, 'jadwalKurir']);
+    Route::get('/dashboard-kurir/{id}',[KurirController::class,'dashboard_kurir']
+);
 
+//jenis sampah buat web admin
+Route::resource('/admin/jenis-sampah',JenisSampahWebController::class);
 
 //jenis sampah buat bank sampah
 Route::apiResource('jenis-sampah',JenisSampahController::class);
@@ -83,6 +93,7 @@ Route::middleware('auth:sanctum')->group(function () {
     //jadwal penjemputan
     Route::post('/jadwal-penjemputan', [JadwalPenjemputanController::class, 'store']);
 
-    
+    //barcode
+    Route::get('/barcode/nasabah/{id}',[BarcodeController::class,'barcodeNasabah']);
 
 });

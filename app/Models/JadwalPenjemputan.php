@@ -19,16 +19,24 @@ class JadwalPenjemputan extends Model
 
     public function nasabah(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'nasabah_id');
+        return $this->belongsTo(
+            User::class,
+            'nasabah_id'
+        );
     }
 
     public function kurir(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'kurir_id');
+        return $this->belongsTo(
+            User::class,
+            'kurir_id'
+        );
     }
 
     public function bankSampah(): BelongsTo
     {
-        return $this->belongsTo(BankSampah::class);
+        return $this->belongsTo(
+            BankSampah::class
+        );
     }
 }

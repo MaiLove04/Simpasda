@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 
+
 class UserController extends Controller
 {
     /**
@@ -38,5 +39,29 @@ class UserController extends Controller
         $users = User::all();
 
         return response()->json($users);
+    }
+
+    public function scanQr($kode)
+    {
+        $nasabah = User::where(
+            'kode_nasabah',
+            $kode
+        )
+        ->where('role', 'nasabah')
+        ->first();
+
+        if (!$nasabah) {
+
+            return response()->json([
+                'message' => 'Nasabah tidak ditemukan'
+            ], 404);
+        }
+
+        return response()->json([
+            'id' => $nasabah->id,
+            'name' => $nasabah->name,
+            'alamat' => $nasabah->alamat,
+            'kode_nasabah' => $nasabah->kode_nasabah,
+        ]);
     }
 }

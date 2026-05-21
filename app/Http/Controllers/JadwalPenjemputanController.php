@@ -7,6 +7,62 @@ use Illuminate\Http\Request;
 
 class JadwalPenjemputanController extends Controller
 {
+
+
+    // =========================
+// JADWAL KURIR
+// =========================
+public function jadwalKurir($id)
+{
+    try {
+
+        $jadwal =
+        JadwalPenjemputan::with([
+
+            'nasabah',
+            'kurir',
+            'bankSampah'
+
+        ])
+
+        ->where(
+            'kurir_id',
+            $id
+        )
+
+        ->latest()
+
+        ->get();
+
+        return response()->json([
+
+            'success' => true,
+
+            'message' =>
+                'Data jadwal berhasil diambil',
+
+            'data' => $jadwal
+
+        ], 200);
+
+    } catch (\Exception $e) {
+
+        return response()->json([
+
+            'success' => false,
+
+            'message' =>
+                'Gagal mengambil jadwal',
+
+            'error' =>
+                $e->getMessage(),
+
+        ], 500);
+    }
+}
+    // =========================
+    // SIMPAN JADWAL PENJEMPUTAN
+    // =========================
     public function store(Request $request)
     {
         $request->validate([
@@ -21,42 +77,75 @@ class JadwalPenjemputanController extends Controller
                 => 'required|date',
 
             'alamat'
-                => 'required',
+                => 'required|string',
 
             'catatan'
-                => 'nullable',
+                => 'nullable|string',
         ]);
 
-        $admin = auth()->user();
+        try {
 
-        $jadwal = JadwalPenjemputan::create([
+            $admin = auth()->user();
 
-            'bank_sampah_id'
-                => $admin->bank_sampah_id,
+            $jadwal =
+            JadwalPenjemputan::create([
 
-            'nasabah_id'
-                => $request->nasabah_id,
+                'bank_sampah_id'
+                    => $admin->bank_sampah_id,
 
-            'kurir_id'
-                => $request->kurir_id,
+                'nasabah_id'
+                    => $request->nasabah_id,
 
-            'tanggal_penjemputan'
-                => $request->tanggal_penjemputan,
+                'kurir_id'
+                    => $request->kurir_id,
 
-            'alamat'
-                => $request->alamat,
+                'tanggal_penjemputan'
+                    => $request->tanggal_penjemputan,
 
-            'catatan'
-                => $request->catatan,
+                'alamat'
+                    => $request->alamat,
 
-            'status'
-                => 'terjadwal',
-        ]);
+                'catatan'
+                    => $request->catatan,
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Jadwal berhasil dibuat',
-            'data' => $jadwal,
-        ], 201);
+                'status'
+                    => 'terjadwal',
+            ]);
+
+            // ================= LOAD RELASI =================
+            $jadwal->load([
+
+                'nasabah',
+                'kurir',
+                'bankSampah'
+
+            ]);
+
+            return response()->json([
+
+                'success' => true,
+
+                'message' =>
+                    'Jadwal berhasil dibuat',
+
+                'data' => $jadwal,
+
+            ], 201);
+
+        } catch (\Exception $e) {
+
+            return response()->json([
+
+                'success' => false,
+
+                'message' =>
+                    'Gagal membuat jadwal',
+
+                'error' =>
+                    $e->getMessage(),
+
+            ], 500);
+        }
     }
+
 }

@@ -80,6 +80,9 @@ class AuthController extends Controller
                 $fileName;
         }
 
+        $jumlahNasabah = User::where('role', 'nasabah')->count() + 1;
+
+        $kodeNasabah = 'NSB' . str_pad($jumlahNasabah, 3, '0', STR_PAD_LEFT);
 
         $user = User::create([
 
@@ -111,6 +114,9 @@ class AuthController extends Controller
 
             'bank_sampah_id' =>
                 $request->bank_sampah_id,
+
+            'kode_nasabah' =>
+                $kodeNasabah,
         ]);
 
 
@@ -234,26 +240,70 @@ class AuthController extends Controller
         ]);
     }
 
+// ================= LOGIN WEB =================
+public function createAdmin(
+    Request $request
+) {
+
+    $request->validate([
+
+        'name' =>
+            'required',
+
+        'email' =>
+            'required|email|unique:users',
+
+        'password' =>
+            'required|min:6',
+
+        'alamat' =>
+            'required',
+
+        'no_hp' =>
+            'required|unique:users',
+
+        'bank_sampah_id' =>
+            'required|exists:bank_sampahs,id',
+    ]);
 
 
-    // ================= LOGOUT =================
-    public function logout(
-        Request $request
-    ) {
+    $admin = User::create([
 
-        $request
+        'name' =>
+            $request->name,
 
-            ->user()
+        'email' =>
+            $request->email,
 
-            ->tokens()
+        'password' =>
+            bcrypt(
+                $request->password
+            ),
 
-            ->delete();
+        'alamat' =>
+            $request->alamat,
+
+        'no_hp' =>
+            $request->no_hp,
+
+        'role' =>
+            'admin_bank',
+
+        'status' =>
+            'aktif',
+
+        'bank_sampah_id' =>
+            $request->bank_sampah_id,
+    ]);
 
 
-        return response()->json([
+    return response()->json([
 
-            'message' =>
-                'Logout berhasil',
-        ]);
-    }
+        'message' =>
+            'Admin berhasil dibuat',
+
+        'data' =>
+            $admin,
+    ], 201);
+}
 }
