@@ -1,409 +1,80 @@
 @extends('layouts.admin')
 
 @section('content')
+<div class="container-fluid px-2 py-2">
 
-<style>
-
-    body{
-        background: #f5f7fb;
-    }
-
-    .card{
-        border-radius: 20px;
-    }
-
-    .table thead th{
-        font-size: 14px;
-        font-weight: 600;
-        color: #6c757d;
-        background: #f8f9fc;
-        border: none;
-        padding: 18px;
-    }
-
-    .table td{
-        vertical-align: middle;
-        border-color: #f1f1f1;
-        padding: 18px;
-    }
-
-    .badge{
-        border-radius: 10px;
-        font-weight: 500;
-        padding: 8px 14px;
-    }
-
-    .btn{
-        border-radius: 10px;
-    }
-
-    .search-box{
-        width: 300px;
-    }
-
-    .stats-card h6{
-        font-size: 15px;
-        color: #6c757d;
-        margin-bottom: 12px;
-    }
-
-    .stats-card h2{
-        font-weight: 700;
-        font-size: 40px;
-    }
-
-    .main-card{
-        border-radius: 24px;
-    }
-
-</style>
-
-<link rel="stylesheet"
-href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-
-
-<div class="container-fluid py-4">
-
-    <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
-
         <div>
-
-            <h1 class="fw-bold mb-2">
-                Jadwal Kurir
-            </h1>
-
-            <p class="text-muted mb-0">
-                Kelola dan atur jadwal penjemputan sampah oleh kurir.
-            </p>
-
+            <h1 class="h2 mb-1" style="color: #0f172a; font-weight: bold;">Jadwal Kurir</h1>
+            <p class="text-muted mb-0" style="font-size: 14px;">Pantau dan kelola plot penjemputan sampah dari nasabah ke kurir.</p>
         </div>
-
-
-        <a href="/admin/jadwal/create"
-            class="btn btn-primary px-4 py-3">
-
-            <i class="bi bi-plus-lg"></i>
-            Tambah Jadwal
-
+        <a href="/admin/jadwal/create" class="btn btn-primary" style="background-color: #16a34a; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600;">
+            + Tambah Jadwal
         </a>
-
     </div>
 
+    <div class="card shadow-sm border-0 p-4" style="border-radius: 16px; background: white;">
+        <h3 class="h5 mb-4" style="color: #0f172a; font-weight: bold;">Daftar Plot Penjemputan</h3>
 
-    <!-- Statistik -->
-    <div class="row mb-4">
-
-        <!-- Total -->
-        <div class="col-md-3 mb-3">
-
-            <div class="card border-0 shadow-sm stats-card h-100">
-
-                <div class="card-body">
-
-                    <h6>Total Jadwal</h6>
-
-                    <h2>
-                        {{ $jadwals->count() }}
-                    </h2>
-
-                </div>
-
-            </div>
-
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" width="100%">
+                <thead style="background-color: #f8fafc; color: #475569; font-weight: 600;">
+                    <tr>
+                        <th class="py-3 ps-3" width="5%">No</th>
+                        <th class="py-3">Nama Nasabah</th>
+                        <th class="py-3">Nama Kurir</th>
+                        <th class="py-3">Alamat</th>
+                        <th class="py-3">Tanggal Penjemputan</th>
+                        <th class="py-3" width="15%">Status</th>
+                    </tr>
+                </thead>
+                <tbody style="color: #334155;">
+                    @forelse($jadwals as $index => $jadwal)
+                    <tr style="border-bottom: 1px solid #f1f5f9;">
+                        <td class="py-3 ps-3">{{ $index + 1 }}</td>
+                        <td class="py-3" style="font-weight: 600; color: #0f172a;">
+                            {{ $jadwal->nasabah->name ?? 'Nasabah ASRI' }}
+                        </td>
+                        <td class="py-3">
+                            {{ $jadwal->kurir->name ?? 'Belum Ditugaskan' }}
+                        </td>
+                        <td class="py-3 text-truncate" style="max-width: 200px;" title="{{ $jadwal->alamat }}">
+                            {{ $jadwal->alamat }}
+                        </td>
+                        <td class="py-3">
+                            {{ \Carbon\Carbon::parse($jadwal->tanggal_penjemputan)->format('d M Y, H:i') }} WIB
+                        </td>
+                        <td class="py-3">
+                            @if($jadwal->status == 'terjadwal')
+                                <span class="badge text-capitalize" style="border-radius: 6px; padding: 6px 12px; font-weight: 600; font-size: 13px; background-color: #e0f2fe; color: #0369a1;">
+                                    {{ $jadwal->status }}
+                                </span>
+                            @elseif($jadwal->status == 'proses')
+                                <span class="badge text-capitalize" style="border-radius: 6px; padding: 6px 12px; font-weight: 600; font-size: 13px; background-color: #fef3c7; color: #b45309;">
+                                    {{ $jadwal->status }}
+                                </span>
+                            @elseif($jadwal->status == 'selesai')
+                                <span class="badge text-capitalize" style="border-radius: 6px; padding: 6px 12px; font-weight: 600; font-size: 13px; background-color: #dcfce7; color: #16a34a;">
+                                    {{ $jadwal->status }}
+                                </span>
+                            @else
+                                <span class="badge text-capitalize" style="border-radius: 6px; padding: 6px 12px; font-weight: 600; font-size: 13px; background-color: #fee2e2; color: #b91c1c;">
+                                    {{ $jadwal->status }}
+                                </span>
+                            @endif
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="6" class="text-center py-5 text-muted">
+                            <div class="mb-2" style="font-size: 40px; color: #cbd5e1;">📅</div>
+                            Belum ada jadwal penjemputan yang dibuat oleh Admin.
+                        </td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
-
-
-        <!-- Menunggu -->
-        <div class="col-md-3 mb-3">
-
-            <div class="card border-0 shadow-sm stats-card h-100">
-
-                <div class="card-body">
-
-                    <h6>Menunggu</h6>
-
-                    <h2 class="text-warning">
-
-                        {{ $jadwals->where('status','menunggu')->count() }}
-
-                    </h2>
-
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <!-- Diproses -->
-        <div class="col-md-3 mb-3">
-
-            <div class="card border-0 shadow-sm stats-card h-100">
-
-                <div class="card-body">
-
-                    <h6>Diproses</h6>
-
-                    <h2 class="text-primary">
-
-                        {{ $jadwals->where('status','diproses')->count() }}
-
-                    </h2>
-
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <!-- Selesai -->
-        <div class="col-md-3 mb-3">
-
-            <div class="card border-0 shadow-sm stats-card h-100">
-
-                <div class="card-body">
-
-                    <h6>Selesai</h6>
-
-                    <h2 class="text-success">
-
-                        {{ $jadwals->where('status','selesai')->count() }}
-
-                    </h2>
-
-                </div>
-
-            </div>
-
-        </div>
-
     </div>
-
-
-    <!-- Main Table -->
-    <div class="card border-0 shadow-sm main-card">
-
-        <div class="card-body p-4">
-
-            <!-- Header Table -->
-            <div class="d-flex justify-content-between align-items-center mb-4">
-
-                <h3 class="fw-semibold mb-0">
-
-                    Daftar Jadwal
-
-                </h3>
-
-
-                <div class="search-box">
-
-                    <input
-                        type="text"
-                        class="form-control"
-                        placeholder="Cari nasabah atau kurir..."
-                    >
-
-                </div>
-
-            </div>
-
-
-            <!-- Table -->
-            <div class="table-responsive">
-
-                <table class="table align-middle">
-
-                    <thead>
-
-                        <tr>
-
-                            <th>No</th>
-
-                            <th>Nasabah</th>
-
-                            <th>Kurir</th>
-
-                            <th>Alamat</th>
-
-                            <th>Tanggal</th>
-
-                            <th>Status</th>
-
-                            <th class="text-center">
-                                Aksi
-                            </th>
-
-                        </tr>
-
-                    </thead>
-
-
-                    <tbody>
-
-                        @forelse($jadwals as $index => $jadwal)
-
-                        <tr>
-
-                            <!-- No -->
-                            <td>
-
-                                {{ $index + 1 }}
-
-                            </td>
-
-
-                            <!-- Nasabah -->
-                            <td>
-
-                                <div class="fw-semibold">
-
-                                    {{ $jadwal->nasabah->name }}
-
-                                </div>
-
-                            </td>
-
-
-                            <!-- Kurir -->
-                            <td>
-
-                                {{ $jadwal->kurir->name }}
-
-                            </td>
-
-
-                            <!-- Alamat -->
-                            <td>
-
-                                {{ $jadwal->alamat }}
-
-                            </td>
-
-
-                            <!-- Tanggal -->
-                            <td>
-
-                                {{ \Carbon\Carbon::parse($jadwal->tanggal_penjemputan)->format('d M Y') }}
-
-                            </td>
-
-
-                            <!-- Status -->
-                            <td>
-
-                                @if($jadwal->status == 'menunggu')
-
-                                    <span class="badge bg-warning-subtle text-warning">
-
-                                        Menunggu
-
-                                    </span>
-
-                                @elseif($jadwal->status == 'diproses')
-
-                                    <span class="badge bg-primary-subtle text-primary">
-
-                                        Diproses
-
-                                    </span>
-
-                                @elseif($jadwal->status == 'selesai')
-
-                                    <span class="badge bg-success-subtle text-success">
-
-                                        Selesai
-
-                                    </span>
-
-                                @else
-
-                                    <span class="badge bg-secondary-subtle text-secondary">
-
-                                        {{ $jadwal->status }}
-
-                                    </span>
-
-                                @endif
-
-                            </td>
-
-
-                            <!-- Aksi -->
-                            <td class="text-center">
-
-                                <div class="d-flex justify-content-center gap-2">
-
-                                    <!-- Detail -->
-                                    <a href="#"
-                                        class="btn btn-light border btn-sm">
-
-                                        <i class="bi bi-eye"></i>
-
-                                    </a>
-
-
-                                    <!-- Edit -->
-                                    <a href="/admin/jadwal/{{ $jadwal->id }}/edit"
-                                        class="btn btn-light border btn-sm">
-
-                                        <i class="bi bi-pencil"></i>
-
-                                    </a>
-
-
-                                    <!-- Hapus -->
-                                    <form
-                                        action="/admin/jadwal/{{ $jadwal->id }}"
-                                        method="POST"
-                                    >
-
-                                        @csrf
-                                        @method('DELETE')
-
-                                        <button
-                                            class="btn btn-light border btn-sm text-danger"
-                                            onclick="return confirm('Yakin hapus jadwal ini?')"
-                                        >
-
-                                            <i class="bi bi-trash"></i>
-
-                                        </button>
-
-                                    </form>
-
-                                </div>
-
-                            </td>
-
-                        </tr>
-
-                        @empty
-
-                        <tr>
-
-                            <td colspan="7"
-                                class="text-center text-muted py-5">
-
-                                Data jadwal belum tersedia
-
-                            </td>
-
-                        </tr>
-
-                        @endforelse
-
-                    </tbody>
-
-                </table>
-
-            </div>
-
-        </div>
-
-    </div>
-
 </div>
-
 @endsection

@@ -1,99 +1,89 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\BankSampahController;
-use App\Http\Controllers\UserController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\KurirController;
+use App\Http\Controllers\BankSampahController;
 use App\Http\Controllers\TransaksiController;
 use App\Http\Controllers\SetorSampahController;
 use App\Http\Controllers\JenisSampahController;
-use App\Http\Controllers\KurirController;
 use App\Http\Controllers\JadwalPenjemputanController;
 use App\Http\Controllers\JenisSampahWebController;
 
+/*
+|--------------------------------------------------------------------------
+| API Routes
+|--------------------------------------------------------------------------
+*/
 
+// ==========================================
+// 1. ROUTE PUBLIC (Tanpa Login / Tanpa Token)
+// ==========================================
 
-// ================= TEST =================
 Route::get('/test', function () {
-    return response()->json(['message' => 'API jalan']);
+    return response()->json(['message' => 'API Bank Sampah ASRI Berjalan Lancar']);
 });
 
-
-// ================= PUBLIC =================
-Route::post('/register', [AuthController::class, 'register']);
+// Autentikasi Utama
 Route::post('/login', [AuthController::class, 'login']);
-Route::post('/logout', [AuthController::class, 'logout']);
-Route::post('/create-admin',[AuthController::class, 'createAdmin']);
-Route::get('/nasabah/qrcode/{kode}',[UserController::class, 'scanQr']);
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/create-admin', [AuthController::class, 'createAdmin']);
 
+// Fitur QR Code & Scanner Nasabah (Dipanggil Aplikasi Kurir)
+Route::get('/nasabah/qrcode/{kode}', [UserController::class, 'scanQr']);
+Route::get('/bank-sampahs', [BankSampahController::class, 'index']);
 
-//data bank sampah
-Route::get('/bank-sampahs',[BankSampahController::class, 'index']);
-
-
-//transaksi buat nasabah
-Route::post('/transaksi', [TransaksiController::class, 'store']);
-
-//setor sampah buat nasabah
-Route::post('/setor-sampah',[SetorSampahController::class,'store']);
+// Alur Setor Sampah dari Flutter Kurir
+Route::post('/setor-sampah', [SetorSampahController::class, 'store']);
 Route::get('/setor-sampah', [SetorSampahController::class, 'index']);
 
-//kurir
-    // Route::get('/dashboard-kurir', [KurirController::class, 'dashboard_kurir']);
-    Route::get('/kurir/jadwal/{id}', [JadwalPenjemputanController::class, 'jadwalKurir']);
-    Route::get('/dashboard-kurir/{id}',[KurirController::class,'dashboard_kurir']
-);
+// Fitur Utama Kurir (Dashboard & Jadwal Lapangan)
+Route::get('/dashboard-kurir/{id}', [KurirController::class, 'dashboard_kurir']);
+Route::get('/kurir/jadwal/{id}', [JadwalPenjemputanController::class, 'jadwalKurir']);
 
-//jenis sampah buat web admin
-Route::resource('/admin/jenis-sampah',JenisSampahWebController::class);
+// Aksi Kurir: Mengubah status penjemputan dari 'terjadwal' menjadi 'proses'
+Route::put('/jadwal-penjemputan/{id}/mulai', [JadwalPenjemputanController::class, 'mulaiJemput']);
 
-//jenis sampah buat bank sampah
-Route::apiResource('jenis-sampah',JenisSampahController::class);
-// Route::get('/jenis-sampahs', [JenisSampahController::class, 'index']);
-// Route::post('/jenis-sampahs', [JenisSampahController::class, 'store']);
-// Route::get('/jenis-sampahs/{id}', [JenisSampahController::class, 'show']);
+// ==========================================
+// 2. ROUTE FOR WEB ADMIN (Pengelolaan Jenis Sampah)
+// ==========================================
+Route::resource('/admin/jenis-sampah', JenisSampahWebController::class);
+Route::apiResource('jenis-sampah', JenisSampahController::class);
 Route::put('/jenis-sampahs/{id}', [JenisSampahController::class, 'update']);
 Route::delete('/jenis-sampahs/{id}', [JenisSampahController::class, 'destroy']);
 
-// ================= PROTECTED =================
+
+// ==========================================
+// 3. ROUTE PROTECTED (Wajib Menggunakan Bearer Token / Sanctum)
+// ==========================================
 Route::middleware('auth:sanctum')->group(function () {
 
-
-// ================= NASABAH Transaksi=================
-    
-    // logout
+    // Identitas & Logout Aman
     Route::post('/logout', [AuthController::class, 'logout']);
+    Route::post('/transaksi', [TransaksiController::class, 'store']);
+    Route::get('/barcode/nasabah/{id}', [BarcodeController::class, 'barcodeNasabah']);
 
-    // ================= ADMIN DLH =================
+    // ------------------------------------------
+    // MIDDLEWARE: ADMIN DLH (Dinas Lingkungan Hidup)
+    // ------------------------------------------
     Route::middleware('admin_dlh')->group(function () {
-
         Route::prefix('bank-sampah')->group(function () {
-            Route::post('/', [BankSampahController::class, 'store']);      // tambah bank sampah
-            Route::get('/', [BankSampahController::class, 'index']);       // list bank sampah
-            Route::get('/{id}', [BankSampahController::class, 'show']);    // detail
-            Route::post('/{id}/approve', [BankSampahController::class, 'approve']); // approve
-            Route::delete('/{id}', [BankSampahController::class, 'destroy']); // hapus
+            Route::get('/', [BankSampahController::class, 'index']);
+            Route::post('/', [BankSampahController::class, 'store']);
+            Route::get('/{id}', [BankSampahController::class, 'show']);
+            Route::post('/{id}/approve', [BankSampahController::class, 'approve']);
+            Route::delete('/{id}', [BankSampahController::class, 'destroy']);
         });
-
     });
 
-
-    // ================= ADMIN BANK SAMPAH =================
+    // ------------------------------------------
+    // MIDDLEWARE: ADMIN BANK SAMPAH (Lokasi)
+    // ------------------------------------------
     Route::middleware('admin_bank')->group(function () {
-
         Route::post('/nasabah/{id}/approve', [UserController::class, 'approveNasabah']);
         Route::post('/kurir', [UserController::class, 'createKurir']);
-       
-        //jadwal penjemputan
         Route::post('/jadwal-penjemputan', [JadwalPenjemputanController::class, 'store']);
-
-
     });
-
-    //jadwal penjemputan
-    Route::post('/jadwal-penjemputan', [JadwalPenjemputanController::class, 'store']);
-
-    //barcode
-    Route::get('/barcode/nasabah/{id}',[BarcodeController::class,'barcodeNasabah']);
 
 });
