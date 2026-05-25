@@ -6,7 +6,7 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h1 class="h2 mb-1" style="color: #0f172a; font-weight: bold;">Data Setor Sampah</h1>
-            <p class="text-muted mb-0" style="font-size: 14px;">Kelola, pantau, dan verifikasi data penyetoran sampah oleh kurir secara real-time.</p>
+            <p class="text-muted mb-0" style="font-size: 14px;">Kelola dan pantau data penyetoran sampah oleh kurir secara real-time.</p>
         </div>
         <button class="btn btn-primary" style="background-color: #16a34a; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600;" onclick="window.location.reload();">
             <i class="fas fa-sync-alt"></i> Refresh Data
@@ -56,7 +56,10 @@
                     <tr style="border-bottom: 1px solid #f1f5f9;">
                         <td class="py-3 ps-3">{{ $index + 1 }}</td>
                         <td class="py-3">{{ \Carbon\Carbon::parse($setor->created_at)->format('d M Y, H:i') }} WIB</td>
-                        <td class="py-3" style="font-weight: 600; color: #0f172a;">{{ $setor->user->name ?? 'Nasabah ASRI' }}</td>
+                        
+                        {{-- 🛠️ FIX 1: Mengubah dari $setor->user->name menjadi relasi model yang benar $setor->nasabah->name --}}
+                        <td class="py-3" style="font-weight: 600; color: #0f172a;">{{ $setor->nasabah->name ?? 'Nasabah ASRI' }}</td>
+                        
                         <td class="py-3">{{ $setor->berat }} Kg</td>
                         <td class="py-3">Rp {{ number_format($setor->harga_per_kg, 0, ',', '.') }}</td>
                         <td class="py-3" style="font-weight: 600; color: #16a34a;">Rp {{ number_format($setor->total, 0, ',', '.') }}</td>
@@ -70,8 +73,9 @@
                             @endif
                         </td>
                         <td class="py-3 pe-3">
+                            {{-- 🛠️ FIX 2: Dipaksa langsung memunculkan badge hijau 'Selesai' tanpa syarat verifikasi manual --}}
                             <span class="badge text-capitalize" style="border-radius: 6px; padding: 6px 12px; font-weight: 600; font-size: 13px; background-color: #dcfce7; color: #16a34a;">
-                                {{ $setor->status ?? 'Selesai' }}
+                                Selesai
                             </span>
                         </td>
                     </tr>
