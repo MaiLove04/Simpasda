@@ -8,25 +8,41 @@ use Illuminate\Database\Eloquent\Model;
 class SetorSampah extends Model
 {
     use HasFactory;
+    
     protected $table = 'setor_sampahs'; 
 
+    // Mass assignment guard (mengizinkan pengisian data masal dari controller)
+    protected $guarded = ['id'];
+
+    /**
+     * RELASI: Menghubungkan ke Pemilik Sampah (Nasabah)
+     */
     public function nasabah()
     {
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function jenis_sampah()
-    {
-        return $this->belongsTo(JenisSampah::class, 'jenis_sampah_id');
-    }
-    
+    /**
+     * RELASI: Menghubungkan ke Kurir Lapangan yang menimbang
+     */
     public function kurir()
     {
         return $this->belongsTo(User::class, 'kurir_id');
     }
+
+    /**
+     * 🔥 RELASI UTAMA MULTI-ITEM: Menghubungkan Ke Banyak Detail Rincian Sampah
+     */
     public function details()
     {
-        // Menggunakan nama class model DetailSetorSampah kamu
         return $this->hasMany(DetailSetorSampah::class, 'setor_sampah_id');
+    }
+
+    /**
+     * 🔒 FALLBACK RELASI LAMA: Dijaga agar data lama/single-item tidak error di web admin
+     */
+    public function jenis_sampah()
+    {
+        return $this->belongsTo(JenisSampah::class, 'jenis_sampah_id');
     }
 }
