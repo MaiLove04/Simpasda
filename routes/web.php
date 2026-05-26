@@ -71,11 +71,19 @@ Route::prefix('admin')->group(function () {
             [SetorSampahWebController::class, 'index']
         )->name('admin.setor.index');
 
-        // Nasabah management
+        // ========================================================
+        // NASABAH MANAGEMENT (SUDAH DISINKRONKAN DENGAN FITUR CETAK)
+        // ========================================================
         Route::get(
             '/nasabah',
             [NasabahWebController::class, 'index']
-        );
+        )->name('admin.nasabah.index'); // Tambah nama rute index
+
+        // 🖨️ FITUR BARU: Rute Cetak QR Code Siap Tempel di Rumah Nasabah
+        Route::get(
+            '/nasabah/{id}/print-qr',
+            [NasabahWebController::class, 'printQr']
+        )->name('admin.nasabah.print-qr');
 
         Route::get(
             '/nasabah/{id}',

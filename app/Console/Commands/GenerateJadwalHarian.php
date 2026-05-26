@@ -22,7 +22,7 @@ class GenerateJadwalHarian extends Command
         $this->info("Memulai generate jadwal untuk hari: $hariBesok ($tanggalBesokYmd)...");
 
         // 2. Ambil semua pola master rutin yang aktif untuk hari besok beserta relasi nasabahnya
-        $polaRutins = MasterJadwalRutin::with('nasabah') // 🔥 Eager loading biar performa cepat & aman
+        $polaRutins = MasterJadwalRutin::with('nasabah') 
                                         ->where('hari_penjemputan', $hariBesok)
                                         ->where('is_aktif', true)
                                         ->get();

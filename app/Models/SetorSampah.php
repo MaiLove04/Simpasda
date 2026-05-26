@@ -19,4 +19,14 @@ class SetorSampah extends Model
     {
         return $this->belongsTo(JenisSampah::class, 'jenis_sampah_id');
     }
+    
+    public function kurir()
+    {
+        return $this->belongsTo(User::class, 'kurir_id');
+    }
+    public function details()
+    {
+        // Menggunakan nama class model DetailSetorSampah kamu
+        return $this->hasMany(DetailSetorSampah::class, 'setor_sampah_id');
+    }
 }

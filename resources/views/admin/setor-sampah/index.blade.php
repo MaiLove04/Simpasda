@@ -1,95 +1,141 @@
 @extends('layouts.admin')
 
 @section('content')
-<div class="container-fluid px-2 py-2">
+<div class="container-fluid px-3 py-3">
     
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3 pb-3 border-bottom">
         <div>
-            <h1 class="h2 mb-1" style="color: #0f172a; font-weight: bold;">Data Setor Sampah</h1>
-            <p class="text-muted mb-0" style="font-size: 14px;">Kelola dan pantau data penyetoran sampah oleh kurir secara real-time.</p>
+            <h1 class="h3 mb-1" style="color: #0f172a; font-weight: bold;">Data Setor Sampah</h1>
+            <p class="text-muted mb-0" style="font-size: 13px;">Pantau log penyetoran multi-sampah secara real-time.</p>
         </div>
-        <button class="btn btn-primary" style="background-color: #16a34a; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600;" onclick="window.location.reload();">
-            <i class="fas fa-sync-alt"></i> Refresh Data
-        </button>
-    </div>
-
-    <div class="row mb-4">
-        <div class="col-md-3 col-sm-6 mb-3">
-            <div class="card p-3 border-0 shadow-sm" style="border-radius: 16px; background: white;">
-                <span class="text-muted" style="font-size: 14px; font-weight: 500;">Total Setoran</span>
-                <h2 class="mt-2 mb-0" style="font-weight: bold; color: #0f172a;">{{ $dataSetor->count() }}</h2>
+        
+        <div class="d-flex gap-2 align-items-center">
+            <div class="bg-white border rounded-3 px-3 py-2 text-center shadow-sm" style="min-width: 130px;">
+                <span class="text-muted d-block" style="font-size: 11px; font-weight: 600; text-transform: uppercase;">Total Transaksi</span>
+                <span class="h5 mb-0" style="font-weight: bold; color: #0f172a;">{{ $dataSetor->total() }}</span>
             </div>
-        </div>
-        <div class="col-md-3 col-sm-6 mb-3">
-            <div class="card p-3 border-0 shadow-sm" style="border-radius: 16px; background: white;">
-                <span class="text-muted" style="font-size: 14px; font-weight: 500;">Total Berat</span>
-                <h2 class="mt-2 mb-0" style="font-weight: bold; color: #16a34a;">{{ $dataSetor->sum('berat') }} <span style="font-size: 16px; font-weight: normal;">Kg</span></h2>
+            <div class="bg-white border rounded-3 px-3 py-2 text-center shadow-sm" style="min-width: 180px;">
+                <span class="text-muted d-block" style="font-size: 11px; font-weight: 600; text-transform: uppercase;">Perputaran Uang</span>
+                <span class="h5 mb-0" style="font-weight: bold; color: #1E521E;">Rp {{ number_format($dataSetor->sum('total'), 0, ',', '.') }}</span>
             </div>
-        </div>
-        <div class="col-md-3 col-sm-6 mb-3">
-            <div class="card p-3 border-0 shadow-sm" style="border-radius: 16px; background: white;">
-                <span class="text-muted" style="font-size: 14px; font-weight: 500;">Perputaran Uang</span>
-                <h2 class="mt-2 mb-0" style="font-weight: bold; color: #2563eb;">Rp {{ number_format($dataSetor->sum('total'), 0, ',', '.') }}</h2>
-            </div>
+            <button class="btn btn-sm btn-light border ms-2" style="height: 38px; font-weight: 600;" onclick="window.location.reload();">
+                <i class="fas fa-sync-alt text-success"></i>
+            </button>
         </div>
     </div>
 
-    <div class="card shadow-sm border-0 p-4" style="border-radius: 16px; background: white;">
-        <h3 class="h5 mb-4" style="color: #0f172a; font-weight: bold;">Log Penyetoran Sampah</h3>
+    <div class="card shadow-sm border-0" style="border-radius: 12px; background: white;">
+        
+        <div class="d-flex justify-content-between align-items-center px-3 py-3 border-bottom">
+            <h3 class="h6 mb-0" style="color: #0f172a; font-weight: bold;"><i class="fas fa-history me-2 text-muted"></i>Log Penyetoran Sampah</h3>
+            
+            <div style="width: 100%; max-width: 320px;">
+                <form action="{{ route('admin.setor.index') }}" method="GET" class="d-flex gap-2 mb-0">
+                    <div class="input-group input-group-sm" style="border-radius: 6px; overflow: hidden; border: 1px solid #cbd5e1;">
+                        <span class="input-group-text bg-white border-0 text-muted pe-1"><i class="fas fa-search" style="font-size: 11px;"></i></span>
+                        <input type="text" name="search" class="form-control border-0 ps-1" placeholder="Cari nasabah / kurir..." value="{{ request('search') }}" style="font-size: 12px; height: 32px;">
+                    </div>
+                    <button type="submit" class="btn btn-sm text-white px-3" style="border-radius: 6px; font-weight: 600; background-color: #1E521E; font-size: 12px; height: 32px;">Cari</button>
+                    @if(request('search'))
+                        <a href="{{ route('admin.setor.index') }}" class="btn btn-sm btn-light border px-2 d-flex align-items-center justify-content-center" style="border-radius: 6px; font-size: 12px; height: 32px;">Reset</a>
+                    @endif
+                </form>
+            </div>
+        </div>
         
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0" width="100%">
-                <thead style="background-color: #f8fafc; color: #475569; font-weight: 600;">
+                <thead style="background-color: #f8fafc; color: #475569; font-weight: 600; font-size: 13px; border-bottom: 2px solid #e2e8f0;">
                     <tr>
-                        <th class="py-3 ps-3" width="5%">No</th>
-                        <th class="py-3">Tanggal & Waktu</th>
-                        <th class="py-3">Nama Nasabah</th>
-                        <th class="py-3">Berat</th>
-                        <th class="py-3">Harga / Kg</th>
-                        <th class="py-3">Total Uang</th>
-                        <th class="py-3">Foto Bukti</th>
-                        <th class="py-3 pe-3" width="12%">Status</th>
+                        <th class="py-2 ps-3" width="4%">No</th>
+                        <th class="py-2" width="14%">Tanggal & Waktu</th>
+                        <th class="py-2">Nama Nasabah</th>
+                        <th class="py-2" style="color: #1E521E;">Nama Kurir</th>
+                        <th class="py-2" width="30%">Rincian Sampah</th>
+                        <th class="py-2">Total Uang</th>
+                        <th class="py-2">Foto</th>
+                        <th class="py-2 pe-3" width="8%">Status</th>
                     </tr>
                 </thead>
-                <tbody style="color: #334155;">
+                <tbody style="color: #334155; font-size: 13px;">
                     @forelse($dataSetor as $index => $setor)
                     <tr style="border-bottom: 1px solid #f1f5f9;">
-                        <td class="py-3 ps-3">{{ $index + 1 }}</td>
-                        <td class="py-3">{{ \Carbon\Carbon::parse($setor->created_at)->format('d M Y, H:i') }} WIB</td>
+                        <td class="py-2 ps-3 text-muted">{{ $dataSetor->firstItem() + $index }}</td>
+                        <td class="py-2 text-muted" style="font-size: 12px;">{{ \Carbon\Carbon::parse($setor->created_at)->format('d M Y, H:i') }}</td>
+                        <td class="py-2" style="font-weight: 600; color: #0f172a;">{{ $setor->nasabah->name ?? 'Nasabah ASRI' }}</td>
+                        <td class="py-2" style="font-weight: 600; color: #1E521E;">{{ $setor->kurir->name ?? 'Kurir Lapangan' }}</td>
                         
-                        {{-- 🛠️ FIX 1: Mengubah dari $setor->user->name menjadi relasi model yang benar $setor->nasabah->name --}}
-                        <td class="py-3" style="font-weight: 600; color: #0f172a;">{{ $setor->nasabah->name ?? 'Nasabah ASRI' }}</td>
-                        
-                        <td class="py-3">{{ $setor->berat }} Kg</td>
-                        <td class="py-3">Rp {{ number_format($setor->harga_per_kg, 0, ',', '.') }}</td>
-                        <td class="py-3" style="font-weight: 600; color: #16a34a;">Rp {{ number_format($setor->total, 0, ',', '.') }}</td>
-                        <td class="py-3">
+                        <td class="py-2">
+                            <div class="d-flex flex-column gap-1">
+                                {{-- 1. Kondisi Data Baru Multi-Item --}}
+                                @if($setor->details && $setor->details->count() > 0)
+                                    @foreach($setor->details as $detail)
+                                        <div class="d-flex justify-content-between align-items-center" style="font-size: 12px; line-height: 1.4;">
+                                            <div>
+                                                <span style="font-weight: 600; color: #334155;">• {{ $detail->jenisSampah->nama ?? 'Jenis Sampah' }}</span>
+                                                <span class="text-muted ms-1">({{ $detail->berat }} Kg)</span>
+                                            </div>
+                                            <span class="text-muted" style="font-size: 11px; font-family: monospace;">@Rp{{ number_format($detail->harga_per_kg, 0, ',', '.') }}</span>
+                                        </div>
+                                    @endforeach
+
+                                {{-- 2. Fallback Data Lama Single-Item --}}
+                                @elseif($setor->berat)
+                                    <div class="d-flex justify-content-between align-items-center" style="font-size: 12px; line-height: 1.4; color: #b45309;">
+                                        <div>
+                                            <span style="font-weight: 600;">• {{ $setor->jenis_sampah->nama ?? 'Sampah' }}</span>
+                                            <span class="ms-1">({{ $setor->berat }} Kg)</span>
+                                        </div>
+                                        <span style="font-size: 11px; font-family: monospace;">@Rp{{ number_format($setor->harga_per_kg, 0, ',', '.') }}</span>
+                                    </div>
+                                @else
+                                    <span class="text-muted font-italic" style="font-size: 11px;">Tidak ada rincian</span>
+                                @endif
+                            </div>
+                        </td>
+
+                        <td class="py-2 font-weight-bold text-success" style="font-size: 14px; font-weight: 700;">Rp {{ number_format($setor->total, 0, ',', '.') }}</td>
+                        <td class="py-2">
                             @if($setor->foto_sampah)
                                 <a href="{{ asset($setor->foto_sampah) }}" target="_blank">
-                                    <img src="{{ asset($setor->foto_sampah) }}" alt="Foto Sampah" class="img-thumbnail" style="max-height: 45px; border-radius: 6px; object-fit: cover; border: 1px solid #e2e8f0;">
+                                    <img src="{{ asset($setor->foto_sampah) }}" alt="Foto" class="img-thumbnail p-0" style="max-height: 32px; width: 32px; border-radius: 4px; object-fit: cover;">
                                 </a>
                             @else
-                                <span class="text-muted font-italic" style="font-size: 13px;">Tanpa Foto</span>
+                                <span class="text-muted font-italic" style="font-size: 11px;">-</span>
                             @endif
                         </td>
-                        <td class="py-3 pe-3">
-                            {{-- 🛠️ FIX 2: Dipaksa langsung memunculkan badge hijau 'Selesai' tanpa syarat verifikasi manual --}}
-                            <span class="badge text-capitalize" style="border-radius: 6px; padding: 6px 12px; font-weight: 600; font-size: 13px; background-color: #dcfce7; color: #16a34a;">
+                        <td class="py-2 pe-3">
+                            <span class="badge" style="border-radius: 4px; padding: 4px 8px; font-weight: 600; font-size: 11px; background-color: #dcfce7; color: #16a34a; border: 1px solid #bbf7d0;">
                                 Selesai
                             </span>
                         </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="8" class="text-center py-5 text-muted">
-                            <div class="mb-2" style="font-size: 40px; color: #cbd5e1;">📥</div>
-                            Belum ada data setoran sampah yang masuk dari aplikasi kurir.
+                        <td colspan="8" class="text-center py-4 text-muted" style="font-size: 13px;">
+                            Tidak ditemukan data setoran sampah yang cocok.
                         </td>
                     </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
+
+        <div class="d-flex justify-content-between align-items-center px-3 py-2 border-top bg-light" style="border-bottom-left-radius: 12px; border-bottom-right-radius: 12px;">
+            <div class="text-muted" style="font-size: 12px;">
+                Menampilkan {{ $dataSetor->firstItem() ?? 0 }}-{{ $dataSetor->lastItem() ?? 0 }} dari {{ $dataSetor->total() }} data
+            </div>
+            <div class="sm-pagination">
+                {{ $dataSetor->appends(request()->input())->links('pagination::bootstrap-5') }}
+            </div>
+        </div>
+
     </div>
 </div>
+
+<style>
+    /* CSS Tambahan Kecil untuk merampingkan pagination bawaan Bootstrap agar tidak kebesaran */
+    .sm-pagination .pagination { mb-0; gap: 2px; }
+    .sm-pagination .page-link { padding: 4px 10px; font-size: 12px; border-radius: 4px; }
+</style>
 @endsection
