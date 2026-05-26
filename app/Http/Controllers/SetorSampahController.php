@@ -4,10 +4,28 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\SetorSampah; 
-use App\Models\JadwalPenjemputan; // Tambahkan ini jika belum ada untuk memanggil model Jadwal
+use App\Models\JadwalPenjemputan; // Memanggil model Jadwal
 
 class SetorSampahController extends Controller
 {
+    /**
+     * AMBIL SEMUA RIWAYAT SETORAN BERDASARKAN KURIR ID
+     * (Untuk halaman RiwayatKurirScreen di Flutter)
+     */
+    public function getRiwayatTotal($kurir_id)
+    {
+        // Mengambil semua data setor sampah milik kurir ini, dimuat beserta relasi nasabah & jenis sampah
+        $riwayat = SetorSampah::with(['nasabah', 'jenis_sampah'])
+                    ->where('kurir_id', $kurir_id)
+                    ->latest()
+                    ->get();
+
+        return response()->json($riwayat, 200);
+    }
+
+    /**
+     * SIMPAN TRANSAKSI PENIMBANGAN BARU
+     */
     public function store(Request $request)
     {
         // 1. Validasi kiriman data dari Flutter (Tambahkan 'jadwal_id')
@@ -41,7 +59,7 @@ class SetorSampahController extends Controller
         $setor->harga_per_kg = $request->harga_per_kg;
         $setor->total = $request->total;
         $setor->foto_sampah = $fotoPath; 
-        $setor->status = 'selesai'; 
+        // 💡 Catatan Mai: Kolom status dihapus dari sini karena di database phpMyAdmin-mu tidak ada kolom 'status' di tabel setor_sampahs
         $setor->save();
 
         // ==========================================================
@@ -60,7 +78,4 @@ class SetorSampahController extends Controller
             'data' => $setor
         ], 201);
     }
-    
 }
-
-    

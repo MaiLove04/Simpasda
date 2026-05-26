@@ -3,8 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use App\Models\JadwalPenjemputan; // Menggunakan model penjemputan asli kamu
-
+use App\Models\JadwalPenjemputan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -12,7 +11,8 @@ class JadwalWebController extends Controller
 {
     public function index()
     {
-        $jadwals = JadwalPenjemputan::with('nasabah', 'kurir')
+        // Mengambil jadwal yang hanya dimiliki oleh bank sampah milik admin yang login
+        $jadwals = JadwalPenjemputan::with(['nasabah', 'kurir'])
             ->where('bank_sampah_id', Auth::user()->bank_sampah_id)
             ->latest()
             ->get();
@@ -22,6 +22,7 @@ class JadwalWebController extends Controller
 
     public function create()
     {
+        // Mengambil nasabah & kurir yang satu bank sampah dengan admin
         $nasabahs = User::where('role', 'nasabah')
             ->where('bank_sampah_id', Auth::user()->bank_sampah_id)
             ->get();
@@ -35,11 +36,13 @@ class JadwalWebController extends Controller
 
     public function store(Request $request)
     {
+        // Validasi diperketat untuk memastikan ID benar-benar valid
         $request->validate([
-            'nasabah_id'          => 'required',
-            'kurir_id'            => 'required',
-            'tanggal_penjemputan' => 'required',
-            'alamat'              => 'required',
+            'nasabah_id'          => 'required|exists:users,id',
+            'kurir_id'            => 'required|exists:users,id',
+            'tanggal_penjemputan' => 'required|date',
+            'alamat'              => 'required|string',
+            'catatan'             => 'nullable|string',
         ]);
 
         JadwalPenjemputan::create([
@@ -52,17 +55,22 @@ class JadwalWebController extends Controller
             'status'              => 'terjadwal',
         ]);
 
-        return redirect('/admin/jadwal');
+        return redirect('/admin/jadwal')->with('success', 'Jadwal penjemputan berhasil dibuat!');
     }
 
-    // ========================================================
-    // PERBAIKAN: Mengubah Jadwal menjadi JadwalPenjemputan
-    // ========================================================
     public function jadwalKurir($id)
     {
-        $jadwal = JadwalPenjemputan::with(['nasabah', 'kurir'])
-            ->where('kurir_id', $id)
-            ->get();
+        // Memastikan kurir yang login hanya bisa melihat jadwal miliknya sendiri
+        // Atau jika diakses admin, admin hanya bisa melihat jadwal kurir di bank sampahnya
+        $userLogedIn = Auth::user();
+
+        $query = JadwalPenjemputan::with(['nasabah', 'kurir'])->where('kurir_id', $id);
+
+        if ($userLogedIn->role === 'admin') {
+            $query->where('bank_sampah_id', $userLogedIn->bank_sampah_id);
+        }
+
+        $jadwal = $query->get();
 
         return response()->json([
             'success' => true,
@@ -70,15 +78,26 @@ class JadwalWebController extends Controller
         ]);
     }
 
-    //mulai penjemputan
     public function mulaiJemput($id)
     {
-        $jadwal = JadwalPenjemputan::find($id);
+        $userLogedIn = Auth::user();
+        
+        $query = JadwalPenjemputan::where('id', $id);
+
+        // Jika yang mengakses adalah kurir, amankan agar dia hanya bisa memulai jadwal miliknya sendiri
+        if ($userLogedIn->role === 'kurir') {
+            $query->where('kurir_id', $userLogedIn->id);
+        } else {
+            // Jika admin yang klik via web, batasi berdasarkan bank sampah admin
+            $query->where('bank_sampah_id', $userLogedIn->bank_sampah_id);
+        }
+
+        $jadwal = $query->first();
 
         if (!$jadwal) {
             return response()->json([
                 'success' => false,
-                'message' => 'Jadwal tidak ditemukan'
+                'message' => 'Jadwal tidak ditemukan atau Anda tidak memiliki akses.'
             ], 404);
         }
 
@@ -89,7 +108,69 @@ class JadwalWebController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Status berhasil diperbarui menjadi proses',
-            'data' => $jadwal
+            'data'    => $jadwal
         ]);
+    }
+
+    public function edit(JadwalPenjemputan $jadwal)
+    {
+        // Pastikan jadwal yang diakses adalah milik bank sampah admin yang login
+        if ($jadwal->bank_sampah_id !== Auth::user()->bank_sampah_id) {
+            abort(403, 'Anda tidak memiliki akses ke jadwal ini.');
+        }
+
+        // Ambil data nasabah & kurir untuk pilihan di dropdown form
+        $nasabahs = User::where('role', 'nasabah')
+            ->where('bank_sampah_id', Auth::user()->bank_sampah_id)
+            ->get();
+
+        $kurirs = User::where('role', 'kurir')
+            ->where('bank_sampah_id', Auth::user()->bank_sampah_id)
+            ->get();
+
+        return view('admin.jadwal.edit', compact('jadwal', 'nasabahs', 'kurirs'));
+    }
+
+    public function update(Request $request, JadwalPenjemputan $jadwal)
+    {
+        // 1. Pastikan hak akses aman
+        if ($jadwal->bank_sampah_id !== Auth::user()->bank_sampah_id) {
+            abort(403, 'Anda tidak memiliki akses ke jadwal ini.');
+        }
+
+        // 2. Validasi data form edit
+        $request->validate([
+            'nasabah_id'          => 'required|exists:users,id',
+            'kurir_id'            => 'required|exists:users,id',
+            'tanggal_penjemputan' => 'required|date',
+            'alamat'              => 'required|string',
+            'status'              => 'required|in:terjadwal,proses,selesai,batal',
+            'catatan'             => 'nullable|string',
+        ]);
+
+        // 3. Update datanya di database
+        $jadwal->update([
+            'nasabah_id'          => $request->nasabah_id,
+            'kurir_id'            => $request->kurir_id,
+            'tanggal_penjemputan' => $request->tanggal_penjemputan,
+            'alamat'              => $request->alamat,
+            'status'              => $request->status,
+            'catatan'             => $request->catatan,
+        ]);
+
+        // 4. Redirect ke halaman utama dengan pesan sukses
+        return redirect('/admin/jadwal')->with('success', 'Jadwal penjemputan berhasil diperbarui!');
+    }
+
+    public function destroy($id)
+    {
+        // Pengaman ekstra: memastikan admin tidak menghapus jadwal milik bank sampah lain
+        $jadwal = JadwalPenjemputan::where('id', $id)
+            ->where('bank_sampah_id', Auth::user()->bank_sampah_id)
+            ->firstOrFail();
+            
+        $jadwal->delete();
+
+        return back()->with('success', 'Jadwal penjemputan berhasil dihapus!');
     }
 }

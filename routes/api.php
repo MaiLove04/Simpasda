@@ -10,6 +10,7 @@ use App\Http\Controllers\SetorSampahController;
 use App\Http\Controllers\JenisSampahController;
 use App\Http\Controllers\JadwalPenjemputanController;
 use App\Http\Controllers\JenisSampahWebController;
+use App\Http\Controllers\BarcodeController;
 
 /*
 |--------------------------------------------------------------------------
@@ -44,6 +45,12 @@ Route::get('/kurir/jadwal/{id}', [JadwalPenjemputanController::class, 'jadwalKur
 
 // Aksi Kurir: Mengubah status penjemputan dari 'terjadwal' menjadi 'proses'
 Route::put('/jadwal-penjemputan/{id}/mulai', [JadwalPenjemputanController::class, 'mulaiJemput']);
+
+//riwayat setor sampah kurir
+Route::get('/riwayat-kurir/{kurir_id}', [SetorSampahController::class, 'getRiwayatTotal']);
+// Fitur Berat IoT (Simulasi Data Berat dari Alat IoT)
+Route::get('/berat-timbangan-iot', [SetorSampahController::class, 'getBeratIot']);
+
 
 // ==========================================
 // 2. ROUTE FOR WEB ADMIN (Pengelolaan Jenis Sampah)

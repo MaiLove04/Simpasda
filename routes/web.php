@@ -7,7 +7,8 @@ use App\Http\Controllers\KurirWebController;
 use App\Http\Controllers\JenisSampahWebController;
 use App\Http\Controllers\JadwalWebController;
 use App\Http\Controllers\NasabahWebController;
-use App\Http\Controllers\SetorSampahWebController; // 1. Impor controller baru disini
+use App\Http\Controllers\SetorSampahWebController; 
+use App\Http\Controllers\MasterJadwalRutinController;
 
 Route::get('/', function () {
     return redirect('/admin/login');
@@ -15,7 +16,7 @@ Route::get('/', function () {
 
 Route::prefix('admin')->group(function () {
 
-    // login
+    // Login (Tanpa perlu auth)
     Route::get(
         '/login',
         [AdminWebController::class, 'showLogin']
@@ -26,7 +27,7 @@ Route::prefix('admin')->group(function () {
         [AdminWebController::class, 'login']
     );
 
-    // protected (Hanya bisa diakses jika sudah login)
+    // Protected (Hanya bisa diakses jika sudah login admin)
     Route::middleware('auth')->group(function () {
 
         Route::get(
@@ -55,15 +56,22 @@ Route::prefix('admin')->group(function () {
         );
 
         // ========================================================
-        // 2. RUTE BARU: HALAMAN SETOR SAMPAH UNTUK WEB ADMIN
+        // MASTER JADWAL RUTIN (SINKRON DI SINI)
         // ========================================================
+        Route::resource('master-jadwal', MasterJadwalRutinController::class)->names([
+            'index'   => 'master-jadwal.index',
+            'create'  => 'master-jadwal.create',
+            'store'   => 'master-jadwal.store',
+            'destroy' => 'master-jadwal.destroy',
+        ]);
+
+        // Halaman setor sampah untuk web admin
         Route::get(
             '/setor-sampah',
             [SetorSampahWebController::class, 'index']
         )->name('admin.setor.index');
 
-
-        //nasabah
+        // Nasabah management
         Route::get(
             '/nasabah',
             [NasabahWebController::class, 'index']
@@ -84,7 +92,7 @@ Route::prefix('admin')->group(function () {
             [NasabahWebController::class, 'destroy']
         );
 
-        //status nasabah
+        // Status nasabah
         Route::post(
             '/nasabah/{id}/status',
             [NasabahWebController::class, 'updateStatus']
