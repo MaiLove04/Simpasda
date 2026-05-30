@@ -16,6 +16,9 @@
     <div class="card shadow-sm border-0 p-4" style="border-radius: 16px; background: white; max-width: 700px;">
         <form action="/admin/jadwal" method="POST">
             @csrf
+            
+            {{-- 🛠️ TAMBAHAN: Amankan ID Bank Sampah induk secara otomatis (Default ID: 1) --}}
+            <input type="hidden" name="bank_sampah_id" value="1">
 
             <div class="mb-3">
                 <label for="nasabah_select" class="form-label" style="font-weight: 600; color: #0f172a;">Pilih Nasabah</label>
@@ -52,8 +55,18 @@
             </div>
 
             <div class="mb-3">
-                <label for="tanggal_penjemputan" class="form-label" style="font-weight: 600; color: #0f172a;">Tanggal & Waktu Penjemputan</label>
-                <input type="datetime-local" class="form-control @error('tanggal_penjemputan') is-invalid @enderror" id="tanggal_penjemputan" name="tanggal_penjemputan" style="border-radius: 8px; padding: 10px;" required>
+                <label for="tanggal_penjemputan" class="form-label" style="font-weight: 600; color: #0f172a; mb-0">Tanggal & Waktu Penjemputan</label>
+                {{-- 💡 INDIKATOR BARU: Memberi kejelasan mutlak kepada admin --}}
+                
+                <input 
+                    type="datetime-local" 
+                    class="form-control @error('tanggal_penjemputan') is-invalid @enderror" 
+                    id="tanggal_penjemputan" 
+                    name="tanggal_penjemputan" 
+                    min="{{ date('Y-m-d\TH:i') }}" {{-- Mencegah admin memilih waktu yang sudah lewat dari menit ini --}}
+                    style="border-radius: 8px; padding: 10px;" 
+                    required
+                >
                 @error('tanggal_penjemputan')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
@@ -76,10 +89,7 @@
 <script>
     $(document).ready(function() {
         $('#nasabah_select').change(function() {
-            // Ambil data-alamat dari option yang dipilih
             var alamatNasabah = $(this).find(':selected').data('alamat');
-            
-            // Masukkan nilainya ke dalam input alamat
             $('#alamat').val(alamatNasabah ? alamatNasabah : '');
         });
     });

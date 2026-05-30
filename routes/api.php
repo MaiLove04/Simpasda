@@ -12,6 +12,7 @@ use App\Http\Controllers\JadwalPenjemputanController;
 use App\Http\Controllers\JenisSampahWebController;
 use App\Http\Controllers\BarcodeController;
 
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -50,6 +51,17 @@ Route::put('/jadwal-penjemputan/{id}/mulai', [JadwalPenjemputanController::class
 Route::get('/riwayat-kurir/{kurir_id}', [SetorSampahController::class, 'getRiwayatTotal']);
 // Fitur Berat IoT (Simulasi Data Berat dari Alat IoT)
 Route::get('/berat-timbangan-iot', [SetorSampahController::class, 'getBeratIot']);
+//data total sampah kurir dashboard
+// Jalur API untuk menyuplai data counter dashboard kurir secara real-time
+Route::get('/dashboard-kurir/{kurir_id}', [SetorSampahController::class, 'getDashboardKurir']);
+
+Route::get('/dashboard-nasabah/{user_id}', [UserController::class, 'dashboard_nasabah']);
+
+// Jalur API ketika nasabah melakukan klik request jemput sampah massal
+Route::post('/request-penjemputan', [SetorSampahController::class, 'requestPenjemputan']);
+
+// Rute untuk kurir mengambil otomatis jenis sampah bawaan request nasabah
+Route::get('/request-detail/{nasabah_id}', [SetorSampahController::class, 'showRequestDetail']);
 
 
 // ==========================================
