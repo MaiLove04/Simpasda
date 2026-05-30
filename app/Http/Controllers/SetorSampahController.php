@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\SetorSampah;
 use App\Models\DetailSetorSampah; 
+use App\Models\User; // Ditambahkan agar bisa memanggil model User Nasabah
+use App\Models\MutasiSaldo; // Ditambahkan agar bisa memanggil model MutasiSaldo
 use Illuminate\Support\Facades\DB;
 
 class SetorSampahController extends Controller
@@ -23,7 +25,7 @@ class SetorSampahController extends Controller
     }
 
     /**
-     * ✅ FIX FINAL API MULTI-SETOR: BERSIH DARI JADWAL_ID
+     * ✅ FIX FINAL API MULTI-SETOR: AUTOMATISASI SALDO & MUTASI (BEBAS TYPO)
      */
     public function store(Request $request)
     {
@@ -74,11 +76,29 @@ class SetorSampahController extends Controller
                 $detail->save();
             }
 
+            // 🔥 1. PROSES FINANSIAL: AMBIL DATA NASABAH & TAMBAH SALDO
+            $nasabah = User::find($request->user_id);
+            if ($nasabah) {
+                $nasabah->saldo += $request->grand_total; // Menambahkan saldo cash berjalan
+                $nasabah->save();
+            }
+
+            // 🔥 2. PROSES AUDIT: CATAT HISTORI MUTASI SALDO (FIXED COLUMN)
+            $mutasi = new MutasiSaldo();
+            $mutasi->user_id         = $request->user_id;
+            $mutasi->jenis_transaksi = 'masuk'; // Karena saldo bertambah
+            $mutasi->sumber          = 'setor_sampah';
+            $mutasi->referensi_id    = $setor->id; // Mengunci ID master setor_sampahs (Match dengan Migration!)
+            $mutasi->nominal         = $request->grand_total;
+            $mutasi->status          = 'success';
+            $mutasi->keterangan      = 'Uang masuk dari penimbangan sampah multi-item';
+            $mutasi->save();
+
             DB::commit(); 
 
             return response()->json([
                 'success' => true,
-                'message' => '✅ Multi-setor sampah berhasil disimpan!',
+                'message' => '✅ Multi-setor sampah berhasil disimpan! Saldo bertambah & mutasi tercatat.',
                 'data' => $setor->load('details')
             ], 201);
 
@@ -86,7 +106,7 @@ class SetorSampahController extends Controller
             DB::rollBack(); 
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal menyimpan data: ' . $e->getMessage()
+                'message' => 'Gagal menyimpan data transaksi: ' . $e->getMessage()
             ], 500);
         }
     }
