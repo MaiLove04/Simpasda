@@ -4,7 +4,7 @@
 
 <div class="card border-0 shadow-sm p-4">
 
-    {{-- HEADER --}}
+    
     <div class="d-flex justify-content-between align-items-center mb-4">
 
         <div>
@@ -39,7 +39,7 @@
 
     @endif
 
-    {{-- TABLE --}}
+   
     <div class="table-responsive">
 
         <table class="table table-hover align-middle text-center">

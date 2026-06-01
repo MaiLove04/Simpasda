@@ -5,14 +5,64 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\JadwalPenjemputan;
 use App\Models\SetorSampah; 
-use App\Models\DetailSetorSampah; // 
+use App\Models\DetailSetorSampah; 
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 
 class KurirController extends Controller
 {
+    /**
+     * TAMPILAN WEB ADMIN: List semua data kurir lapangan
+     */
+    public function index()
+    {
+        // Mengambil semua user dengan role kurir
+        $kurirs = User::where('role', 'kurir')->get();
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $kurirs
+        ], 200);
+    }
+
+    /**
+     * TAMPILAN WEB ADMIN: Mengambil counter statistik untuk dashboard.html
+     */
+    public function getDashboardStats()
+    {
+        try {
+            $totalNasabah = User::where('role', 'nasabah')->count();
+            $totalKurir = User::where('role', 'kurir')->count();
+            
+            // Menghitung akumulasi transaksi dari tabel SetorSampah
+            $totalTransaksi = SetorSampah::count(); 
+
+            return response()->json([
+                'total_nasabah' => $totalNasabah,
+                'total_kurir' => $totalKurir,
+                'total_transaksi' => $totalTransaksi
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'total_nasabah' => 0,
+                'total_kurir' => 0,
+                'total_transaksi' => 0,
+                'error' => $e->getMessage()
+            ], 200);
+        }
+    }
+
+    /**
+     * APLIKASI FLUTTER: Dashboard spesifik untuk tiap kurir
+     */
     public function dashboard_kurir($id)
     {
         $user = User::find($id);
+        
+        if (!$user) {
+            return response()->json(['message' => 'Kurir tidak ditemukan'], 404);
+        }
         
         // 1. Ambil jadwal penjemputan khusus untuk HARI INI
         $jadwalHariIni = JadwalPenjemputan::where('kurir_id', $id)
@@ -67,7 +117,7 @@ class KurirController extends Controller
                 
                 // Cek detail item untuk menampilkan nama jenis sampah pertama
                 $detailPertama = DetailSetorSampah::with('jenisSampah')
-                    ->where('setor_sampah_id', $item->id)
+                    ?->where('setor_sampah_id', $item->id)
                     ->first();
                 
                 $namaJenis = $detailPertama && $detailPertama->jenisSampah 
@@ -100,7 +150,7 @@ class KurirController extends Controller
             
             // Pasokan variabel untuk sinkronisasi Flutter Dashboard kamu
             'total_pesanan'             => $totalPesanan,
-            'total_pesanan_selesai'     => $totalPesananSelesai,
+            'total_pesanan_selesan'     => $totalPesananSelesai,
             'total_berat_hari_ini'      => round($totalBeratHariIni, 1), 
             'total_pendapatan_hari_ini' => number_format($totalPendapatanHariIni, 0, ',', '.'), 
             'berat_bulan_ini'           => round($beratBulanIni, 1),

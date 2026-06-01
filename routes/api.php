@@ -83,6 +83,16 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/transaksi', [TransaksiController::class, 'store']);
     Route::get('/barcode/nasabah/{id}', [BarcodeController::class, 'barcodeNasabah']);
 
+
+    // 🟢 TAMBAHKAN DUA BARIS BARU INI DI SINI:
+    Route::get('/nasabah', [UserController::class, 'index']); 
+    Route::get('/dashboard-stats', [UserController::class, 'getDashboardStats']);
+    Route::get('/kurir', [KurirController::class, 'index']);
+
+    // Identitas & Logout Aman (Bawaan kodemu yang sudah ada)
+    Route::post('/logout', [AuthController::class, 'logout']);
+    Route::post('/transaksi', [TransaksiController::class, 'store']);
+
     // ------------------------------------------
     // MIDDLEWARE: ADMIN DLH (Dinas Lingkungan Hidup)
     // ------------------------------------------
@@ -104,5 +114,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/kurir', [UserController::class, 'createKurir']);
         Route::post('/jadwal-penjemputan', [JadwalPenjemputanController::class, 'store']);
     });
+
+    
 
 });
