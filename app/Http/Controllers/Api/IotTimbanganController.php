@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Models\BeratTimbangan;
+use Illuminate\Support\Facades\Validator;
 
 class IotTimbanganController extends Controller
 {
