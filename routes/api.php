@@ -11,6 +11,8 @@ use App\Http\Controllers\JenisSampahController;
 use App\Http\Controllers\JadwalPenjemputanController;
 use App\Http\Controllers\JenisSampahWebController;
 use App\Http\Controllers\BarcodeController;
+use App\Http\Controllers\Api\IotTimbanganController;
+
 
 
 /*
@@ -62,6 +64,14 @@ Route::post('/request-penjemputan', [SetorSampahController::class, 'requestPenje
 
 // Rute untuk kurir mengambil otomatis jenis sampah bawaan request nasabah
 Route::get('/request-detail/{nasabah_id}', [SetorSampahController::class, 'showRequestDetail']);
+
+//Fitur Berat IoT (Simulasi Data Berat dari Alat IoT)
+// Endpoint yang ditembak oleh alat IoT (Menggunakan POST)
+Route::post('/update-berat-iot', [IotTimbanganController::class, 'updateBerat']);
+
+// Endpoint yang ditembak oleh Flutter Mai (Menggunakan GET)
+Route::get('/berat-timbangan-iot', [IotTimbanganController::class, 'getBeratTerakhir']);
+
 
 
 // ==========================================
