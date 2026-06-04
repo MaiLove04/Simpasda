@@ -58,6 +58,7 @@ Route::get('/berat-timbangan-iot', [SetorSampahController::class, 'getBeratIot']
 Route::get('/dashboard-kurir/{kurir_id}', [SetorSampahController::class, 'getDashboardKurir']);
 
 Route::get('/dashboard-nasabah/{user_id}', [UserController::class, 'dashboard_nasabah']);
+Route::post('/tarik-tunai', [UserController::class, 'tarikTunai']);
 
 // Jalur API ketika nasabah melakukan klik request jemput sampah massal
 Route::post('/request-penjemputan', [SetorSampahController::class, 'requestPenjemputan']);
@@ -95,12 +96,12 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
     // TAMBAHKAN DUA BARIS BARU INI DI SINI:
-    Route::get('/nasabah', [UserController::class, 'index']); 
+    Route::get('/nasabah', [UserController::class, 'index']);
     Route::get('/dashboard-stats', [UserController::class, 'getDashboardStats']);
     Route::get('/kurir', [KurirController::class, 'index']);
     Route::post('/kurir', [KurirController::class, 'store']);
     // Dibuat POST untuk memudahkan pengiriman 'multipart/form-data' jika upload foto dari Flutter
-    Route::post('/kurir/{id}', [KurirController::class, 'update']); 
+    Route::post('/kurir/{id}', [KurirController::class, 'update']);
     Route::delete('/kurir/{id}', [KurirController::class, 'destroy']);
     Route::get('/kurir/{id}', [KurirController::class, 'show']);
 
@@ -130,6 +131,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/jadwal-penjemputan', [JadwalPenjemputanController::class, 'store']);
     });
 
-    
+
 
 });
