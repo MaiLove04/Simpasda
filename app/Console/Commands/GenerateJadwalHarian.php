@@ -55,7 +55,7 @@ class GenerateJadwalHarian extends Command
                 'nasabah_id'          => $pola->nasabah_id,
                 'kurir_id'            => $pola->kurir_id,
                 
-                'bank_sampah_id'      => $pola->bank_sampah_id?? $pola->nasabah->bank_sampah_id?? 1, // Coba ambil dari pola dulu, kalau kosong baru ambil dari relasi nasabah 
+                'bank_sampah_id'      => $pola->nasabah->bank_sampah_id ?? 1, 
                 
                 'alamat'              => $pola->nasabah->alamat ?? '-',
                 'tanggal_penjemputan' => $waktuPenjemputan,

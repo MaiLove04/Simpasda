@@ -9,7 +9,7 @@
             <p class="text-muted mb-0" style="font-size: 13px;">Pantau log penyetoran multi-sampah secara real-time.</p>
         </div>
         
-        <div class="d-flex gap-2 align-items-center">
+        <div class="d-flex flex-wrap gap-2 align-items-center mt-2 mt-md-0">
             <div class="bg-white border rounded-3 px-3 py-2 text-center shadow-sm" style="min-width: 130px;">
                 <span class="text-muted d-block" style="font-size: 11px; font-weight: 600; text-transform: uppercase;">Total Transaksi</span>
                 <span class="h5 mb-0" style="font-weight: bold; color: #0f172a;">{{ $dataSetor->total() }}</span>
@@ -19,20 +19,20 @@
                 <span class="h5 mb-0" style="font-weight: bold; color: #1E521E;">Rp {{ number_format($dataSetor->sum('total'), 0, ',', '.') }}</span>
             </div>
             <button class="btn btn-sm btn-light border ms-2" style="height: 38px; font-weight: 600;" onclick="window.location.reload();">
-                <i class="fas fa-sync-alt text-success"></i>
+                <i class="bi bi-arrow-clockwise text-success"></i>
             </button>
         </div>
     </div>
 
     <div class="card shadow-sm border-0" style="border-radius: 12px; background: white;">
         
-        <div class="d-flex justify-content-between align-items-center px-3 py-3 border-bottom">
-            <h3 class="h6 mb-0" style="color: #0f172a; font-weight: bold;"><i class="fas fa-history me-2 text-muted"></i>Log Penyetoran Sampah</h3>
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 px-3 py-3 border-bottom">
+            <h3 class="h6 mb-0" style="color: #0f172a; font-weight: bold;"><i class="bi bi-clock-history me-2 text-muted"></i>Log Penyetoran Sampah</h3>
             
-            <div style="width: 100%; max-width: 320px;">
+            <div class="w-100" style="max-width: 320px;">
                 <form action="{{ route('admin.setor.index') }}" method="GET" class="d-flex gap-2 mb-0">
                     <div class="input-group input-group-sm" style="border-radius: 6px; overflow: hidden; border: 1px solid #cbd5e1;">
-                        <span class="input-group-text bg-white border-0 text-muted pe-1"><i class="fas fa-search" style="font-size: 11px;"></i></span>
+                        <span class="input-group-text bg-white border-0 text-muted pe-1"><i class="bi bi-search" style="font-size: 11px;"></i></span>
                         <input type="text" name="search" class="form-control border-0 ps-1" placeholder="Cari nasabah / kurir..." value="{{ request('search') }}" style="font-size: 12px; height: 32px;">
                     </div>
                     <button type="submit" class="btn btn-sm text-white px-3" style="border-radius: 6px; font-weight: 600; background-color: #1E521E; font-size: 12px; height: 32px;">Cari</button>
@@ -55,6 +55,7 @@
                         <th class="py-2">Total Uang</th>
                         <th class="py-2">Foto</th>
                         <th class="py-2 pe-3" width="8%">Status</th>
+                        <th class="py-2 pe-3 text-center" width="8%">Aksi</th>
                     </tr>
                 </thead>
                 <tbody style="color: #334155; font-size: 13px;">
@@ -109,10 +110,24 @@
                                 Selesai
                             </span>
                         </td>
+                        <td class="py-2 pe-3">
+                            <div class="d-flex gap-1 justify-content-center">
+                                <a href="{{ route('admin.setor.show', $setor->id) }}" class="btn btn-sm btn-light border px-2" style="border-radius: 6px;" title="Lihat Detail">
+                                    <i class="bi bi-eye" style="font-size: 11px;"></i>
+                                </a>
+                                <form action="{{ route('admin.setor.destroy', $setor->id) }}" method="POST" onsubmit="return confirm('Anda yakin ingin menghapus data setoran ini? Tindakan ini tidak dapat diurungkan.');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-sm btn-light border px-2" style="border-radius: 6px;" title="Hapus Data">
+                                        <i class="bi bi-trash text-danger" style="font-size: 11px;"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="8" class="text-center py-4 text-muted" style="font-size: 13px;">
+                        <td colspan="9" class="text-center py-4 text-muted" style="font-size: 13px;">
                             Tidak ditemukan data setoran sampah yang cocok.
                         </td>
                     </tr>
@@ -121,7 +136,7 @@
             </table>
         </div>
 
-        <div class="d-flex justify-content-between align-items-center px-3 py-2 border-top bg-light" style="border-bottom-left-radius: 12px; border-bottom-right-radius: 12px;">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-2 px-3 py-2 border-top bg-light" style="border-bottom-left-radius: 12px; border-bottom-right-radius: 12px;">
             <div class="text-muted" style="font-size: 12px;">
                 Menampilkan {{ $dataSetor->firstItem() ?? 0 }}-{{ $dataSetor->lastItem() ?? 0 }} dari {{ $dataSetor->total() }} data
             </div>

@@ -17,7 +17,7 @@
     <!-- Alert Notification -->
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show border-0 mb-4 shadow-sm" role="alert" style="border-radius: 10px; background-color: #dcfce7; color: #15803d; font-weight: 500;">
-            ✅ {{ session('success') }}
+             {{ session('success') }}
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
@@ -79,7 +79,7 @@
                             <div class="d-flex justify-content-center gap-2">
                                 <!-- Tombol Edit (Sudah Diperbaiki) -->
                                 <a href="{{ route('jadwal.edit', $jadwal->id) }}" class="btn btn-sm btn-outline-warning" style="border-radius: 6px; padding: 6px 12px; font-weight: 600;">
-                                    ✏️ Edit
+                                     Edit
                                 </a>
 
                                 <!-- Tombol Hapus -->
@@ -87,7 +87,7 @@
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-sm btn-outline-danger" style="border-radius: 6px; padding: 6px 12px; font-weight: 600;">
-                                        🗑️ Hapus
+                                         Hapus
                                     </button>
                                 </form>
                             </div>

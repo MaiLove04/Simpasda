@@ -5,19 +5,30 @@ namespace App\Http\Controllers;
 use App\Models\MasterJadwalRutin;
 use App\Models\User; 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class MasterJadwalRutinController extends Controller
 {
     public function index()
     {
-        $masterJadwals = MasterJadwalRutin::with(['nasabah', 'kurir'])->get();
+        $masterJadwals = MasterJadwalRutin::with(['nasabah', 'kurir'])
+            ->whereHas('nasabah', function ($query) {
+                $query->where('bank_sampah_id', Auth::user()->bank_sampah_id);
+            })
+            ->get();
         return view('admin.master_jadwal.index', compact('masterJadwals'));
     }
 
     public function create()
     {
-        $nasabahs = User::where('role', 'nasabah')->get();
-        $kurirs = User::where('role', 'kurir')->get();
+        $nasabahs = User::where('role', 'nasabah')
+            ->where('bank_sampah_id', Auth::user()->bank_sampah_id)
+            ->get();
+
+        $kurirs = User::where('role', 'kurir')
+            ->where('bank_sampah_id', Auth::user()->bank_sampah_id)
+            ->get();
+
         $hariOptions = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
 
         return view('admin.master_jadwal.create', compact('nasabahs', 'kurirs', 'hariOptions'));
@@ -46,9 +57,18 @@ class MasterJadwalRutinController extends Controller
     // Menampilkan Form Edit Pola
     public function edit($id)
     {
-        $master = MasterJadwalRutin::findOrFail($id);
-        $nasabahs = User::where('role', 'nasabah')->get();
-        $kurirs = User::where('role', 'kurir')->get();
+        $master = MasterJadwalRutin::whereHas('nasabah', function ($query) {
+            $query->where('bank_sampah_id', Auth::user()->bank_sampah_id);
+        })->findOrFail($id);
+        
+        $nasabahs = User::where('role', 'nasabah')
+            ->where('bank_sampah_id', Auth::user()->bank_sampah_id)
+            ->get();
+
+        $kurirs = User::where('role', 'kurir')
+            ->where('bank_sampah_id', Auth::user()->bank_sampah_id)
+            ->get();
+
         $hariOptions = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
 
         return view('admin.master_jadwal.edit', compact('master', 'nasabahs', 'kurirs', 'hariOptions'));
@@ -64,7 +84,10 @@ class MasterJadwalRutinController extends Controller
             'jam_estimasi' => 'required',
         ]);
 
-        $master = MasterJadwalRutin::findOrFail($id);
+        $master = MasterJadwalRutin::whereHas('nasabah', function ($query) {
+            $query->where('bank_sampah_id', Auth::user()->bank_sampah_id);
+        })->findOrFail($id);
+
         $master->update([
             'nasabah_id' => $request->nasabah_id,
             'kurir_id' => $request->kurir_id,
@@ -78,7 +101,10 @@ class MasterJadwalRutinController extends Controller
 
     public function destroy($id)
     {
-        $pola = MasterJadwalRutin::findOrFail($id);
+        $pola = MasterJadwalRutin::whereHas('nasabah', function ($query) {
+            $query->where('bank_sampah_id', Auth::user()->bank_sampah_id);
+        })->findOrFail($id);
+
         $pola->delete();
 
         return redirect()->route('master-jadwal.index')->with('success', 'Pola penjemputan rutin berhasil dihapus!');

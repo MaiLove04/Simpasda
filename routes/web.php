@@ -65,11 +65,39 @@ Route::prefix('admin')->group(function () {
             'destroy' => 'master-jadwal.destroy',
         ]);
 
-        // Halaman setor sampah untuk web admin
+        // ========================================================
+        // TRANSAKSI SETOR SAMPAH (WEB ADMIN)
+        // ========================================================
         Route::get(
             '/setor-sampah',
             [SetorSampahWebController::class, 'index']
         )->name('admin.setor.index');
+
+        Route::get(
+            '/setor-sampah/{id}',
+            [SetorSampahWebController::class, 'show']
+        )->name('admin.setor.show');
+
+        Route::post(
+            '/setor-sampah/{id}/status',
+            [SetorSampahWebController::class, 'updateStatus']
+        )->name('admin.setor.updateStatus');
+
+        Route::delete(
+            '/setor-sampah/{id}',
+            [SetorSampahWebController::class, 'destroy']
+        )->name('admin.setor.destroy');
+
+        // 🔥 FITUR BARU: Setor Sampah Manual Langsung via Loket Web Admin
+        Route::get(
+            '/setor-sampah/manual/{id}',
+            [SetorSampahWebController::class, 'formManual']
+        )->name('admin.setor.form-manual');
+
+        Route::post(
+            '/setor-sampah/manual/{id}',
+            [SetorSampahWebController::class, 'prosesManual']
+        )->name('admin.setor.proses-manual');
 
         // ========================================================
         // NASABAH MANAGEMENT (SUDAH DISINKRONKAN DENGAN FITUR CETAK)
@@ -77,7 +105,7 @@ Route::prefix('admin')->group(function () {
         Route::get(
             '/nasabah',
             [NasabahWebController::class, 'index']
-        )->name('admin.nasabah.index'); // Tambah nama rute index
+        )->name('admin.nasabah.index');
 
         // 🖨️ FITUR BARU: Rute Cetak QR Code Siap Tempel di Rumah Nasabah
         Route::get(
@@ -106,5 +134,15 @@ Route::prefix('admin')->group(function () {
             [NasabahWebController::class, 'updateStatus']
         );
 
+        // ========================================================
+        // MENU TARIK TUNAI & RIWAYAT (SUDAH DISINKRONKAN)
+        // ========================================================
+        Route::get('/tarik-tunai', [NasabahWebController::class, 'indexTarikTunai'])->name('admin.tarik-tunai.index');
+        Route::get('/tarik-tunai/{id}', [NasabahWebController::class, 'tarikTunai'])->name('admin.tarik-tunai.form');
+        Route::post('/tarik-tunai/{id}', [NasabahWebController::class, 'prosesTarikTunai'])->name('admin.tarik-tunai.proses');
+        
+        // Jalur halaman riwayat penarikan saldo nasabah
+        Route::get('/riwayat-penarikan', [NasabahWebController::class, 'riwayatPenarikan'])->name('admin.tarik-tunai.riwayat');
+        
     });
 });
