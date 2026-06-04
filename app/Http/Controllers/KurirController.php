@@ -25,6 +25,120 @@ class KurirController extends Controller
         ], 200);
     }
 
+    // =========================================================================
+    // API: TAMBAH KURIR BARU
+    // =========================================================================
+    public function store(Request $request)
+    {
+        $request->validate([
+            'name' => 'required',
+            'email' => 'required|email|unique:users',
+            'password' => 'required|min:6',
+            'alamat' => 'required',
+            'no_hp' => 'required|unique:users',
+            'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'bank_sampah_id' => 'required|exists:bank_sampahs,id',
+        ]);
+
+        $foto = null;
+        if ($request->hasFile('foto')) {
+            $file = $request->file('foto');
+            $fileName = time() . '_' . $file->getClientOriginalName();
+            $file->move(public_path('uploads/users'), $fileName);
+            $foto = 'uploads/users/' . $fileName;
+        }
+
+        $kurir = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => bcrypt($request->password),
+            'alamat' => $request->alamat,
+            'no_hp' => $request->no_hp,
+            'foto' => $foto,
+            'role' => 'kurir',
+            'status' => 'aktif',
+            'bank_sampah_id' => $request->bank_sampah_id,
+        ]);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Data kurir berhasil ditambahkan',
+            'data' => $kurir
+        ], 201);
+    }
+
+    // =========================================================================
+    // API: EDIT DATA KURIR
+    // =========================================================================
+    public function update(Request $request, $id)
+    {
+        $kurir = User::where('role', 'kurir')->find($id);
+
+        if (!$kurir) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Kurir tidak ditemukan'
+            ], 404);
+        }
+
+        $request->validate([
+            'name' => 'required',
+            'email' => 'required|email|unique:users,email,' . $kurir->id,
+            'alamat' => 'required',
+            'no_hp' => 'required|unique:users,no_hp,' . $kurir->id,
+            'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+        ]);
+
+        $foto = $kurir->foto;
+        if ($request->hasFile('foto')) {
+            $file = $request->file('foto');
+            $fileName = time() . '_' . $file->getClientOriginalName();
+            $file->move(public_path('uploads/users'), $fileName);
+            $foto = 'uploads/users/' . $fileName;
+        }
+
+        $kurir->update([
+            'name' => $request->name,
+            'email' => $request->email,
+            'alamat' => $request->alamat,
+            'no_hp' => $request->no_hp,
+            'foto' => $foto,
+        ]);
+
+        // Update password hanya jika form password diisi
+        if ($request->filled('password')) {
+            $kurir->update(['password' => bcrypt($request->password)]);
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Data kurir berhasil diupdate',
+            'data' => $kurir
+        ], 200);
+    }
+
+    // =========================================================================
+    // API: HAPUS DATA KURIR
+    // =========================================================================
+    public function destroy($id)
+    {
+        $kurir = User::where('role', 'kurir')->find($id);
+
+        if (!$kurir) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Kurir tidak ditemukan'
+            ], 404);
+        }
+
+        $kurir->delete();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Data kurir berhasil dihapus'
+        ], 200);
+    }
+
     /**
      * TAMPILAN WEB ADMIN: Mengambil counter statistik untuk dashboard.html
      */

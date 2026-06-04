@@ -98,6 +98,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/nasabah', [UserController::class, 'index']); 
     Route::get('/dashboard-stats', [UserController::class, 'getDashboardStats']);
     Route::get('/kurir', [KurirController::class, 'index']);
+    Route::post('/kurir', [KurirController::class, 'store']);
+    // Dibuat POST untuk memudahkan pengiriman 'multipart/form-data' jika upload foto dari Flutter
+    Route::post('/kurir/{id}', [KurirController::class, 'update']); 
+    Route::delete('/kurir/{id}', [KurirController::class, 'destroy']);
+    Route::get('/kurir/{id}', [KurirController::class, 'show']);
 
     // Identitas & Logout Aman (Bawaan kodemu yang sudah ada)
     Route::post('/logout', [AuthController::class, 'logout']);
@@ -121,7 +126,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // ------------------------------------------
     Route::middleware('admin_bank')->group(function () {
         Route::post('/nasabah/{id}/approve', [UserController::class, 'approveNasabah']);
-        Route::post('/kurir', [UserController::class, 'createKurir']);
+        // Route::post('/kurir', [UserController::class, 'createKurir']); // Dimatikan agar tidak bentrok dengan rute POST kurir yang baru di atas
         Route::post('/jadwal-penjemputan', [JadwalPenjemputanController::class, 'store']);
     });
 
