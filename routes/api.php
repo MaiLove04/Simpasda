@@ -94,7 +94,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/barcode/nasabah/{id}', [BarcodeController::class, 'barcodeNasabah']);
 
 
-    // 🟢 TAMBAHKAN DUA BARIS BARU INI DI SINI:
+    // TAMBAHKAN DUA BARIS BARU INI DI SINI:
     Route::get('/nasabah', [UserController::class, 'index']); 
     Route::get('/dashboard-stats', [UserController::class, 'getDashboardStats']);
     Route::get('/kurir', [KurirController::class, 'index']);
