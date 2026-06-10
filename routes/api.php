@@ -12,6 +12,7 @@ use App\Http\Controllers\JadwalPenjemputanController;
 use App\Http\Controllers\JenisSampahWebController;
 use App\Http\Controllers\BarcodeController;
 use App\Http\Controllers\Api\IotTimbanganController;
+use App\Http\Controllers\AduanController;
 
 
 
@@ -42,21 +43,20 @@ Route::get('/bank-sampahs', [BankSampahController::class, 'index']);
 Route::post('/setor-sampah', [SetorSampahController::class, 'store']);
 Route::get('/setor-sampah', [SetorSampahController::class, 'index']);
 
-// Fitur Utama Kurir (Dashboard & Jadwal Lapangan)
+// Fitur Utama Kurir (Dashboard Statistik & Jadwal Lapangan)
 Route::get('/dashboard-kurir/{id}', [KurirController::class, 'dashboard_kurir']);
+// Jalur API untuk menyuplai data counter setoran secara real-time
+Route::get('/dashboard-kurir-counter/{kurir_id}', [SetorSampahController::class, 'getDashboardKurir']);
+
 Route::get('/kurir/jadwal/{id}', [JadwalPenjemputanController::class, 'jadwalKurir']);
 
 // Aksi Kurir: Mengubah status penjemputan dari 'terjadwal' menjadi 'proses'
 Route::put('/jadwal-penjemputan/{id}/mulai', [JadwalPenjemputanController::class, 'mulaiJemput']);
 
-//riwayat setor sampah kurir
+// riwayat setor sampah kurir
 Route::get('/riwayat-kurir/{kurir_id}', [SetorSampahController::class, 'getRiwayatTotal']);
-// Fitur Berat IoT (Simulasi Data Berat dari Alat IoT)
-Route::get('/berat-timbangan-iot', [SetorSampahController::class, 'getBeratIot']);
-//data total sampah kurir dashboard
-// Jalur API untuk menyuplai data counter dashboard kurir secara real-time
-Route::get('/dashboard-kurir/{kurir_id}', [SetorSampahController::class, 'getDashboardKurir']);
 
+// Dashboard Nasabah
 Route::get('/dashboard-nasabah/{user_id}', [UserController::class, 'dashboard_nasabah']);
 Route::post('/tarik-tunai', [UserController::class, 'tarikTunai']);
 
@@ -73,6 +73,11 @@ Route::post('/update-berat-iot', [IotTimbanganController::class, 'updateBerat'])
 // Endpoint yang ditembak oleh Flutter Mai (Menggunakan GET)
 Route::get('/berat-timbangan-iot', [IotTimbanganController::class, 'getBeratTerakhir']);
 
+// ==========================================
+// FITUR PENGADUAN (TICKETING) UNTUK MOBILE
+// ==========================================
+Route::post('/aduan', [AduanController::class, 'store']);
+Route::get('/aduan/riwayat/{user_id}', [AduanController::class, 'riwayat']);
 
 
 // ==========================================
@@ -89,9 +94,6 @@ Route::delete('/jenis-sampahs/{id}', [JenisSampahController::class, 'destroy']);
 // ==========================================
 Route::middleware('auth:sanctum')->group(function () {
 
-    // Identitas & Logout Aman
-    Route::post('/logout', [AuthController::class, 'logout']);
-    Route::post('/transaksi', [TransaksiController::class, 'store']);
     Route::get('/barcode/nasabah/{id}', [BarcodeController::class, 'barcodeNasabah']);
 
 

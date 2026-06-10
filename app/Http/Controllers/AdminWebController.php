@@ -14,7 +14,14 @@ class AdminWebController extends Controller
     public function showLogin()
     {
         if (Auth::check()) {
-            return redirect('/admin/dashboard');
+            if (Auth::user()->role === 'admin_dlh') {
+                return redirect()->route('dlh.dashboard');
+            } elseif (Auth::user()->role === 'admin_bank') {
+                return redirect('/admin/dashboard');
+            }
+            
+            // Kick user yang mencoba akses via URL login namun dia bukan admin
+            Auth::logout();
         }
 
         return view('admin.login');
@@ -35,15 +42,17 @@ class AdminWebController extends Controller
         if (Auth::attempt($credentials)) {
             $user = Auth::user();
 
-            // Pengecekan role sesuai bawaan sistemmu
-            if ($user->role !== 'admin_bank') {
+            // Cek role untuk memisahkan pintu masuk admin_dlh dan admin_bank
+            if ($user->role === 'admin_dlh') {
+                $request->session()->regenerate();
+                return redirect()->route('dlh.dashboard');
+            } elseif ($user->role === 'admin_bank') {
+                $request->session()->regenerate();
+                return redirect('/admin/dashboard');
+            } else {
                 Auth::logout();
-                return back()->with('error', 'Bukan admin bank sampah');
+                return back()->with('error', 'Akun ini khusus untuk pengguna aplikasi mobile. Silakan gunakan aplikasi mobile untuk login.');
             }
-
-            $request->session()->regenerate();
-
-            return redirect('/admin/dashboard');
         }
 
         return back()->with('error', 'Email atau password salah');
@@ -54,20 +63,27 @@ class AdminWebController extends Controller
     // ========================================================
     public function dashboard()
     {
+        $adminBankId = Auth::user()->bank_sampah_id;
+
         // 1. Hitung total nasabah aktif
-        $totalNasabah = User::where('role', 'nasabah')->count();
+        $totalNasabah = User::where('role', 'nasabah')
+            ->where('bank_sampah_id', $adminBankId)->count();
 
         // 2. Hitung total kurir aktif
-        $totalKurir = User::where('role', 'kurir')->count();
+        $totalKurir = User::where('role', 'kurir')
+            ->where('bank_sampah_id', $adminBankId)->count();
 
         // 3. Hitung jumlah antrean rute penjemputan harian yang belum selesai (terjadwal atau proses)
         // Jika nama model harianmu adalah 'Jadwal', gantry bagian ini menjadi Jadwal::...
         $jadwalPending = JadwalPenjemputan::whereDate('tanggal_penjemputan', Carbon::today())
+            ->where('bank_sampah_id', $adminBankId)
             ->whereIn('status', ['terjadwal', 'proses'])
             ->count();
 
         // 4. Hitung akumulasi berat (Kg) sampah yang berhasil disetor khusus HARI INI
-        $beratHariIni = SetorSampah::whereDate('created_at', Carbon::today())->sum('berat');
+        $beratHariIni = SetorSampah::whereHas('nasabah', function ($query) use ($adminBankId) {
+                $query->where('bank_sampah_id', $adminBankId);
+            })->whereDate('created_at', Carbon::today())->sum('berat');
 
         // Balikkan ke view dashboard dengan membawa data ringkasan di atas
         return view('admin.dashboard', compact('totalNasabah', 'totalKurir', 'jadwalPending', 'beratHariIni'));
@@ -80,6 +96,6 @@ class AdminWebController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/admin/login');
+        return redirect('/login');
     }
 }

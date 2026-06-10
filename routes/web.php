@@ -9,23 +9,39 @@ use App\Http\Controllers\JadwalWebController;
 use App\Http\Controllers\NasabahWebController;
 use App\Http\Controllers\SetorSampahWebController; 
 use App\Http\Controllers\MasterJadwalRutinController;
+use App\Http\Controllers\DlhDashboardController;
+use App\Http\Controllers\DlhBankSampahWebController;
+use App\Http\Controllers\DlhAduanWebController;
 
 Route::get('/', function () {
-    return redirect('/admin/login');
+    return redirect('/login');
 });
 
+// 🔥 JALANKAN URL INI DI BROWSER UNTUK MEMBUAT AKUN DLH OTOMATIS
+Route::get('/buat-akun-dlh', function () {
+    \App\Models\User::updateOrCreate(
+        ['email' => 'dlh@gmail.com'], // Cek jika email ini sudah ada, maka update
+        [
+            'name' => 'Admin DLH Pusat',
+            'password' => bcrypt('password123'),
+            'role' => 'admin_dlh',
+            'status' => 'aktif',
+            'alamat' => 'Kantor DLH Pusat',
+            'no_hp' => '081234567899',
+            'bank_sampah_id' => 1 // Kosongkan atau isi 1 tergantung database
+        ]
+    );
+    return '✅ Akun DLH berhasil dibuat! Silakan buka /login dengan email: dlh@gmail.com dan password: password123';
+});
+
+// ========================================================
+// ROUTE LOGIN & LOGOUT UNIVERSAL (WEB)
+// ========================================================
+Route::get('/login', [AdminWebController::class, 'showLogin'])->name('login');
+Route::post('/login', [AdminWebController::class, 'login']);
+Route::post('/logout', [AdminWebController::class, 'logout'])->middleware('auth')->name('logout');
+
 Route::prefix('admin')->group(function () {
-
-    // Login (Tanpa perlu auth)
-    Route::get(
-        '/login',
-        [AdminWebController::class, 'showLogin']
-    );
-
-    Route::post(
-        '/login',
-        [AdminWebController::class, 'login']
-    );
 
     // Protected (Hanya bisa diakses jika sudah login admin)
     Route::middleware('auth')->group(function () {
@@ -33,11 +49,6 @@ Route::prefix('admin')->group(function () {
         Route::get(
             '/dashboard',
             [AdminWebController::class, 'dashboard']
-        );
-
-        Route::post(
-            '/logout',
-            [AdminWebController::class, 'logout']
         );
 
         Route::resource(
@@ -145,4 +156,24 @@ Route::prefix('admin')->group(function () {
         Route::get('/riwayat-penarikan', [NasabahWebController::class, 'riwayatPenarikan'])->name('admin.tarik-tunai.riwayat');
         
     });
+});
+
+// ========================================================
+// ROUTE KHUSUS ADMIN DINAS LINGKUNGAN HIDUP (DLH)
+// ========================================================
+Route::prefix('dlh')->middleware(['auth', 'admin_dlh'])->group(function () {
+    
+    // Dashboard
+    Route::get('/dashboard', [DlhDashboardController::class, 'index'])->name('dlh.dashboard');
+
+    // Kelola Bank Sampah
+    Route::get('/bank-sampah', [DlhBankSampahWebController::class, 'index'])->name('dlh.bank-sampah.index');
+    Route::post('/bank-sampah/{id}/approve', [DlhBankSampahWebController::class, 'approve'])->name('dlh.bank-sampah.approve');
+    Route::delete('/bank-sampah/{id}', [DlhBankSampahWebController::class, 'destroy'])->name('dlh.bank-sampah.destroy');
+
+    // Kelola Ticketing/Aduan
+    Route::get('/aduan', [DlhAduanWebController::class, 'index'])->name('dlh.aduan.index');
+    Route::get('/aduan/{id}', [DlhAduanWebController::class, 'show'])->name('dlh.aduan.show');
+    Route::put('/aduan/{id}', [DlhAduanWebController::class, 'update'])->name('dlh.aduan.update');
+    
 });
