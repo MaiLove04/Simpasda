@@ -9,7 +9,8 @@
             <p class="text-muted mb-0" style="font-size: 14px;">Selamat datang kembali, {{ auth()->user()->name }} Kelola operasional hari ini.</p>
         </div>
         
-        <form method="POST" action="/admin/logout" onsubmit="return confirm('Yakin ingin keluar dari panel admin?')">
+        {{-- Ganti action dari "/admin/logout" menjadi "{{ route('logout') }}" --}}
+        <form method="POST" action="{{ route('logout') }}" onsubmit="return confirm('Yakin ingin keluar dari panel admin?')">
             @csrf
             <button class="btn btn-outline-danger d-flex align-items-center gap-2" type="submit" style="border-radius: 8px; padding: 10px 16px; font-weight: 600;">
                 <i class="bi bi-box-arrow-right"></i> Keluar Aplikasi

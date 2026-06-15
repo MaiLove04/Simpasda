@@ -89,13 +89,14 @@ class AdminWebController extends Controller
         return view('admin.dashboard', compact('totalNasabah', 'totalKurir', 'jadwalPending', 'beratHariIni'));
     }
 
-    public function logout(Request $request)
+        public function logout(Request $request)
     {
         Auth::logout();
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/login');
+        // UBAH BAGIAN INI: gunakan route() bukan URL string
+        return redirect()->route('login'); 
     }
 }

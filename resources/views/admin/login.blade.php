@@ -5,11 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login Admin - SIMPASDA</title>
 
-    <!-- Bootstrap Icons & Google Fonts Premium -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2=family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
         :root {
@@ -36,7 +35,7 @@
             padding: 20px;
         }
 
-        /* 🏛️ CARD PLATINUM DESIGN */
+        /* 🏛️ CARD DESIGN */
         .login-card {
             width: 100%;
             max-width: 400px;
@@ -208,7 +207,6 @@
 
 <div class="login-card">
 
-    <!-- Header Brand SIMPASDA -->
     <div class="brand-header">
         <div class="brand-icon">
             <i class="bi bi-recycle"></i>
@@ -217,27 +215,29 @@
         <p>Sistem Manajemen Bank Sampah Daerah</p>
     </div>
 
-    <!-- Tampilan Error Laravel Session -->
     @if(session('error'))
         <div class="error-alert">
             <i class="bi bi-exclamation-triangle-fill"></i>
             <div>{{ session('error') }}</div>
         </div>
+    @elseif($errors->any())
+        <div class="error-alert">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <div>{{ $errors->first() }}</div>
+        </div>
     @endif
 
-    <form method="POST" action="/admin/login">
+    <form method="POST" action="{{ route('login') }}">
         @csrf
 
-        <!-- Input Email -->
         <div class="form-group">
             <label for="email">Alamat Email Admin</label>
             <div class="input-wrapper">
                 <i class="bi bi-envelope input-icon"></i>
-                <input type="email" id="email" name="email" placeholder="nama@email.com" required autocomplete="email">
+                <input type="email" id="email" name="email" value="{{ old('email') }}" placeholder="nama@email.com" required autocomplete="email" autofocus>
             </div>
         </div>
 
-        <!-- Input Password -->
         <div class="form-group">
             <label for="password">Kata Sandi</label>
             <div class="input-wrapper password-wrapper">
@@ -249,7 +249,6 @@
             </div>
         </div>
 
-        <!-- Tombol Kirim Form -->
         <button type="submit" class="btn-submit">Masuk ke Dashboard</button>
     </form>
 
