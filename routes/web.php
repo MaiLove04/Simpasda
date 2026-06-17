@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Artisan;
 
 use App\Http\Controllers\AdminWebController;
 use App\Http\Controllers\KurirWebController;
@@ -13,12 +14,20 @@ use App\Http\Controllers\DlhDashboardController;
 use App\Http\Controllers\DlhBankSampahWebController;
 use App\Http\Controllers\DlhAduanWebController;
 
-// Otomatis mengarahkan rute utama '/' langsung ke halaman Login
+// Ubah bagian paling atas web.php menjadi ini:
+Route::get('/', function () {
+    // Paksa hapus ingatan rute lama di server
+    \Illuminate\Support\Facades\Artisan::call('route:clear');
+    \Illuminate\Support\Facades\Artisan::call('config:clear');
+    \Illuminate\Support\Facades\Artisan::call('cache:clear');
+    
+    return " Ingatan rute lama dihapus! Sekarang silakan buka: pht.my.id/up-db";
+});
+
 Route::get('/', function () {
     return redirect()->route('login');
 });
 
-// 🔥 JALANKAN URL INI DI BROWSER UNTUK MEMBUAT AKUN DLH OTOMATIS
 Route::get('/buat-akun-dlh', function () {
     \App\Models\User::updateOrCreate(
         ['email' => 'dlh@gmail.com'], 
@@ -35,28 +44,18 @@ Route::get('/buat-akun-dlh', function () {
     return '✅ Akun DLH berhasil dibuat! Silakan buka /login dengan email: dlh@gmail.com dan password: password123';
 });
 
-// ========================================================
-// ROUTE LOGIN & LOGOUT UNIVERSAL (WEB)
-// ========================================================
 Route::get('/login', [AdminWebController::class, 'showLogin'])->name('login');
 Route::post('/login', [AdminWebController::class, 'login']);
 Route::post('/logout', [AdminWebController::class, 'logout'])->middleware('auth')->name('logout');
 
-
-// ========================================================
-// ROUTE KHUSUS ADMIN BANK SAMPAH (OPERASIONAL LOKAL)
-// ========================================================
 Route::prefix('admin')->middleware('auth')->group(function () {
 
-    // Dashboard Internal Bank Sampah
     Route::get('/dashboard', [AdminWebController::class, 'dashboard'])->name('admin.dashboard');
 
-    // Master Data Manajemen Operasional (Otomatis dapat named routes dari Laravel)
     Route::resource('kurir', KurirWebController::class);
     Route::resource('jenis-sampah', JenisSampahWebController::class);
     Route::resource('jadwal', JadwalWebController::class);
 
-    // Master Jadwal Rutin Penjemputan
     Route::resource('master-jadwal', MasterJadwalRutinController::class)->names([
         'index'   => 'master-jadwal.index',
         'create'  => 'master-jadwal.create',
@@ -64,9 +63,6 @@ Route::prefix('admin')->middleware('auth')->group(function () {
         'destroy' => 'master-jadwal.destroy',
     ]);
 
-    // ========================================================
-    // MODUL TRANSAKSI SETOR SAMPAH (Sudah Diberi Nama Rute Konsisten)
-    // ========================================================
     Route::prefix('setor-sampah')->group(function () {
         Route::get('/', [SetorSampahWebController::class, 'index'])->name('admin.setor.index');
         Route::get('/manual/{id}', [SetorSampahWebController::class, 'formManual'])->name('admin.setor.form-manual');
@@ -76,9 +72,6 @@ Route::prefix('admin')->middleware('auth')->group(function () {
         Route::delete('/{id}', [SetorSampahWebController::class, 'destroy'])->name('admin.setor.destroy');
     });
 
-    // ========================================================
-    // MODUL DATA KEANGGOTAAN NASABAH (⚠️ PERBAIKAN: Kini Sudah Ada Named Routes)
-    // ========================================================
     Route::prefix('nasabah')->group(function () {
         Route::get('/', [NasabahWebController::class, 'index'])->name('admin.nasabah.index');
         Route::get('/{id}/print-qr', [NasabahWebController::class, 'printQr'])->name('admin.nasabah.print-qr');
@@ -88,9 +81,6 @@ Route::prefix('admin')->middleware('auth')->group(function () {
         Route::delete('/{id}', [NasabahWebController::class, 'destroy'])->name('admin.nasabah.destroy');
     });
 
-    // ========================================================
-    // MODUL KEUANGAN / TARIK TUNAI NASABAH (Sudah Diberi Nama Rute Konsisten)
-    // ========================================================
     Route::prefix('tarik-tunai')->group(function () {
         Route::get('/', [NasabahWebController::class, 'indexTarikTunai'])->name('admin.tarik-tunai.index');
         Route::get('/{id}', [NasabahWebController::class, 'tarikTunai'])->name('admin.tarik-tunai.form');
@@ -100,23 +90,37 @@ Route::prefix('admin')->middleware('auth')->group(function () {
         
 });
 
-
-// ========================================================
-// ROUTE KHUSUS ADMIN DINAS LINGKUNGAN HIDUP (DLH)
-// ========================================================
 Route::prefix('dlh')->middleware(['auth', 'admin_dlh'])->group(function () {
     
-    // Dashboard Utama Statistik DLH
     Route::get('/dashboard', [DlhDashboardController::class, 'index'])->name('dlh.dashboard');
 
-    // Modul Pengesahan & Verifikasi Unit Bank Sampah Baru
     Route::prefix('bank-sampah')->group(function () {
-        Route::get('/', [DlhBankSampahWebController::class, 'index'])->name('dlh.bank-sampah.index');
-        Route::post('/{id}/approve', [DlhBankSampahWebController::class, 'approve'])->name('dlh.bank-sampah.approve');
-        Route::delete('/{id}', [DlhBankSampahWebController::class, 'destroy'])->name('dlh.bank-sampah.destroy');
+
+        Route::get('/', [DlhBankSampahWebController::class, 'index'])
+            ->name('dlh.bank-sampah.index');
+
+        Route::get('/create', [DlhBankSampahWebController::class, 'create'])
+            ->name('dlh.bank-sampah.create');
+
+        Route::post('/', [DlhBankSampahWebController::class, 'store'])
+            ->name('dlh.bank-sampah.store');
+
+        Route::get('/{id}', [DlhBankSampahWebController::class, 'show'])
+            ->name('dlh.bank-sampah.show');
+
+        Route::get('/{id}/edit', [DlhBankSampahWebController::class, 'edit'])
+            ->name('dlh.bank-sampah.edit');
+
+        Route::put('/{id}', [DlhBankSampahWebController::class, 'update'])
+            ->name('dlh.bank-sampah.update');
+
+        Route::delete('/{id}', [DlhBankSampahWebController::class, 'destroy'])
+            ->name('dlh.bank-sampah.destroy');
+
+        Route::post('/{id}/approve', [DlhBankSampahWebController::class, 'approve'])
+            ->name('dlh.bank-sampah.approve');
     });
 
-    // Modul Pusat Pengaduan Kendala & Fasilitas Sampah Warga
     Route::prefix('aduan')->group(function () {
         Route::get('/', [DlhAduanWebController::class, 'index'])->name('dlh.aduan.index');
         Route::get('/{id}', [DlhAduanWebController::class, 'show'])->name('dlh.aduan.show');

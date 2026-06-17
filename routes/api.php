@@ -110,6 +110,8 @@ Route::middleware('auth:sanctum')->group(function () {
     // Identitas & Logout Aman (Bawaan kodemu yang sudah ada)
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::post('/transaksi', [TransaksiController::class, 'store']);
+    Route::post('/tarik-tunai', [UserController::class, 'tarikTunai']);
+    Route::post('/setup-pin', [UserController::class, 'setupPin']);
 
     // ------------------------------------------
     // MIDDLEWARE: ADMIN DLH (Dinas Lingkungan Hidup)

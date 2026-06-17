@@ -25,6 +25,9 @@ class User extends Authenticatable
         'status',
         'bank_sampah_id',
         'kode_nasabah',
+        'pin_hash',
+        'pin_attempts',
+        'pin_locked_until',
     ];
 
     protected $hidden = [
