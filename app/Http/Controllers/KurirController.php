@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\JadwalPenjemputan;
-use App\Models\SetorSampah; 
-use App\Models\DetailSetorSampah; 
+use App\Models\SetorSampah;
+use App\Models\DetailSetorSampah;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -48,6 +48,10 @@ class KurirController extends Controller
             $foto = 'uploads/users/' . $fileName;
         }
 
+        // Hitung kode kurir otomatis secara dinamis
+        $jumlahKurir = User::where('role', 'kurir')->count() + 1;
+        $kodeKurir = 'KRR' . str_pad($jumlahKurir, 3, '0', STR_PAD_LEFT);
+
         $kurir = User::create([
             'name' => $request->name,
             'email' => $request->email,
@@ -58,6 +62,7 @@ class KurirController extends Controller
             'role' => 'kurir',
             'status' => 'aktif',
             'bank_sampah_id' => $request->bank_sampah_id,
+            'kode_nasabah' => $kodeKurir, // Menggunakan kolom yang sama agar tidak merusak database schema
         ]);
 
         return response()->json([
@@ -147,9 +152,9 @@ class KurirController extends Controller
         try {
             $totalNasabah = User::where('role', 'nasabah')->count();
             $totalKurir = User::where('role', 'kurir')->count();
-            
+
             // Menghitung akumulasi transaksi dari tabel SetorSampah
-            $totalTransaksi = SetorSampah::count(); 
+            $totalTransaksi = SetorSampah::count();
 
             return response()->json([
                 'total_nasabah' => $totalNasabah,
@@ -173,11 +178,11 @@ class KurirController extends Controller
     public function dashboard_kurir($id)
     {
         $user = User::find($id);
-        
+
         if (!$user) {
             return response()->json(['message' => 'Kurir tidak ditemukan'], 404);
         }
-        
+
         // 1. Ambil jadwal penjemputan khusus untuk HARI INI
         $jadwalHariIni = JadwalPenjemputan::where('kurir_id', $id)
             ->whereDate('tanggal_penjemputan', Carbon::today())
@@ -192,7 +197,7 @@ class KurirController extends Controller
         // 3. Hitung tugas yang SUDAH SELESAI hari ini (status selesai)
         $totalPesananSelesai = JadwalPenjemputan::where('kurir_id', $id)
             ->whereDate('tanggal_penjemputan', Carbon::today())
-            ->where('status', 'selesai') 
+            ->where('status', 'selesai')
             ->count();
 
         // 4. Ambil semua ID transaksi setor sampah milik kurir ini KHUSUS HARI INI
@@ -228,14 +233,14 @@ class KurirController extends Controller
             ->map(function($item) {
                 // Hitung berat total per transaksi dari tabel anak
                 $beratTransaksi = DetailSetorSampah::where('setor_sampah_id', $item->id)->sum('berat');
-                
+
                 // Cek detail item untuk menampilkan nama jenis sampah pertama
                 $detailPertama = DetailSetorSampah::with('jenisSampah')
                     ?->where('setor_sampah_id', $item->id)
                     ->first();
-                
-                $namaJenis = $detailPertama && $detailPertama->jenisSampah 
-                    ? $detailPertama->jenisSampah->nama 
+
+                $namaJenis = $detailPertama && $detailPertama->jenisSampah
+                    ? $detailPertama->jenisSampah->nama
                     : 'Sampah';
 
                 // Hitung jika ada item tambahan
@@ -261,15 +266,15 @@ class KurirController extends Controller
             'email'                     => $user->email ?? '-',
             'no_hp'                     => $user->no_hp ?? '-',
             'alamat'                    => $user->alamat ?? '-',
-            
+
             // Pasokan variabel untuk sinkronisasi Flutter Dashboard kamu
             'total_pesanan'             => $totalPesanan,
             'total_pesanan_selesan'     => $totalPesananSelesai,
-            'total_berat_hari_ini'      => round($totalBeratHariIni, 1), 
-            'total_pendapatan_hari_ini' => number_format($totalPendapatanHariIni, 0, ',', '.'), 
+            'total_berat_hari_ini'      => round($totalBeratHariIni, 1),
+            'total_pendapatan_hari_ini' => number_format($totalPendapatanHariIni, 0, ',', '.'),
             'berat_bulan_ini'           => round($beratBulanIni, 1),
             'keterangan_tren'           => 'Performa kerja Anda luar biasa hari ini, tingkatkan terus!',
-            
+
             'jadwal'                    => $jadwalHariIni,
             'aktivitas_terbaru'         => $aktivitasTerbaru
         ]);

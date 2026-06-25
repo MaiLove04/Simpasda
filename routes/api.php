@@ -13,6 +13,7 @@ use App\Http\Controllers\JenisSampahWebController;
 use App\Http\Controllers\BarcodeController;
 use App\Http\Controllers\Api\IotTimbanganController;
 use App\Http\Controllers\AduanController;
+use App\Http\Controllers\Api\TarikTunaiController;
 
 
 
@@ -25,6 +26,10 @@ use App\Http\Controllers\AduanController;
 // ==========================================
 // 1. ROUTE PUBLIC (Tanpa Login / Tanpa Token)
 // ==========================================
+
+Route::get('/bank-sampah', function() {
+    return \DB::table('bank_sampahs')->get();
+});
 
 Route::get('/test', function () {
     return response()->json(['message' => 'API Bank Sampah ASRI Berjalan Lancar']);
@@ -50,6 +55,9 @@ Route::get('/dashboard-kurir-counter/{kurir_id}', [SetorSampahController::class,
 
 Route::get('/kurir/jadwal/{id}', [JadwalPenjemputanController::class, 'jadwalKurir']);
 
+// Ambil jadwal aktif khusus nasabah (untuk halaman Lacak)
+Route::get('/nasabah/jadwal/{id}', [JadwalPenjemputanController::class, 'jadwalNasabah']);
+
 // Aksi Kurir: Mengubah status penjemputan dari 'terjadwal' menjadi 'proses'
 Route::put('/jadwal-penjemputan/{id}/mulai', [JadwalPenjemputanController::class, 'mulaiJemput']);
 
@@ -58,7 +66,6 @@ Route::get('/riwayat-kurir/{kurir_id}', [SetorSampahController::class, 'getRiway
 
 // Dashboard Nasabah
 Route::get('/dashboard-nasabah/{user_id}', [UserController::class, 'dashboard_nasabah']);
-Route::post('/tarik-tunai', [UserController::class, 'tarikTunai']);
 
 // Jalur API ketika nasabah melakukan klik request jemput sampah massal
 Route::post('/request-penjemputan', [SetorSampahController::class, 'requestPenjemputan']);
@@ -110,7 +117,13 @@ Route::middleware('auth:sanctum')->group(function () {
     // Identitas & Logout Aman (Bawaan kodemu yang sudah ada)
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::post('/transaksi', [TransaksiController::class, 'store']);
-    Route::post('/tarik-tunai', [UserController::class, 'tarikTunai']);
+
+    // Fitur Tarik Tunai (Request & Approve)
+    Route::get('/tarik-tunai', [TarikTunaiController::class, 'index']);
+    Route::post('/tarik-tunai', [TarikTunaiController::class, 'store']);
+    Route::patch('/tarik-tunai/{id}/approve', [TarikTunaiController::class, 'approve']);
+    Route::patch('/tarik-tunai/{id}/reject', [TarikTunaiController::class, 'reject']);
+
     Route::post('/setup-pin', [UserController::class, 'setupPin']);
 
     // ------------------------------------------

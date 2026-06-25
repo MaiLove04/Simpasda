@@ -8,7 +8,7 @@
             <h1 class="h2 mb-1" style="color: #0f172a; font-weight: bold;">Dashboard Admin</h1>
             <p class="text-muted mb-0" style="font-size: 14px;">Selamat datang kembali, {{ auth()->user()->name }} Kelola operasional hari ini.</p>
         </div>
-        
+
         {{-- Ganti action dari "/admin/logout" menjadi "{{ route('logout') }}" --}}
         <form method="POST" action="{{ route('logout') }}" onsubmit="return confirm('Yakin ingin keluar dari panel admin?')">
             @csrf
@@ -19,7 +19,7 @@
     </div>
 
     <div class="row g-4 mb-5">
-        
+
         <div class="col-12 col-md-6 col-lg-3">
             <div class="card border-0 shadow-sm p-4 h-100" style="border-radius: 16px; background: white;">
                 <div class="d-flex justify-content-between align-items-start">
@@ -90,12 +90,29 @@
             </div>
         </div>
 
+        <div class="col-12 col-md-6 col-lg-3">
+            <div class="card border-0 shadow-sm p-4 h-100" style="border-radius: 16px; background: white; border-left: 5px solid #16a34a;">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <p class="text-muted mb-1 text-uppercase tracking-wider" style="font-size: 11px; font-weight: 700; letter-spacing: 0.5px;">Request Tarik Tunai</p>
+                        <h3 class="mb-0 fw-bold" style="color: #16a34a;">{{ $tarikPending ?? '0' }} Antrean</h3>
+                    </div>
+                    <div class="p-3 rounded-3" style="background: #dcfce7; color: #16a34a;">
+                        <i class="bi bi-cash-coin fs-4" style="line-height: 1;"></i>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <a href="{{ route('admin.tarik-tunai.index') }}" class="text-success small fw-bold text-decoration-none">Lihat & Approve <i class="bi bi-arrow-right"></i></a>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <div class="card border-0 shadow-sm p-4 mb-4" style="border-radius: 16px; background: white;">
         <h4 class="h5 mb-3 fw-bold" style="color: #0f172a;">Aktivitas Operasional Instan</h4>
         <p class="text-muted small mb-4">Gunakan pintasan di bawah ini untuk mengelola penjadwalan berkala nasabah secara cepat tanpa membuka menu sidebar:</p>
-        
+
         <div class="row g-3">
             <div class="col-md-6">
                 <a href="{{ route('master-jadwal.create') }}" class="btn btn-light w-100 text-start p-3 d-flex align-items-center justify-content-between border" style="border-radius: 12px; transition: all 0.2s;">

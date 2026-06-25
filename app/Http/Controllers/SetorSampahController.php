@@ -4,9 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\SetorSampah;
-use App\Models\DetailSetorSampah; 
-use App\Models\User; 
-use App\Models\MutasiSaldo; 
+use App\Models\DetailSetorSampah;
+use App\Models\User;
+use App\Models\MutasiSaldo;
 use Illuminate\Support\Facades\DB;
 
 class SetorSampahController extends Controller
@@ -32,7 +32,7 @@ class SetorSampahController extends Controller
         $request->validate([
             'user_id'     => 'required',
             'grand_total' => 'required',
-            'sampah_list' => 'required', 
+            'sampah_list' => 'required',
             'foto_sampah' => 'nullable|image|mimes:jpeg,png,jpg|max:2048'
         ]);
 
@@ -51,8 +51,12 @@ class SetorSampahController extends Controller
             // 2. Simpan Data Induk Master Setor Sampah
             $setor = new SetorSampah();
             $setor->user_id = $request->user_id;
-            $setor->kurir_id = $request->kurir_id ?? 14; 
-            $setor->total = $request->grand_total; 
+
+            // Cari kurir pengganti jika ID 14 tidak ada
+            $defaultKurir = User::where('role', 'kurir')->first();
+            $setor->kurir_id = $request->kurir_id ?? ($defaultKurir ? $defaultKurir->id : 14);
+
+            $setor->total = $request->grand_total;
             $setor->foto_sampah = $pathFoto;
             $setor->catatan = $request->catatan ?? 'Disetor massal lewat aplikasi kurir';
             $setor->save();
@@ -65,18 +69,18 @@ class SetorSampahController extends Controller
 
             foreach ($sampahList as $item) {
                 $detail = new DetailSetorSampah();
-                $detail->setor_sampah_id = $setor->id; 
+                $detail->setor_sampah_id = $setor->id;
                 $detail->jenis_sampah_id = $item['jenis_sampah_id'];
                 $detail->berat           = $item['berat'];
                 $detail->harga_per_kg    = $item['harga_per_kg'];
-                $detail->subtotal        = $item['total_item']; 
+                $detail->subtotal        = $item['total_item'];
                 $detail->save();
             }
 
             // 4. PROSES FINANSIAL: UPDATE SALDO NASABAH
             $nasabah = User::find($request->user_id);
             if ($nasabah) {
-                $nominalMasuk = (int) $request->grand_total; 
+                $nominalMasuk = (int) $request->grand_total;
                 $nasabah->saldo = $nasabah->saldo + $nominalMasuk;
                 $nasabah->save();
             }
@@ -86,7 +90,7 @@ class SetorSampahController extends Controller
             $mutasi->user_id         = $request->user_id;
             $mutasi->jenis_transaksi = 'masuk';
             $mutasi->sumber          = 'setor_sampah';
-            $mutasi->referensi_id    = $setor->id; 
+            $mutasi->referensi_id    = $setor->id;
             $mutasi->nominal         = (int) $request->grand_total;
             $mutasi->status          = 'success';
             $mutasi->keterangan      = 'Uang masuk dari penimbangan sampah multi-item';
@@ -96,12 +100,12 @@ class SetorSampahController extends Controller
             if ($request->has('jadwal_id') && !empty($request->jadwal_id)) {
                 $jadwal = \App\Models\JadwalPenjemputan::find($request->jadwal_id);
                 if ($jadwal) {
-                    $jadwal->status = 'selesai'; 
+                    $jadwal->status = 'selesai';
                     $jadwal->save();
                 }
             }
 
-            DB::commit(); 
+            DB::commit();
 
             return response()->json([
                 'success' => true,
@@ -110,7 +114,7 @@ class SetorSampahController extends Controller
             ], 201);
 
         } catch (\Exception $e) {
-            DB::rollBack(); 
+            DB::rollBack();
             return response()->json([
                 'success' => false,
                 'message' => 'Gagal memproses setoran: ' . $e->getMessage()
@@ -140,7 +144,7 @@ class SetorSampahController extends Controller
                 'success' => true,
                 'kurir_id' => $kurir_id,
                 'total_transaksi' => $totalTransaksi,
-                'total_kg_sampah' => round($totalKgSampah, 2), 
+                'total_kg_sampah' => round($totalKgSampah, 2),
                 'total_uang_diproses' => (int) $totalUangDiproses
             ], 200);
 
@@ -163,7 +167,7 @@ class SetorSampahController extends Controller
         // Validasi murni melacak data bawaan dari Flutter kamu
         $request->validate([
             'user_id' => 'required|exists:users,id',
-            'items'   => 'required|array', 
+            'items'   => 'required|array',
         ]);
 
         DB::beginTransaction();
@@ -171,11 +175,14 @@ class SetorSampahController extends Controller
         try {
             // 1. Ambil data profil nasabah untuk mendeteksi alamat aslinya
             $nasabah = User::find($request->user_id);
-            $kurirIdDefault = 14; // Kurir penanggung jawab
+
+            // 🔥 PERBAIKAN: Cari kurir yang benar-benar ada di database (dinamis)
+            $kurirAktif = User::where('role', 'kurir')->first();
+            $kurirIdDefault = $kurirAktif ? $kurirAktif->id : 14;
 
             // 2. SIMPAN KE TABEL jadwal_penjemputans (Murni Catatan Nasabah)
             $jadwal = new \App\Models\JadwalPenjemputan();
-            $jadwal->nasabah_id = $request->user_id; 
+            $jadwal->nasabah_id = $request->user_id;
             $jadwal->kurir_id = $kurirIdDefault;
             $jadwal->bank_sampah_id = 1; // Default Lokasi Bank Sampah Basayan Bestari
             $jadwal->alamat = $nasabah->alamat ?? 'Alamat tidak diisi nasabah';
@@ -222,7 +229,7 @@ class SetorSampahController extends Controller
             DB::rollBack();
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal memproses di server: ' . $e->getMessage() 
+                'message' => 'Gagal memproses di server: ' . $e->getMessage()
             ], 500);
         }
     }
@@ -257,16 +264,16 @@ class SetorSampahController extends Controller
             foreach ($details as $item) {
                 if ($item->jenisSampah) {
                     // 🔥 DETEKSI OTOMATIS: Mengantisipasi segala nama kolom harga di database kamu
-                    $hargaBeliTerupdate = $item->jenisSampah->harga_beli 
-                                        ?? $item->jenisSampah->harga 
-                                        ?? $item->jenisSampah->harga_per_kg 
+                    $hargaBeliTerupdate = $item->jenisSampah->harga_beli
+                                        ?? $item->jenisSampah->harga
+                                        ?? $item->jenisSampah->harga_per_kg
                                         ?? 2000; // Fallback aman angka 2000 jika semua kolom null
 
                     $formAutoload[] = [
                         'jenis_sampah_id' => $item->jenis_sampah_id,
                         'nama_sampah'     => $item->jenisSampah->nama,
-                        'harga_per_kg'    => (int) $hargaBeliTerupdate, 
-                        'berat'           => 0, 
+                        'harga_per_kg'    => (int) $hargaBeliTerupdate,
+                        'berat'           => 0,
                         'total_item'      => 0
                     ];
                 }

@@ -19,6 +19,7 @@ class JadwalPenjemputanController extends Controller
                 'bankSampah'
             ])
             ->where('kurir_id', $id)
+            ->where('status', '!=', 'selesai') // Hanya tampilkan yang belum selesai
             ->latest()
             ->get();
 
@@ -111,6 +112,27 @@ class JadwalPenjemputanController extends Controller
                 'message' => 'Gagal memperbarui status penjemputan',
                 'error'   => $e->getMessage(),
             ], 500);
+        }
+    }
+
+    // ==========================================
+    // AMBIL JADWAL AKTIF NASABAH (DIPANGGIL FLUTTER)
+    // ==========================================
+    public function jadwalNasabah($id)
+    {
+        try {
+            $jadwal = \App\Models\JadwalPenjemputan::with(['kurir'])
+                ->where('nasabah_id', $id)
+                ->where('status', '!=', 'selesai')
+                ->latest()
+                ->first();
+
+            return response()->json([
+                'success' => true,
+                'data'    => $jadwal
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
         }
     }
 }
