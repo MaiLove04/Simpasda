@@ -14,6 +14,7 @@ use App\Http\Controllers\BarcodeController;
 use App\Http\Controllers\Api\IotTimbanganController;
 use App\Http\Controllers\AduanController;
 use App\Http\Controllers\Api\TarikTunaiController;
+use App\Http\Controllers\OtpController;
 
 
 
@@ -39,6 +40,10 @@ Route::get('/test', function () {
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/create-admin', [AuthController::class, 'createAdmin']);
+
+// Rute untuk Lupa Password via WhatsApp OTP (Struktur Baru)
+Route::post('/otp/send', [OtpController::class, 'sendOtp']);
+Route::post('/otp/reset-password', [OtpController::class, 'verifyOtpAndReset']);
 
 // Fitur QR Code & Scanner Nasabah (Dipanggil Aplikasi Kurir)
 Route::get('/nasabah/qrcode/{kode}', [UserController::class, 'scanQr']);
