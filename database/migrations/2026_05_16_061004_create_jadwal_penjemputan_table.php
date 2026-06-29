@@ -49,9 +49,9 @@ return new class extends Migration
                     'status',
                     [
                         'terjadwal',
-                        'dalam_perjalanan',
+                        'proses',
                         'selesai',
-                        'dibatalkan',
+                        'batal',
                     ]
                 )->default(
                     'terjadwal'

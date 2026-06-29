@@ -15,6 +15,25 @@ use App\Http\Controllers\DlhDashboardController;
 use App\Http\Controllers\DlhBankSampahWebController;
 use App\Http\Controllers\DlhAduanWebController;
 
+/**
+ * ======================================================================
+ * RUTE DARURAT: Untuk membersihkan cache tanpa perlu akses SSH
+ * ======================================================================
+ */
+Route::get('/system-refresh-6285', function () {
+    \Illuminate\Support\Facades\Artisan::call('optimize:clear');
+    return "✅ Cache berhasil dibersihkan! Aplikasi web sudah diperbarui.";
+});
+
+// 🔥 RUTE UNTUK MIGRASI DATABASE DARI WEB
+Route::get('/up-db', function () {
+    try {
+        \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+        return "✅ Database berhasil diperbarui! Silakan cek fitur jadwal rutin Anda.";
+    } catch (\Exception $e) {
+        return "❌ Gagal migrasi: " . $e->getMessage();
+    }
+});
 
 // Rute untuk menerima setup PIN dari Flutter
 Route::post('/setup-pin', function (\Illuminate\Http\Request $request) {
@@ -23,56 +42,10 @@ Route::post('/setup-pin', function (\Illuminate\Http\Request $request) {
         'status' => 'success',
         'message' => 'Rute setup-pin berhasil dihubungkan ke Laravel!'
     ], 200);
-
-
-Route::get('/bersihkan-ingatan-rute', function () {
-    \Illuminate\Support\Facades\Artisan::call('route:clear');
-    \Illuminate\Support\Facades\Artisan::call('config:clear');
-    \Illuminate\Support\Facades\Artisan::call('cache:clear');
-
-    return "Ingatan rute lama dihapus! Sekarang silakan buka: pht.my.id/up-db";
-});
-
-// Tambahkan rute ini untuk menjalankan migrasi database via browser
-Route::get('/up-db', function () {
-    \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
-    return "✅ Database Berhasil Dimigrasi! Silakan cek tabel tarik_tunais.";
 });
 
 Route::get('/', function () {
     return redirect()->route('login');
-});
-
-Route::get('/buat-akun-dlh', function () {
-    \App\Models\User::updateOrCreate(
-        ['email' => 'dlh@gmail.com'],
-        [
-            'name' => 'Admin DLH Pusat',
-            'password' => bcrypt('password123'),
-            'role' => 'admin_dlh',
-            'status' => 'aktif',
-            'alamat' => 'Kantor DLH Pusat',
-            'no_hp' => '081234567899',
-            'bank_sampah_id' => 1
-        ]
-    );
-    return '✅ Akun DLH berhasil dibuat! Silakan buka /login dengan email: dlh@gmail.com dan password: password123';
-});
-
-Route::get('/buat-akun-admin', function () {
-    \App\Models\User::updateOrCreate(
-        ['email' => 'adminbasayan@gmail.com'],
-        [
-            'name' => 'Admin Bank Sampah',
-            'password' => bcrypt('password123'),
-            'role' => 'admin_bank_sampah',
-            'status' => 'aktif',
-            'alamat' => 'Kantor Bank Sampah',
-            'no_hp' => '081122334455',
-            'bank_sampah_id' => 1
-        ]
-    );
-    return '✅ Akun Admin Bank Sampah berhasil dibuat! Silakan buka /login dengan email: adminbasayan@gmail.com dan password: password123';
 });
 
 Route::get('/login', [AdminWebController::class, 'showLogin'])->name('login');
@@ -125,31 +98,10 @@ Route::prefix('dlh')->middleware(['auth', 'admin_dlh'])->group(function () {
 
     Route::get('/dashboard', [DlhDashboardController::class, 'index'])->name('dlh.dashboard');
 
-    Route::prefix('bank-sampah')->group(function () {
-
-        Route::get('/', [DlhBankSampahWebController::class, 'index'])
-            ->name('dlh.bank-sampah.index');
-
-        Route::get('/create', [DlhBankSampahWebController::class, 'create'])
-            ->name('dlh.bank-sampah.create');
-
-        Route::post('/', [DlhBankSampahWebController::class, 'store'])
-            ->name('dlh.bank-sampah.store');
-
-        Route::get('/{id}', [DlhBankSampahWebController::class, 'show'])
-            ->name('dlh.bank-sampah.show');
-
-        Route::get('/{id}/edit', [DlhBankSampahWebController::class, 'edit'])
-            ->name('dlh.bank-sampah.edit');
-
-        Route::put('/{id}', [DlhBankSampahWebController::class, 'update'])
-            ->name('dlh.bank-sampah.update');
-
-        Route::delete('/{id}', [DlhBankSampahWebController::class, 'destroy'])
-            ->name('dlh.bank-sampah.destroy');
-
+    Route::prefix('bank-sampah')->name('dlh.bank-sampah.')->group(function () {
+        Route::resource('/', DlhBankSampahWebController::class)->parameters(['' => 'id']);
         Route::post('/{id}/approve', [DlhBankSampahWebController::class, 'approve'])
-            ->name('dlh.bank-sampah.approve');
+            ->name('approve');
     });
 
     Route::prefix('aduan')->group(function () {

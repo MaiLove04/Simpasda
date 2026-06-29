@@ -184,9 +184,11 @@ class KurirController extends Controller
         }
 
         // 1. Ambil jadwal penjemputan khusus untuk HARI INI
-        $jadwalHariIni = JadwalPenjemputan::where('kurir_id', $id)
+        $jadwalHariIni = JadwalPenjemputan::with(['nasabah', 'bankSampah'])
+            ->where('kurir_id', $id)
             ->whereDate('tanggal_penjemputan', Carbon::today())
-            ->latest()
+            ->where('status', '!=', 'selesai')
+            ->orderBy('tanggal_penjemputan', 'asc') // Ambil yang jam-nya paling awal
             ->first();
 
         // 2. Hitung total lokasi/tugas untuk HARI INI berdasarkan jadwal yang aktif

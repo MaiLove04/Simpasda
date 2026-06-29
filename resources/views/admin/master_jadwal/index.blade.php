@@ -6,11 +6,21 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h1 class="h2 mb-1" style="color: #0f172a; font-weight: bold;">Master Jadwal Rutin</h1>
-            <p class="text-muted mb-0" style="font-size: 14px;">Atur plotting penjemputan tetap mingguan untuk nasabah.</p>
+            <p class="text-muted mb-0" style="font-size: 14px;">Atur plotting penjemputan tetap mingguan atau interval untuk nasabah.</p>
         </div>
-        <a href="{{ route('master-jadwal.create') }}" class="btn btn-primary" style="background-color: #16a34a; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600;">
-            + Tambah Pola Rutin
-        </a>
+        <div class="d-flex gap-2">
+            <!-- 🔥 TOMBOL GENERATE MANUAL -->
+            <form action="{{ route('master-jadwal.generate') }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin mensinkronkan jadwal rutin ke tugas harian kurir untuk HARI INI?')">
+                @csrf
+                <button type="submit" class="btn btn-warning" style="background-color: #f59e0b; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600;">
+                    🔄 Sinkronkan Jadwal Hari Ini
+                </button>
+            </form>
+
+            <a href="{{ route('master-jadwal.create') }}" class="btn btn-primary" style="background-color: #16a34a; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600;">
+                + Tambah Pola Rutin
+            </a>
+        </div>
     </div>
 
     @if(session('success'))
@@ -30,7 +40,7 @@
                         <th class="py-3 ps-3" width="5%">No</th>
                         <th class="py-3">Nama Nasabah</th>
                         <th class="py-3">Nama Kurir</th>
-                        <th class="py-3">Hari Penjemputan</th>
+                        <th class="py-3">Pola Penjemputan</th>
                         <th class="py-3">Estimasi Jam</th>
                         <th class="py-3" width="10%">Status</th>
                         <th class="py-3 text-center" width="20%">Aksi</th>
@@ -47,9 +57,19 @@
                             {{ $master->kurir->name ?? 'Belum Ditugaskan' }}
                         </td>
                         <td class="py-3">
-                            <span class="badge bg-light text-dark border px-2 py-2" style="font-size: 13px; border-radius: 6px;">
-                                📅 {{ $master->hari_penjemputan }}
-                            </span>
+                            @if($master->tipe_jadwal === 'interval')
+                                <span class="badge px-2 py-2" style="font-size: 13px; border-radius: 6px; background-color: #ede9fe; color: #7c3aed; border: 1px solid #ddd6fe;">
+                                    🔄 Setiap {{ $master->interval_hari }} hari
+                                </span>
+                                <br>
+                                <small class="text-muted" style="font-size: 11px;">
+                                    Mulai: {{ \Carbon\Carbon::parse($master->tanggal_mulai)->format('d M Y') }}
+                                </small>
+                            @else
+                                <span class="badge bg-light text-dark border px-2 py-2" style="font-size: 13px; border-radius: 6px;">
+                                    📅 {{ $master->hari_penjemputan }}
+                                </span>
+                            @endif
                         </td>
                         <td class="py-3">
                             {{ \Carbon\Carbon::parse($master->jam_estimasi)->format('H:i') }} WIB

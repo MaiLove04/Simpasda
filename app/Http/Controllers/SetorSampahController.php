@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Traits\SendsPushNotifications;
 use Illuminate\Http\Request;
 use App\Models\SetorSampah;
 use App\Models\DetailSetorSampah;
@@ -11,6 +12,8 @@ use Illuminate\Support\Facades\DB;
 
 class SetorSampahController extends Controller
 {
+    use SendsPushNotifications;
+
     /**
      * 📋 AMBIL RIWAYAT BERDASARKAN KURIR (UNTUK FLUTTER)
      */
@@ -102,6 +105,11 @@ class SetorSampahController extends Controller
                 if ($jadwal) {
                     $jadwal->status = 'selesai';
                     $jadwal->save();
+
+                    // Kirim notifikasi ke nasabah bahwa penjemputan selesai
+                    if ($nasabah && $nasabah->fcm_token) {
+                        $this->sendPushNotification($nasabah->fcm_token, 'Penjemputan Selesai', 'Proses penjemputan dan penimbangan sampah telah selesai. Saldo Anda telah diperbarui.');
+                    }
                 }
             }
 

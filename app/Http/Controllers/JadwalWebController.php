@@ -3,12 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Traits\SendsPushNotifications;
 use App\Models\JadwalPenjemputan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class JadwalWebController extends Controller
 {
+    use SendsPushNotifications;
+
     public function index()
     {
         // Mengambil jadwal yang hanya dimiliki oleh bank sampah milik admin yang login
@@ -45,7 +48,7 @@ class JadwalWebController extends Controller
             'catatan'             => 'nullable|string',
         ]);
 
-        JadwalPenjemputan::create([
+        $jadwal = JadwalPenjemputan::create([
             'bank_sampah_id'      => Auth::user()->bank_sampah_id,
             'nasabah_id'          => $request->nasabah_id,
             'kurir_id'            => $request->kurir_id,
@@ -54,6 +57,19 @@ class JadwalWebController extends Controller
             'catatan'             => $request->catatan,
             'status'              => 'terjadwal',
         ]);
+
+        // Kirim notifikasi ke Nasabah dan Kurir
+        $nasabah = User::find($request->nasabah_id);
+        $kurir = User::find($request->kurir_id);
+
+        if ($nasabah && $nasabah->fcm_token) {
+            $this->sendPushNotification($nasabah->fcm_token, 'Jadwal Penjemputan Baru', 'Anda memiliki jadwal penjemputan baru yang telah dibuat oleh admin.');
+        }
+
+        if ($kurir && $kurir->fcm_token) {
+            $this->sendPushNotification($kurir->fcm_token, 'Tugas Penjemputan Baru', 'Anda mendapatkan tugas penjemputan baru dari admin.');
+        }
+
 
         return redirect('/admin/jadwal')->with('success', 'Jadwal penjemputan berhasil dibuat!');
     }
@@ -104,6 +120,12 @@ class JadwalWebController extends Controller
         // Ubah status menjadi proses
         $jadwal->status = 'proses';
         $jadwal->save();
+
+        // Kirim notifikasi ke Nasabah
+        $nasabah = $jadwal->nasabah;
+        if ($nasabah && $nasabah->fcm_token) {
+            $this->sendPushNotification($nasabah->fcm_token, 'Kurir Dalam Perjalanan', 'Kurir sedang dalam perjalanan untuk menjemput sampah Anda.');
+        }
 
         return response()->json([
             'success' => true,

@@ -78,14 +78,17 @@ class AdminWebController extends Controller
         // 3. Hitung jumlah antrean rute penjemputan harian yang belum selesai (terjadwal atau proses)
         // Jika nama model harianmu adalah 'Jadwal', gantry bagian ini menjadi Jadwal::...
         $jadwalPending = JadwalPenjemputan::whereDate('tanggal_penjemputan', Carbon::today())
-            ->where('bank_sampah_id', $adminBankId)
-            ->whereIn('status', ['terjadwal', 'proses'])
+            ->where('bank_sampah_id', $adminBankId)            ->whereIn('status', ['terjadwal', 'proses'])
             ->count();
 
-        // 4. Hitung akumulasi berat (Kg) sampah yang berhasil disetor khusus HARI INI
-        $beratHariIni = SetorSampah::whereHas('nasabah', function ($query) use ($adminBankId) {
-                $query->where('bank_sampah_id', $adminBankId);
-            })->whereDate('created_at', Carbon::today())->sum('berat');
+        // 4. [FIXED] Hitung akumulasi berat (Kg) dari tabel detail yang benar
+        $beratHariIni = \App\Models\DetailSetorSampah::whereHas('setorSampah', function ($query) use ($adminBankId) {
+            $query->whereDate('created_at', Carbon::today())
+                  ->whereHas('nasabah', function ($subQuery) use ($adminBankId) {
+                      $subQuery->where('bank_sampah_id', $adminBankId);
+                  });
+        })->sum('berat');
+
 
         // 5. Hitung jumlah request tarik tunai yang sedang pending
         $tarikPending = TarikTunai::whereHas('user', function ($query) use ($adminBankId) {

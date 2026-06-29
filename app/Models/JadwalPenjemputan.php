@@ -12,6 +12,7 @@ class JadwalPenjemputan extends Model
         'nasabah_id',
         'kurir_id',
         'tanggal_penjemputan',
+        'tanggal', // 🔥 Tambahkan ini agar bisa disimpan!
         'alamat',
         'catatan',
         'status',
