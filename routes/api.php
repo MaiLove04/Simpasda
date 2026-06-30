@@ -9,7 +9,6 @@ use App\Http\Controllers\TransaksiController;
 use App\Http\Controllers\SetorSampahController;
 use App\Http\Controllers\JenisSampahController;
 use App\Http\Controllers\JadwalPenjemputanController;
-use App\Http\Controllers\JenisSampahWebController;
 use App\Http\Controllers\BarcodeController;
 use App\Http\Controllers\Api\IotTimbanganController;
 use App\Http\Controllers\AduanController;
@@ -43,15 +42,25 @@ Route::get('/kurir/jadwal/{id}', [JadwalPenjemputanController::class, 'jadwalKur
 Route::get('/dashboard-kurir-counter/{kurir_id}', [SetorSampahController::class, 'getDashboardKurir']);
 Route::get('/riwayat-kurir/{kurir_id}', [SetorSampahController::class, 'getRiwayatTotal']);
 
-// 🔥 BARU: Route Intelligent Scan QR Kurir (Metode POST sesuai kodingan Flutter)
+// 🔥 SCAN QR (Tetap POST sesuai kodingan Flutter)
 Route::post('/kurir/scan-qr', [KurirController::class, 'scanQrNasabah']);
 
-// Ubah PUT menjadi POST di api.php
-Route::post('/jadwal-penjemputan/{id}/mulai', [JadwalPenjemputanController::class, 'mulaiJemput']);
-Route::post('/jadwal-penjemputan/{id}/batal', [JadwalPenjemputanController::class, 'batalJemput']);
+// 🔄 UBAH KE PATCH: Mengubah Status Alur Penjemputan
+Route::patch('/jadwal-penjemputan/{id}/mulai', [JadwalPenjemputanController::class, 'mulaiJemput']);
+Route::patch('/jadwal-penjemputan/{id}/batal', [JadwalPenjemputanController::class, 'batalJemput']);
 
-// Setor Sampah
-Route::apiResource('/setor-sampah', SetorSampahController::class)->only(['index', 'store']);
+// =========================================================================
+// ♻️ PROSES SETOR / INPUT DATA TIMBANGAN OLEH KURIR (UBAH KE PATCH)
+// =========================================================================
+
+// 1. Kurir isi Jenis & Berat untuk JADWAL dari ADMIN
+Route::patch('/setor-sampah/jadwal-admin/{id}', [SetorSampahController::class, 'setorJadwalAdmin']);
+
+// 2. Kurir update Berat untuk REQUEST dari NASABAH
+Route::patch('/setor-sampah/request-nasabah/{setor_sampah_id}', [SetorSampahController::class, 'setorRequestNasabah']);
+
+// Route pendukung transaksi setor sampah
+Route::get('/setor-sampah', [SetorSampahController::class, 'index']); 
 Route::post('/request-penjemputan', [SetorSampahController::class, 'requestPenjemputan']);
 Route::get('/request-detail/{nasabah_id}', [SetorSampahController::class, 'showRequestDetail']);
 
@@ -66,13 +75,13 @@ Route::apiResource('jenis-sampah', JenisSampahController::class);
 Route::post('/update-berat-iot', [IotTimbanganController::class, 'updateBerat']);
 Route::get('/berat-timbangan-iot', [IotTimbanganController::class, 'getBeratTerakhir']);
 
+
 // ------------------------------------------
 // PROTECTED ROUTES (Butuh Otentikasi Sanctum)
 // ------------------------------------------
 Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/barcode/nasabah/{id}', [BarcodeController::class, 'barcodeNasabah']);
-
     Route::get('/nasabah', [UserController::class, 'index']);
     Route::get('/dashboard-stats', [UserController::class, 'getDashboardStats']); 
     Route::apiResource('kurir', KurirController::class);
@@ -105,5 +114,4 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/nasabah/{id}/approve', [UserController::class, 'approveNasabah']);
     });
 
-    
-});
+}); // Kurung penutup middleware utama berada di sini sekarang

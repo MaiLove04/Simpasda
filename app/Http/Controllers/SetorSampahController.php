@@ -27,16 +27,16 @@ class SetorSampahController extends Controller
     }
 
     /**
-     * ⚖️ STORE SIMPAN TIMBANGAN KURIR: OTOMATISASI SALDO & UPDATE JADWAL SELESAI
+     * ⚖️ PATCH 1: KURIR SETOR JADWAL ADMIN (Edit Jenis & Berat Sekaligus)
      */
-    public function store(Request $request)
+    public function setorJadwalAdmin(Request $request, $id)
     {
         $validator = \Validator::make($request->all(), [
-            'user_id'         => 'required',
-            'grand_total'     => 'required',
-            'sampah_list'     => 'required',
-            'foto_sampah'     => 'nullable',
-            'setor_sampah_id' => 'nullable'
+            'user_id'     => 'required',
+            'grand_total' => 'required',
+            'sampah_list' => 'required',
+            'foto_sampah' => 'nullable',
+            'jadwal_id'   => 'nullable'
         ]);
 
         if ($validator->fails()) {
@@ -50,100 +50,120 @@ class SetorSampahController extends Controller
 
         try {
             // 1. Olah upload gambar bukti penimbangan sampah jika ada
-            $pathFoto = null;
-            if ($request->hasFile('foto_sampah')) {
-                $file = $request->file('foto_sampah');
-                $namaFile = time() . '_' . $file->getClientOriginalName();
-                $file->move(public_path('uploads/sampah'), $namaFile);
-                $pathFoto = 'uploads/sampah/' . $namaFile;
-            }
+            $pathFoto = $this->uploadFoto($request);
 
-            // 2. LOGIKA UTAMA: Cek data induk gantung
-            if ($request->filled('setor_sampah_id')) {
-                $setor = SetorSampah::find($request->setor_sampah_id);
-                if (!$setor) {
-                    return response()->json(['success' => false, 'message' => 'Data transaksi induk tidak ditemukan.'], 404);
-                }
-            } else {
-                $setor = new SetorSampah();
-            }
-
+            // 2. Ambil data gantung lama atau buat instance baru jika belum ada
+            $setor = SetorSampah::find($id) ?? new SetorSampah();
             $setor->user_id = $request->user_id;
 
             $defaultKurir = User::where('role', 'kurir')->first();
             $setor->kurir_id = $request->kurir_id ?? ($defaultKurir ? $defaultKurir->id : 14);
-
             $setor->total = $request->grand_total;
-            
-            if ($pathFoto) {
-                $setor->foto_sampah = $pathFoto;
-            } else {
-                $setor->foto_sampah = ""; 
-            }
-            
-            $setor->catatan = $request->catatan ?? 'Selesai ditimbang oleh kurir lapangan';
+            $setor->foto_sampah = $pathFoto ?? $setor->foto_sampah ?? ""; 
+            $setor->catatan = $request->catatan ?? 'Selesai ditimbang oleh kurir lapangan (Jadwal Admin)';
             $setor->status = 'selesai'; 
             $setor->save();
 
-            // 3. Simpan ke Details (Tabel Anak)
-            $sampahList = json_decode($request->sampah_list, true);
-            if (!is_array($sampahList)) {
-                return response()->json(['success' => false, 'message' => 'Format sampah_list tidak valid.'], 400);
-            }
-
-            DetailSetorSampah::where('setor_sampah_id', $setor->id)->delete();
-
-            foreach ($sampahList as $item) {
-                $detail = new DetailSetorSampah();
-                $detail->setor_sampah_id = $setor->id;
-                $detail->jenis_sampah_id = $item['jenis_sampah_id'];
-                $detail->berat           = $item['berat'];
-                $detail->harga_per_kg    = $item['harga_per_kg'];
-                $detail->subtotal        = $item['total_item'];
-                $detail->save();
-            }
+            // 3. Simpan ke Details (Tabel Anak) via Helper
+            $this->simpanDetailSampah($setor->id, $request->sampah_list);
 
             // 4. PROSES FINANSIAL: UPDATE SALDO NASABAH
-            $nasabah = User::find($request->user_id);
-            if ($nasabah) {
-                $nominalMasuk = (int) $request->grand_total;
-                $nasabah->saldo = $nasabah->saldo + $nominalMasuk;
-                $nasabah->save();
-            }
+            $this->tambahSaldoNasabah($request->user_id, $request->grand_total);
 
             // 5. CATAT HISTORI KE TABEL MUTASI SALDO
-            $mutasi = new MutasiSaldo();
-            $mutasi->user_id         = $request->user_id;
-            $mutasi->jenis_transaksi = 'masuk';
-            $mutasi->sumber          = 'setor_sampah';
-            $mutasi->referensi_id    = $setor->id;
-            $mutasi->nominal         = (int) $request->grand_total;
-            $mutasi->status          = 'success';
-            $mutasi->keterangan      = 'Uang masuk dari penimbangan sampah multi-item';
-            $mutasi->save();
+            $this->catatMutasi($request->user_id, $setor->id, $request->grand_total);
 
-            // 6. SINKRONISASI UPDATE STATUS JADWAL JADI SELESAI (Notifikasi Di-disable)
-            if ($request->has('jadwal_id') && !empty($request->jadwal_id)) {
-                $jadwal = JadwalPenjemputan::find($request->jadwal_id);
-                if ($jadwal) {
-                    $jadwal->status = 'selesai';
-                    $jadwal->save();
-                }
+            // 6. SINKRONISASI UPDATE STATUS JADWAL JADI SELESAI
+            if ($request->filled('jadwal_id')) {
+                JadwalPenjemputan::where('id', $request->jadwal_id)->update(['status' => 'selesai']);
             }
 
             DB::commit();
 
             return response()->json([
                 'success' => true,
-                'message' => '✅ Setoran sukses diproses! Data sinkron, saldo bertambah.',
+                'message' => '✅ Setoran dari jadwal admin sukses diproses oleh kurir!',
                 'data' => $setor->load('details')
-            ], 201);
+            ], 200);
 
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
                 'success' => false,
                 'message' => 'Gagal memproses setoran: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * ⚖️ PATCH 2: KURIR SETOR REQUEST NASABAH (Hanya Update Berat)
+     */
+    public function setorRequestNasabah(Request $request, $setor_sampah_id)
+    {
+        $validator = \Validator::make($request->all(), [
+            'user_id'     => 'required',
+            'grand_total' => 'required',
+            'sampah_list' => 'required',
+            'foto_sampah' => 'nullable',
+            'jadwal_id'   => 'nullable'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal Validasi Input: ' . implode(', ', $validator->errors()->all())
+            ], 422);
+        }
+
+        DB::beginTransaction();
+
+        try {
+            // 1. Ambil data manifes request nasabah yang menggantung
+            $setor = SetorSampah::findOrFail($setor_sampah_id);
+
+            // 2. Olah upload gambar bukti penimbangan jika dilampirkan kurir
+            $pathFoto = $this->uploadFoto($request);
+
+            $setor->user_id = $request->user_id;
+            $defaultKurir = User::where('role', 'kurir')->first();
+            $setor->kurir_id = $request->kurir_id ?? ($defaultKurir ? $defaultKurir->id : 14);
+            $setor->total = $request->grand_total;
+            
+            if ($pathFoto) {
+                $setor->foto_sampah = $pathFoto;
+            }
+
+            $setor->catatan = $request->catatan ?? 'Berat di-update dan diselesaikan oleh kurir lapangan';
+            $setor->status = 'selesai'; 
+            $setor->save();
+
+            // 3. Simpan pembaruan berat ke Details (Tabel Anak)
+            $this->simpanDetailSampah($setor->id, $request->sampah_list);
+
+            // 4. PROSES FINANSIAL: UPDATE SALDO NASABAH
+            $this->tambahSaldoNasabah($request->user_id, $request->grand_total);
+
+            // 5. CATAT HISTORI KE TABEL MUTASI SALDO
+            $this->catatMutasi($request->user_id, $setor->id, $request->grand_total);
+
+            // 6. SINKRONISASI UPDATE STATUS JADWAL JADI SELESAI
+            if ($request->filled('jadwal_id')) {
+                JadwalPenjemputan::where('id', $request->jadwal_id)->update(['status' => 'selesai']);
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => '✅ Berat request nasabah berhasil diperbarui dan diselesaikan!',
+                'data' => $setor->load('details')
+            ], 200);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal memperbarui berat request: ' . $e->getMessage()
             ], 500);
         }
     }
@@ -208,7 +228,9 @@ class SetorSampahController extends Controller
             $setor->total = 0; 
             $setor->foto_sampah = null; 
             $setor->catatan = $request->catatan ?? 'Request jemput lewat aplikasi';
-            $setor->status = 'menunggu_verifikasi'; 
+            
+            // 🛠️ PERBAIKAN UTAMA: Ganti dari 'menunggu_verifikasi' menjadi 'proses'
+            $setor->status = 'proses'; 
             $setor->save();
 
             foreach ($request->items as $item) {
@@ -250,7 +272,8 @@ class SetorSampahController extends Controller
     {
         try {
             $setorMaster = SetorSampah::where('user_id', $nasabah_id)
-                ->where('status', 'menunggu_verifikasi')
+                // 🛠️ PERBAIKAN UTAMA: Cari data manifes yang berstatus 'proses'
+                ->where('status', 'proses')
                 ->latest()
                 ->first();
 
@@ -295,5 +318,64 @@ class SetorSampahController extends Controller
                 'message' => 'Gagal meload data request: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    /**
+     * =========================================================================
+     * 🛠️ INTERNAL HELPER PRIVATE METHODS (Don't Repeat Yourself)
+     * =========================================================================
+     */
+    
+    private function uploadFoto(Request $request)
+    {
+        if ($request->hasFile('foto_sampah')) {
+            $file = $request->file('foto_sampah');
+            $namaFile = time() . '_' . $file->getClientOriginalName();
+            $file->move(public_path('uploads/sampah'), $namaFile);
+            return 'uploads/sampah/' . $namaFile;
+        }
+        return null;
+    }
+
+    private function simpanDetailSampah($setorId, $sampahListJson)
+    {
+        $sampahList = json_decode($sampahListJson, true);
+        if (is_array($sampahList)) {
+            // Bersihkan manifes item lama sebelum diganti dengan timbangan riil lapangan
+            DetailSetorSampah::where('setor_sampah_id', $setorId)->delete();
+
+            foreach ($sampahList as $item) {
+                $detail = new DetailSetorSampah();
+                $detail->setor_sampah_id = $setorId;
+                $detail->jenis_sampah_id = $item['jenis_sampah_id'];
+                $detail->berat           = $item['berat'];
+                $detail->harga_per_kg    = $item['harga_per_kg'];
+                $detail->subtotal        = $item['total_item'];
+                $detail->save();
+            }
+        }
+    }
+
+    private function tambahSaldoNasabah($userId, $grandTotal)
+    {
+        $nasabah = User::find($userId);
+        if ($nasabah) {
+            $nominalMasuk = (int) $grandTotal;
+            $nasabah->saldo = $nasabah->saldo + $nominalMasuk;
+            $nasabah->save();
+        }
+    }
+
+    private function catatMutasi($userId, $referensiId, $grandTotal)
+    {
+        $mutasi = new MutasiSaldo();
+        $mutasi->user_id         = $userId;
+        $mutasi->jenis_transaksi = 'masuk';
+        $mutasi->sumber          = 'setor_sampah';
+        $mutasi->referensi_id    = $referensiId;
+        $mutasi->nominal         = (int) $grandTotal;
+        $mutasi->status          = 'success';
+        $mutasi->keterangan      = 'Uang masuk dari penimbangan sampah lapangan';
+        $mutasi->save();
     }
 }
