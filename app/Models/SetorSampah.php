@@ -8,11 +8,21 @@ use Illuminate\Database\Eloquent\Model;
 class SetorSampah extends Model
 {
     use HasFactory;
-    
-    protected $table = 'setor_sampahs'; 
+
+    protected $table = 'setor_sampahs';
 
     // Mass assignment guard (mengizinkan pengisian data masal dari controller)
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'user_id',
+        'kurir_id',
+        'jadwal_id',
+        'total',
+        'foto_sampah',
+        'catatan',
+        'status',
+        'jenis_sampah_id',
+        'berat',
+    ];
 
     /**
      * RELASI: Menghubungkan ke Pemilik Sampah (Nasabah)
