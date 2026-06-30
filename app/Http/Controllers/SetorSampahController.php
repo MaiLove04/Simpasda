@@ -206,39 +206,42 @@ class SetorSampahController extends Controller
         ]);
 
         DB::beginTransaction();
-
         try {
             $nasabah = User::find($request->user_id);
             $kurirAktif = User::where('role', 'kurir')->first();
             $kurirIdDefault = $kurirAktif ? $kurirAktif->id : 14;
 
+            // 1. Buat agenda rencana di tabel jadwal_penjemputans
             $jadwal = new JadwalPenjemputan();
             $jadwal->nasabah_id = $request->user_id;
             $jadwal->kurir_id = $kurirIdDefault;
             $jadwal->bank_sampah_id = 1; 
             $jadwal->alamat = $nasabah->alamat ?? 'Alamat tidak diisi nasabah';
             $jadwal->tanggal_penjemputan = Carbon::today()->format('Y-m-d');
-            $jadwal->status = 'terjadwal'; 
-            $jadwal->catatan = $request->catatan ?? 'Disetor lewat aplikasi nasabah'; 
+            $jadwal->status = 'proses'; // Langsung berstatus proses karena request mandiri riil hari ini
+            $jadwal->catatan = $request->catatan ?? 'Request jemput lewat aplikasi nasabah'; 
             $jadwal->save();
 
+            // 2. Buat draf nota gantung di tabel setor_sampahs
             $setor = new SetorSampah();
             $setor->user_id = $request->user_id;
             $setor->kurir_id = $kurirIdDefault;
+            $setor->jadwal_id = $jadwal->id; // Kunci relasi antar tabel
             $setor->total = 0; 
             $setor->foto_sampah = null; 
-            $setor->catatan = $request->catatan ?? 'Request jemput lewat aplikasi';
+            $setor->catatan = $request->catatan ?? 'Request jemput mandiri nasabah';
             
-            // 🛠️ PERBAIKAN UTAMA: Ganti dari 'menunggu_verifikasi' menjadi 'proses'
+            // 🛠️ Sesuai List Alur: Status draf di awal adalah 'proses'
             $setor->status = 'proses'; 
             $setor->save();
 
+            // 3. Mengunci kategori jenis sampah pesanan nasabah (Berat masih dikosongkan/null)
             foreach ($request->items as $item) {
                 if (isset($item['jenis_sampah_id'])) {
                     $detail = new DetailSetorSampah();
                     $detail->setor_sampah_id = $setor->id; 
                     $detail->jenis_sampah_id = $item['jenis_sampah_id'];
-                    $detail->berat           = null; 
+                    $detail->berat           = null; // Mengosongkan berat sampai kurir datang menimbang
                     $detail->harga_per_kg    = null; 
                     $detail->subtotal        = 0;
                     $detail->save();
@@ -246,10 +249,9 @@ class SetorSampahController extends Controller
             }
 
             DB::commit();
-
             return response()->json([
                 'success' => true,
-                'message' => '✅ Request penjemputan & manifes kategori sampah berhasil didaftarkan!',
+                'message' => '✅ Request penjemputan & draf manifes kategori sampah berhasil didaftarkan!',
                 'data' => [
                     'jadwal' => $jadwal,
                     'setor'  => $setor->load('details')

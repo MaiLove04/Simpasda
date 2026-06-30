@@ -83,33 +83,46 @@ class JadwalPenjemputanController extends Controller
     // ==========================================
     // UPDATE STATUS JADWAL JADI PROSES (AKSI KURIR)
     // ==========================================
+    /**
+ * 🔄 PATCH: KURIR UPDATE STATUS JADWAL JADI PROSES (MULAI JEMPUT)
+ */
     public function mulaiJemput($id)
     {
+        DB::beginTransaction();
         try {
+            // 1. Cari data jadwal penjemputan
             $jadwal = JadwalPenjemputan::find($id);
 
             if (!$jadwal) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Jadwal tidak ditemukan'
+                    'message' => 'Data jadwal penjemputan tidak ditemukan.'
                 ], 404);
             }
 
-            // Ubah status menjadi proses penjemputan
+            // 2. Ubah status jadwal dari 'terjadwal' menjadi 'proses'
             $jadwal->status = 'proses';
             $jadwal->save();
 
+            // 3. Pastikan draf di setor_sampahs yang terikat ikut dipastikan berstatus 'proses'
+            // (Langkah preventif agar sinkronisasi data tetap terjaga)
+            \App\Models\SetorSampah::where('jadwal_id', $id)
+                ->where('status', 'proses')
+                ->update(['status' => 'proses']);
+
+            DB::commit();
+
             return response()->json([
                 'success' => true,
-                'message' => 'Status berhasil diperbarui menjadi proses',
-                'data'    => $jadwal
+                'message' => '🚚 Status berhasil diperbarui! Kurir sedang dalam perjalanan menuju lokasi.',
+                'data' => $jadwal
             ], 200);
 
         } catch (\Exception $e) {
+            DB::rollBack();
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal memperbarui status penjemputan',
-                'error'   => $e->getMessage(),
+                'message' => 'Gagal mengubah status penjemputan: ' . $e->getMessage()
             ], 500);
         }
     }

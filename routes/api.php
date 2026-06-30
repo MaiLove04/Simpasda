@@ -46,6 +46,7 @@ Route::get('/riwayat-kurir/{kurir_id}', [SetorSampahController::class, 'getRiway
 Route::post('/kurir/scan-qr', [KurirController::class, 'scanQrNasabah']);
 
 // 🔄 UBAH KE PATCH: Mengubah Status Alur Penjemputan
+// Proses alur jemput oleh kurir lapangan
 Route::patch('/jadwal-penjemputan/{id}/mulai', [JadwalPenjemputanController::class, 'mulaiJemput']);
 Route::patch('/jadwal-penjemputan/{id}/batal', [JadwalPenjemputanController::class, 'batalJemput']);
 

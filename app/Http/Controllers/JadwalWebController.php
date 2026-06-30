@@ -39,39 +39,42 @@ class JadwalWebController extends Controller
 
     public function store(Request $request)
     {
-        // Validasi diperketat untuk memastikan ID benar-benar valid
         $request->validate([
-            'nasabah_id'          => 'required|exists:users,id',
-            'kurir_id'            => 'required|exists:users,id',
-            'tanggal_penjemputan' => 'required|date',
-            'alamat'              => 'required|string',
-            'catatan'             => 'nullable|string',
+            'nasabah_id' => 'required|exists:users,id',
+            'kurir_id'   => 'required|exists:users,id',
+            'tanggal'    => 'required|date',
         ]);
 
-        $jadwal = JadwalPenjemputan::create([
-            'bank_sampah_id'      => Auth::user()->bank_sampah_id,
-            'nasabah_id'          => $request->nasabah_id,
-            'kurir_id'            => $request->kurir_id,
-            'tanggal_penjemputan' => $request->tanggal_penjemputan,
-            'alamat'              => $request->alamat,
-            'catatan'             => $request->catatan,
-            'status'              => 'terjadwal',
-        ]);
+        DB::beginTransaction();
+        try {
+            // 1. Buat agenda rencana di tabel jadwal_penjemputans
+            $jadwal = new JadwalPenjemputan();
+            $jadwal->nasabah_id = $request->nasabah_id;
+            $jadwal->kurir_id = $request->kurir_id;
+            $jadwal->bank_sampah_id = 1; // Sesuaikan default ID Bank Sampah kamu
+            $jadwal->alamat = \App\Models\User::find($request->nasabah_id)->alamat ?? 'Alamat tidak diisi';
+            $jadwal->tanggal_penjemputan = $request->tanggal;
+            $jadwal->status = 'terjadwal'; // Status rencana awal
+            $jadwal->catatan = $request->catatan ?? 'Jadwal dibuat oleh Admin Kantor';
+            $jadwal->save();
 
-        // Kirim notifikasi ke Nasabah dan Kurir
-        $nasabah = User::find($request->nasabah_id);
-        $kurir = User::find($request->kurir_id);
+            // 2. 🔥 IDE KAMU: Otomatis buat draf nota kosong di tabel setor_sampahs
+            $setor = new SetorSampah();
+            $setor->user_id = $request->nasabah_id;
+            $setor->kurir_id = $request->kurir_id;
+            $setor->jadwal_id = $jadwal->id; // Kunci relasi antar tabel
+            $setor->total = 0;
+            $setor->foto_sampah = "";
+            $setor->catatan = 'Draf timbangan otomatis dari Jadwal Admin';
+            $setor->status = 'proses'; // Berstatus 'proses' (Menunggu kurir timbang di lapangan)
+            $setor->save();
 
-        if ($nasabah && $nasabah->fcm_token) {
-            $this->sendPushNotification($nasabah->fcm_token, 'Jadwal Penjemputan Baru', 'Anda memiliki jadwal penjemputan baru yang telah dibuat oleh admin.');
+            DB::commit();
+            return redirect()->back()->with('success', '✅ Jadwal Kerja dan Draf Transaksi Berhasil Dibuat!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Gagal memproses data: ' . $e->getMessage());
         }
-
-        if ($kurir && $kurir->fcm_token) {
-            $this->sendPushNotification($kurir->fcm_token, 'Tugas Penjemputan Baru', 'Anda mendapatkan tugas penjemputan baru dari admin.');
-        }
-
-
-        return redirect('/admin/jadwal')->with('success', 'Jadwal penjemputan berhasil dibuat!');
     }
 
     public function jadwalKurir($id)
