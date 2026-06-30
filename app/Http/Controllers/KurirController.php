@@ -188,7 +188,7 @@ class KurirController extends Controller
             ->where('kurir_id', $id)
             ->whereDate('tanggal_penjemputan', Carbon::today())
             ->where('status', '!=', 'selesai')
-            ->orderBy('tanggal_penjemputan', 'asc') // Ambil yang jam-nya paling awal
+            ->orderBy('tanggal_penjemputan', 'asc') 
             ->first();
 
         // 2. Hitung total lokasi/tugas untuk HARI INI berdasarkan jadwal yang aktif
@@ -207,7 +207,7 @@ class KurirController extends Controller
             ->whereDate('created_at', Carbon::today())
             ->pluck('id');
 
-        // 🔥 FIX UTAMA: Hitung akumulasi BERAT total dari tabel ANAK (detail_setor_sampahs)
+        // Hitung akumulasi BERAT total dari tabel ANAK (detail_setor_sampahs)
         $totalBeratHariIni = DetailSetorSampah::whereIn('setor_sampah_id', $setorHariIniIds)
             ->sum('berat');
 
@@ -221,7 +221,7 @@ class KurirController extends Controller
             ->whereYear('created_at', Carbon::now()->year)
             ->pluck('id');
 
-        // 🔥 FIX KEDUA: Hitung akumulasi berat bulanan dari tabel anak juga
+        // Hitung akumulasi berat bulanan dari tabel anak juga
         $beratBulanIni = DetailSetorSampah::whereIn('setor_sampah_id', $setorBulanIniIds)
             ->sum('berat');
 
@@ -269,9 +269,8 @@ class KurirController extends Controller
             'no_hp'                     => $user->no_hp ?? '-',
             'alamat'                    => $user->alamat ?? '-',
 
-            // Pasokan variabel untuk sinkronisasi Flutter Dashboard kamu
             'total_pesanan'             => $totalPesanan,
-            'total_pesanan_selesan'     => $totalPesananSelesai,
+            'total_pesanan_selesai'     => $totalPesananSelesai, // Fix typo pencocokan dashboard data
             'total_berat_hari_ini'      => round($totalBeratHariIni, 1),
             'total_pendapatan_hari_ini' => number_format($totalPendapatanHariIni, 0, ',', '.'),
             'berat_bulan_ini'           => round($beratBulanIni, 1),
@@ -280,5 +279,92 @@ class KurirController extends Controller
             'jadwal'                    => $jadwalHariIni,
             'aktivitas_terbaru'         => $aktivitasTerbaru
         ]);
+    }
+
+    // =========================================================================
+    // 🔥 BARU: API INTELLIGENT SCAN QR UNTUK MENENTUKAN JALUR TIMBANGAN KURIR
+    // =========================================================================
+    public function scanQrNasabah(Request $request)
+    {
+        $request->validate([
+            'nasabah_id' => 'required',
+            'kurir_id'   => 'required',
+        ]);
+
+        try {
+            // 1. Cari data nasabah asli berdasarkan ID atau Kode Nasabah dari QR
+            $nasabah = User::where('role', 'nasabah')
+                ->where(function($query) use ($request) {
+                    $query->where('id', $request->nasabah_id)
+                          ->orWhere('kode_nasabah', $request->nasabah_id);
+                })->first();
+
+            if (!$nasabah) {
+                return response()->json([
+                    'status'  => 'error',
+                    'message' => 'Gagal: Kode QR tidak merujuk ke data nasabah manapun.'
+                ], 404);
+            }
+
+            // 2. SKENARIO 1 (MANUAL): Cek apakah ada Request Penjemputan Aktif
+            $transaksiManual = SetorSampah::where('user_id', $nasabah->id)
+                ->where('status', 'menunggu_verifikasi')
+                ->whereHas('details', function ($query) {
+                    $query->whereNull('berat'); 
+                })
+                ->latest()
+                ->first();
+
+            if ($transaksiManual) {
+                return response()->json([
+                    'status'       => 'success',
+                    'mode'         => 'manual',
+                    'id_transaksi' => $transaksiManual->id,
+                    'nasabah' => [
+                        'id'     => $nasabah->id,
+                        'nama'   => $nasabah->name,
+                        'alamat' => $nasabah->alamat ?? 'Alamat tidak diisi'
+                    ]
+                ], 200);
+            }
+
+            // 3. SKENARIO 2 (RUTIN): Cek apakah ada manifes agenda berkala buatan Cron Job
+            $transaksiRutin = SetorSampah::where('user_id', $nasabah->id)
+                ->where('status', 'menunggu_verifikasi')
+                ->doesntHave('details') 
+                ->latest()
+                ->first();
+
+            if ($transaksiRutin) {
+                return response()->json([
+                    'status'       => 'success',
+                    'mode'         => 'rutin',
+                    'id_transaksi' => $transaksiRutin->id,
+                    'nasabah' => [
+                        'id'     => $nasabah->id,
+                        'nama'   => $nasabah->name,
+                        'alamat' => $nasabah->alamat ?? 'Alamat tidak diisi'
+                    ]
+                ], 200);
+            }
+
+            // 4. SKENARIO 3 (BARU / DADAKAN): Setoran langsung mandiri
+            return response()->json([
+                'status'       => 'success',
+                'mode'         => 'baru',
+                'id_transaksi' => null,
+                'nasabah' => [
+                    'id'     => $nasabah->id,
+                    'nama'   => $nasabah->name,
+                    'alamat' => $nasabah->alamat ?? 'Alamat tidak diisi'
+                ]
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Gagal memproses di server: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

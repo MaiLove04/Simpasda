@@ -8,12 +8,11 @@
             <h1 class="h2 mb-1" style="color: #0f172a; font-weight: bold;">Master Jadwal Rutin</h1>
             <p class="text-muted mb-0" style="font-size: 14px;">Atur plotting penjemputan tetap mingguan atau interval untuk nasabah.</p>
         </div>
-        <div class="d-flex gap-2">
-            <!-- 🔥 TOMBOL GENERATE MANUAL -->
+        <div class="d-flex gap-2 align-items-center">
             <form action="{{ route('master-jadwal.generate') }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin mensinkronkan jadwal rutin ke tugas harian kurir untuk HARI INI?')">
                 @csrf
-                <button type="submit" class="btn btn-warning" style="background-color: #f59e0b; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600;">
-                    🔄 Sinkronkan Jadwal Hari Ini
+                <button type="submit" class="btn btn-sm btn-outline-secondary" style="padding: 10px 16px; border-radius: 8px; font-weight: 500; border: 1px solid #cbd5e1; color: #475569; background: #ffffff;">
+                    🔄 Force Sync (Manual)
                 </button>
             </form>
 
@@ -57,17 +56,19 @@
                             {{ $master->kurir->name ?? 'Belum Ditugaskan' }}
                         </td>
                         <td class="py-3">
-                            @if($master->tipe_jadwal === 'interval')
+                            @if(($master->tipe_jadwal ?? '') === 'interval' || !empty($master->interval_hari))
                                 <span class="badge px-2 py-2" style="font-size: 13px; border-radius: 6px; background-color: #ede9fe; color: #7c3aed; border: 1px solid #ddd6fe;">
-                                    🔄 Setiap {{ $master->interval_hari }} hari
+                                    🔄 Setiap {{ $master->interval_hari }} Hari
                                 </span>
+                                @if(!empty($master->tanggal_mulai))
                                 <br>
                                 <small class="text-muted" style="font-size: 11px;">
                                     Mulai: {{ \Carbon\Carbon::parse($master->tanggal_mulai)->format('d M Y') }}
                                 </small>
+                                @endif
                             @else
-                                <span class="badge bg-light text-dark border px-2 py-2" style="font-size: 13px; border-radius: 6px;">
-                                    📅 {{ $master->hari_penjemputan }}
+                                <span class="badge px-2 py-2" style="font-size: 13px; border-radius: 6px; background-color: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd;">
+                                    📅 Mingguan ({{ $master->hari_penjemputan ?? 'Hari Belum Set' }})
                                 </span>
                             @endif
                         </td>
@@ -83,15 +84,15 @@
                         </td>
                         <td class="py-3 text-center">
                             <div class="d-flex justify-content-center gap-2">
-                                <a href="{{ route('master-jadwal.edit', $master->id) }}" class="btn btn-sm btn-outline-primary" style="border-radius: 6px; padding: 6px 12px; font-weight: 600;">
-                                    ✏️
-                                </a>
+                                <button class="btn btn-sm" style="border-radius: 6px; padding: 6px 14px; font-weight: 600; background-color: #3b82f6; color: white; border: none;">
+                                    ✏️ Edit
+                                </button>
 
                                 <form action="{{ route('master-jadwal.destroy', $master->id) }}" method="POST" onsubmit="return confirm('Hapus pola rutin penjemputan nasabah ini?')">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-outline-danger" style="border-radius: 6px; padding: 6px 12px; font-weight: 600;">
-                                        🗑️
+                                    <button type="submit" class="btn btn-sm" style="border-radius: 6px; padding: 6px 14px; font-weight: 600; background-color: #ef4444; color: white; border: none;">
+                                        🗑️ Hapus
                                     </button>
                                 </form>
                             </div>

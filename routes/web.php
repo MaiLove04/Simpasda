@@ -10,40 +10,47 @@ use App\Http\Controllers\JadwalWebController;
 use App\Http\Controllers\NasabahWebController;
 use App\Http\Controllers\SetorSampahWebController;
 use App\Http\Controllers\TarikTunaiWebController;
-use App\Http\Controllers\MasterJadwalRutinController;
+use App\Http\Controllers\MasterJadwalRutinController; // Controller Master Pola Rutin
 use App\Http\Controllers\DlhDashboardController;
 use App\Http\Controllers\DlhBankSampahWebController;
 use App\Http\Controllers\DlhAduanWebController;
 
 /**
  * ======================================================================
- * RUTE DARURAT: Untuk membersihkan cache tanpa perlu akses SSH
+ * 🛠️ RUTE UTILITY & MAINTENANCE (Akses via URL Browser)
  * ======================================================================
  */
+
+// Menyegarkan seluruh sistem cache
 Route::get('/system-refresh-6285', function () {
-    \Illuminate\Support\Facades\Artisan::call('optimize:clear');
+    Artisan::call('optimize:clear');
     return "✅ Cache berhasil dibersihkan! Aplikasi web sudah diperbarui.";
 });
 
-// 🔥 RUTE UNTUK MIGRASI DATABASE DARI WEB
+// Jalankan migrasi database otomatis dari web
 Route::get('/up-db', function () {
     try {
-        \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+        Artisan::call('migrate', ['--force' => true]);
         return "✅ Database berhasil diperbarui! Silakan cek fitur jadwal rutin Anda.";
     } catch (\Exception $e) {
         return "❌ Gagal migrasi: " . $e->getMessage();
     }
 });
 
-// Rute untuk menerima setup PIN dari Flutter
+// Endpoint tes koneksi setup PIN dari Flutter
 Route::post('/setup-pin', function (\Illuminate\Http\Request $request) {
-    // Ini contoh logika sederhana untuk tes koneksi dari Flutter
     return response()->json([
         'status' => 'success',
         'message' => 'Rute setup-pin berhasil dihubungkan ke Laravel!'
     ], 200);
 });
 
+
+/**
+ * ======================================================================
+ * 🔐 AUTHENTICATION
+ * ======================================================================
+ */
 Route::get('/', function () {
     return redirect()->route('login');
 });
@@ -52,6 +59,12 @@ Route::get('/login', [AdminWebController::class, 'showLogin'])->name('login');
 Route::post('/login', [AdminWebController::class, 'login']);
 Route::post('/logout', [AdminWebController::class, 'logout'])->middleware('auth')->name('logout');
 
+
+/**
+ * ======================================================================
+ * 🏢 AREA ADMIN BANK SAMPAH
+ * ======================================================================
+ */
 Route::prefix('admin')->middleware('auth')->group(function () {
 
     Route::get('/dashboard', [AdminWebController::class, 'dashboard'])->name('admin.dashboard');
@@ -60,6 +73,10 @@ Route::prefix('admin')->middleware('auth')->group(function () {
     Route::resource('jenis-sampah', JenisSampahWebController::class);
     Route::resource('jadwal', JadwalWebController::class);
 
+    // 🔥 PERBAIKAN: Rute Force Sync Manual dipindahkan ke Controller MasterJadwalRutinController
+    Route::post('/master-jadwal/generate', [MasterJadwalRutinController::class, 'generate'])->name('master-jadwal.generate');
+
+    // CRUD Master Jadwal Rutin Nasabah
     Route::resource('master-jadwal', MasterJadwalRutinController::class)->names([
         'index'   => 'master-jadwal.index',
         'create'  => 'master-jadwal.create',
@@ -67,47 +84,59 @@ Route::prefix('admin')->middleware('auth')->group(function () {
         'destroy' => 'master-jadwal.destroy',
     ]);
 
+    // Manajemen Transaksi Setor Sampah
     Route::prefix('setor-sampah')->group(function () {
-        Route::get('/', [SetorSampahWebController::class, 'index'])->name('admin.setor.index');
-        Route::get('/manual/{id}', [SetorSampahWebController::class, 'formManual'])->name('admin.setor.form-manual');
-        Route::post('/manual/{id}', [SetorSampahWebController::class, 'prosesManual'])->name('admin.setor.proses-manual');
-        Route::get('/{id}', [SetorSampahWebController::class, 'show'])->name('admin.setor.show');
-        Route::post('/{id}/status', [SetorSampahWebController::class, 'updateStatus'])->name('admin.setor.updateStatus');
-        Route::delete('/{id}', [SetorSampahWebController::class, 'destroy'])->name('admin.setor.destroy');
+        $controller = SetorSampahWebController::class;
+        Route::get('/', [$controller, 'index'])->name('admin.setor.index');
+        Route::get('/manual/{id}', [$controller, 'formManual'])->name('admin.setor.form-manual');
+        Route::post('/manual/{id}', [$controller, 'prosesManual'])->name('admin.setor.proses-manual');
+        Route::get('/{id}', [$controller, 'show'])->name('admin.setor.show');
+        Route::post('/{id}/status', [$controller, 'updateStatus'])->name('admin.setor.updateStatus');
+        Route::delete('/{id}', [$controller, 'destroy'])->name('admin.setor.destroy');
     });
 
+    // Manajemen Data Nasabah
     Route::prefix('nasabah')->group(function () {
-        Route::get('/', [NasabahWebController::class, 'index'])->name('admin.nasabah.index');
-        Route::get('/{id}/print-qr', [NasabahWebController::class, 'printQr'])->name('admin.nasabah.print-qr');
-        Route::get('/{id}', [NasabahWebController::class, 'show'])->name('admin.nasabah.show');
-        Route::post('/{id}/approve', [NasabahWebController::class, 'approve'])->name('admin.nasabah.approve');
-        Route::post('/{id}/status', [NasabahWebController::class, 'updateStatus'])->name('admin.nasabah.updateStatus');
-        Route::delete('/{id}', [NasabahWebController::class, 'destroy'])->name('admin.nasabah.destroy');
+        $controller = NasabahWebController::class;
+        Route::get('/', [$controller, 'index'])->name('admin.nasabah.index');
+        Route::get('/{id}/print-qr', [$controller, 'printQr'])->name('admin.nasabah.print-qr');
+        Route::get('/{id}', [$controller, 'show'])->name('admin.nasabah.show');
+        Route::post('/{id}/approve', [$controller, 'approve'])->name('admin.nasabah.approve');
+        Route::post('/{id}/status', [$controller, 'updateStatus'])->name('admin.nasabah.updateStatus');
+        Route::delete('/{id}', [$controller, 'destroy'])->name('admin.nasabah.destroy');
     });
 
+    // Manajemen Keuangan / Tarik Tunai
     Route::prefix('tarik-tunai')->group(function () {
-        Route::get('/', [TarikTunaiWebController::class, 'index'])->name('admin.tarik-tunai.index');
-        Route::post('/{id}/approve', [TarikTunaiWebController::class, 'approve'])->name('admin.tarik-tunai.approve');
-        Route::post('/{id}/reject', [TarikTunaiWebController::class, 'reject'])->name('admin.tarik-tunai.reject');
+        $controller = TarikTunaiWebController::class;
+        Route::get('/', [$controller, 'index'])->name('admin.tarik-tunai.index');
+        Route::post('/{id}/approve', [$controller, 'approve'])->name('admin.tarik-tunai.approve');
+        Route::post('/{id}/reject', [$controller, 'reject'])->name('admin.tarik-tunai.reject');
     });
     Route::get('/riwayat-penarikan', [TarikTunaiWebController::class, 'riwayat'])->name('admin.tarik-tunai.riwayat');
 
 });
 
+
+/**
+ * ======================================================================
+ * 🏛️ AREA ADMIN DINAS LINGKUNGAN HIDUP (DLH)
+ * ======================================================================
+ */
 Route::prefix('dlh')->middleware(['auth', 'admin_dlh'])->group(function () {
 
     Route::get('/dashboard', [DlhDashboardController::class, 'index'])->name('dlh.dashboard');
 
     Route::prefix('bank-sampah')->name('dlh.bank-sampah.')->group(function () {
         Route::resource('/', DlhBankSampahWebController::class)->parameters(['' => 'id']);
-        Route::post('/{id}/approve', [DlhBankSampahWebController::class, 'approve'])
-            ->name('approve');
+        Route::post('/{id}/approve', [DlhBankSampahWebController::class, 'approve'])->name('approve');
     });
 
     Route::prefix('aduan')->group(function () {
-        Route::get('/', [DlhAduanWebController::class, 'index'])->name('dlh.aduan.index');
-        Route::get('/{id}', [DlhAduanWebController::class, 'show'])->name('dlh.aduan.show');
-        Route::put('/{id}', [DlhAduanWebController::class, 'update'])->name('dlh.aduan.update');
+        $controller = DlhAduanWebController::class;
+        Route::get('/', [$controller, 'index'])->name('dlh.aduan.index');
+        Route::get('/{id}', [$controller, 'show'])->name('dlh.aduan.show');
+        Route::put('/{id}', [$controller, 'update'])->name('dlh.aduan.update');
     });
 
 });

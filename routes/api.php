@@ -35,11 +35,16 @@ Route::get('/bank-sampah', [BankSampahController::class, 'index']);
 Route::get('/nasabah/qrcode/{kode}', [UserController::class, 'scanQr']);
 Route::get('/dashboard-nasabah/{user_id}', [UserController::class, 'dashboard_nasabah']);
 
-// Kurir (Public Area - Akses Mudah dari Aplikasi Flutter)
+// =========================================================================
+// 📋 KURIR (PUBLIC AREA - AKSES MUDAH DARI APLIKASI FLUTTER)
+// =========================================================================
 Route::get('/dashboard-kurir/{id}', [KurirController::class, 'dashboard_kurir']);
 Route::get('/kurir/jadwal/{id}', [JadwalPenjemputanController::class, 'jadwalKurir']); 
 Route::get('/dashboard-kurir-counter/{kurir_id}', [SetorSampahController::class, 'getDashboardKurir']);
 Route::get('/riwayat-kurir/{kurir_id}', [SetorSampahController::class, 'getRiwayatTotal']);
+
+// 🔥 BARU: Route Intelligent Scan QR Kurir (Metode POST sesuai kodingan Flutter)
+Route::post('/kurir/scan-qr', [KurirController::class, 'scanQrNasabah']);
 
 // Ubah PUT menjadi POST di api.php
 Route::post('/jadwal-penjemputan/{id}/mulai', [JadwalPenjemputanController::class, 'mulaiJemput']);
@@ -99,4 +104,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('admin_bank')->group(function () {
         Route::post('/nasabah/{id}/approve', [UserController::class, 'approveNasabah']);
     });
+
+    
 });

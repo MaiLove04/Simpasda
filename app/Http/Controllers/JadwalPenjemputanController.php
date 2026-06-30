@@ -2,29 +2,29 @@
 
 namespace App\Http\Controllers;
 
-use App\Traits\SendsPushNotifications;
 use App\Models\JadwalPenjemputan;
 use Illuminate\Http\Request;
 
 class JadwalPenjemputanController extends Controller
 {
-    //use SendsPushNotifications;
-    use SendsPushNotifications;
-
     // ==========================================
     // AMBIL JADWAL KURIR (DIPANGGIL FLUTTER)
     // ==========================================
     public function jadwalKurir($id)
     {
         try {
-            $jadwal = JadwalPenjemputan::with(['nasabah', 'kurir', 'bankSampah'])
-                ->where('kurir_id', $id)
-                ->whereNotIn('status', ['selesai', 'batal']) // Ambil semua yang masih aktif
-                ->orderBy('tanggal_penjemputan', 'asc')
-                ->get();
+            $jadwal = JadwalPenjemputan::with([
+                'nasabah',
+                'kurir',
+                'bankSampah'
+            ])
+            ->where('kurir_id', $id)
+            ->latest()
+            ->get();
 
             return response()->json([
                 'success' => true,
+                'message' => 'Data jadwal berhasil diambil',
                 'data'    => $jadwal
             ], 200);
 
@@ -85,7 +85,7 @@ class JadwalPenjemputanController extends Controller
     // ==========================================
     public function mulaiJemput($id)
     {
-         try {
+        try {
             $jadwal = JadwalPenjemputan::find($id);
 
             if (!$jadwal) {
@@ -99,12 +99,6 @@ class JadwalPenjemputanController extends Controller
             $jadwal->status = 'proses';
             $jadwal->save();
 
-            // Kirim notifikasi ke Nasabah
-            $nasabah = $jadwal->nasabah;
-            if ($nasabah && $nasabah->fcm_token) {
-                $this->sendPushNotification($nasabah->fcm_token, 'Kurir Dalam Perjalanan', 'Kurir sedang dalam perjalanan untuk menjemput sampah Anda.');
-            }
-
             return response()->json([
                 'success' => true,
                 'message' => 'Status berhasil diperbarui menjadi proses',
@@ -117,77 +111,6 @@ class JadwalPenjemputanController extends Controller
                 'message' => 'Gagal memperbarui status penjemputan',
                 'error'   => $e->getMessage(),
             ], 500);
-        }
-    }
-
-    // ==========================================
-    // AMBIL JADWAL AKTIF NASABAH (DIPANGGIL FLUTTER)
-    // ==========================================
-    public function jadwalNasabah($id)
-    {
-        try {
-            $jadwal = \App\Models\JadwalPenjemputan::with(['kurir'])
-                ->where('nasabah_id', $id)
-                ->where('status', '!=', 'selesai')
-                ->latest()
-                ->first();
-
-            return response()->json([
-                'success' => true,
-                'data'    => $jadwal
-            ], 200);
-        } catch (\Exception $e) {
-            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
-        }
-    }
-
-    // ==========================================
-    // BATALKAN JADWAL (AKSI NASABAH VIA FLUTTER)
-    // ==========================================
-    public function batalJemput(Request $request, $id)
-    {
-        try {
-            $nasabah = $request->user();
-            $jadwal = JadwalPenjemputan::find($id);
-
-            // 1. Validasi: Jadwal tidak ditemukan
-            if (!$jadwal) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Jadwal penjemputan tidak ditemukan.'
-                ], 404);
-            }
-
-            // 2. Validasi Keamanan: Pastikan nasabah hanya bisa membatalkan jadwal miliknya sendiri
-            if ($jadwal->nasabah_id !== $nasabah->id) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Anda tidak memiliki akses untuk membatalkan jadwal ini.'
-                ], 403);
-            }
-
-            // 3. Validasi Logika: Jadwal hanya bisa dibatalkan jika statusnya masih 'terjadwal'
-            if ($jadwal->status !== 'terjadwal') {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Jadwal ini tidak dapat dibatalkan karena sedang dalam proses atau telah selesai.'
-                ], 400);
-            }
-
-            // Update status menjadi 'dibatalkan'
-            $jadwal->status = 'batal';
-            $jadwal->save();
-
-            // Kirim notifikasi ke Kurir bahwa jadwal dibatalkan
-            $kurir = $jadwal->kurir;
-            if ($kurir && $kurir->fcm_token) {
-                $this->sendPushNotification($kurir->fcm_token, 'Jadwal Dibatalkan', "Jadwal penjemputan untuk nasabah {$nasabah->name} telah dibatalkan.");
-            }
-
-            return response()->json(['success' => true, 'message' => 'Jadwal penjemputan berhasil dibatalkan.'], 200);
-
-        } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => 'Gagal membatalkan jadwal: ' . $e->getMessage()], 500);
         }
     }
 }
