@@ -268,92 +268,134 @@ class KurirController extends Controller
      * =========================================================================
      */
     public function scanQrNasabah(Request $request)
-    {
-        $request->validate([
-            'nasabah_id' => 'required', // Menerima payload QR data dari Flutter
-            'kurir_id'   => 'required',
-        ]);
+{
+    $request->validate([
+        'nasabah_id' => 'required',
+        'kurir_id'   => 'required',
+    ]);
 
-        try {
-            // 1. Ambil record data nasabah secara valid
-            $nasabah = User::where('role', 'nasabah')
-                ->where(function($query) {
-                    $query->where('id', request('nasabah_id'))
-                          ->orWhere('kode_nasabah', request('nasabah_id'));
-                })->first();
+    try {
 
-            if (!$nasabah) {
-                return response()->json([
-                    'status'  => 'error',
-                    'message' => 'Gagal: Kode QR tidak merujuk ke data nasabah manapun.'
-                ], 404);
-            }
+        /*
+        |--------------------------------------------------------------------------
+        | Cari Nasabah
+        |--------------------------------------------------------------------------
+        */
 
-            // 2. PRIORITAS 1: Cek apakah ada 'Request Mandiri' dari aplikasi nasabah yang aktif berstatus 'proses'
-            $requestNasabahActive = SetorSampah::where('user_id', $nasabah->id)
-                ->where('status', 'proses') // 🛠️ FIX: Menggunakan status 'proses' baru penanda manifes gantung
-                ->latest()
-                ->first();
+        $nasabah = User::where('role', 'nasabah')
+            ->where(function ($q) use ($request) {
+                $q->where('id', $request->nasabah_id)
+                  ->orWhere('kode_nasabah', $request->nasabah_id);
+            })
+            ->first();
 
-            if ($requestNasabahActive) {
-                // Selaraskan pencarian agenda penjemputan terkait di lapangan jika ada
-                $jadwalTerkait = JadwalPenjemputan::where('nasabah_id', $nasabah->id)
-                    ->whereIn('status', ['terjadwal', 'proses'])
-                    ->latest()
-                    ->first();
-
-                return response()->json([
-                    'status'       => 'success',
-                    'mode'         => 'manual', // Flutter akan mengidentifikasi ini sebagai 'isRealRequestNasabah = true'
-                    'id_transaksi' => $requestNasabahActive->id,
-                    'jadwal_id'    => $jadwalTerkait ? $jadwalTerkait->id : 0,
-                    'nasabah' => [
-                        'id'     => $nasabah->id,
-                        'nama'   => $nasabah->name,
-                        'alamat' => $nasabah->alamat ?? 'Alamat tidak diisi'
-                    ]
-                ], 200);
-            }
-
-            // 3. PRIORITAS 2: Cek agenda 'Jadwal Admin' (Rutin / Manual) khusus hari ini yang siap ditimbang
-            $jadwalAdminActive = JadwalPenjemputan::where('nasabah_id', $nasabah->id)
-                ->whereIn('status', ['terjadwal', 'proses'])
-                ->whereDate('tanggal_penjemputan', Carbon::today())
-                ->latest()
-                ->first();
-
-            if ($jadwalAdminActive) {
-                return response()->json([
-                    'status'       => 'success',
-                    'mode'         => 'rutin', // Flutter akan mengidentifikasi ini sebagai 'isRealRequestNasabah = false'
-                    'id_transaksi' => 0,
-                    'jadwal_id'    => $jadwalAdminActive->id,
-                    'nasabah' => [
-                        'id'     => $nasabah->id,
-                        'nama'   => $nasabah->name,
-                        'alamat' => $nasabah->alamat ?? 'Alamat tidak diisi'
-                    ]
-                ], 200);
-            }
-
-            // 4. PRIORITAS 3: Setoran dadakan (Nasabah langsung setor ke tempat kurir tanpa jadwal)
+        if (!$nasabah) {
             return response()->json([
-                'status'       => 'success',
-                'mode'         => 'baru', // Mengarahkan kurir ke pengisian form baru kosong
-                'id_transaksi' => null,
-                'jadwal_id'    => 0,
-                'nasabah' => [
-                    'id'     => $nasabah->id,
-                    'nama'   => $nasabah->name,
-                    'alamat' => $nasabah->alamat ?? 'Alamat tidak diisi'
-                ]
-            ], 200);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'status'  => 'error',
-                'message' => 'Gagal memproses di server: ' . $e->getMessage()
-            ], 500);
+                'status' => 'error',
+                'message' => 'QR Code tidak valid.'
+            ],404);
         }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | PRIORITAS 1
+        | REQUEST NASABAH
+        |--------------------------------------------------------------------------
+        */
+
+        $requestAktif = SetorSampah::with('details.jenisSampah')
+            ->where('user_id',$nasabah->id)
+            ->whereNull('jadwal_id')
+            ->where('status','pending')
+            ->latest()
+            ->first();
+
+        if($requestAktif){
+
+            return response()->json([
+
+                'status'=>'success',
+
+                'mode'=>'request',
+
+                'jadwal_id'=>null,
+
+                'setor_sampah_id'=>$requestAktif->id,
+
+                'nasabah'=>[
+                    'id'=>$nasabah->id,
+                    'nama'=>$nasabah->name,
+                    'alamat'=>$nasabah->alamat,
+                ]
+
+            ],200);
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | PRIORITAS 2
+        | JADWAL ADMIN
+        |--------------------------------------------------------------------------
+        */
+
+        $jadwal = JadwalPenjemputan::where('nasabah_id',$nasabah->id)
+            ->where('kurir_id',$request->kurir_id)
+            ->whereIn('status',['terjadwal','proses'])
+            ->latest()
+            ->first();
+
+        if($jadwal){
+
+            return response()->json([
+
+                'status'=>'success',
+
+                'mode'=>'jadwal',
+
+                'jadwal_id'=>$jadwal->id,
+
+                'setor_sampah_id'=>null,
+
+                'nasabah'=>[
+                    'id'=>$nasabah->id,
+                    'nama'=>$nasabah->name,
+                    'alamat'=>$nasabah->alamat,
+                ]
+
+            ],200);
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | TIDAK ADA TUGAS
+        |--------------------------------------------------------------------------
+        */
+
+        return response()->json([
+
+            'status'=>'error',
+
+            'message'=>'Nasabah tidak memiliki tugas penjemputan aktif.'
+
+        ],404);
+
     }
+
+    catch(\Exception $e){
+
+        return response()->json([
+
+            'status'=>'error',
+
+            'message'=>$e->getMessage()
+
+        ],500);
+
+    }
+}
 }

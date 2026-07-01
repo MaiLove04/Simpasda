@@ -51,7 +51,17 @@ class SetorSampahController extends Controller
         try {
             $pathFoto = $this->uploadFoto($request);
 
-            $setor = SetorSampah::find($id) ?? new SetorSampah();
+            $setor = SetorSampah::where('jadwal_id', $id)->first();
+
+            if (!$setor) {
+
+                $setor = new SetorSampah();
+
+                $setor->jadwal_id = $id;
+
+                $setor->jadwal_id = $id;
+            }
+
             $setor->user_id = $request->user_id;
 
             $defaultKurir = User::where('role', 'kurir')->first();
@@ -60,6 +70,7 @@ class SetorSampahController extends Controller
             $setor->foto_sampah = $pathFoto ?? $setor->foto_sampah ?? "";
             $setor->catatan = $request->catatan ?? 'Selesai ditimbang oleh kurir lapangan (Jadwal Admin)';
             $setor->status = 'selesai';
+            $setor->jadwal_id = $id;
             $setor->save();
 
             $this->simpanDetailSampah($setor->id, $request->sampah_list);
@@ -115,7 +126,7 @@ class SetorSampahController extends Controller
 
             $setor->user_id = $request->user_id;
             $defaultKurir = User::where('role', 'kurir')->first();
-            $setor->kurir_id = $request->kurir_id ?? ($defaultKurir ? $defaultKurir->id : 14);
+            $setor->kurir_id = $request->kurir_id;
             $setor->total = $request->grand_total;
 
             if ($pathFoto) {
@@ -193,34 +204,13 @@ class SetorSampahController extends Controller
 
         DB::beginTransaction();
         try {
-            $nasabah = User::find($request->user_id);
-            $kurirAktif = User::where('role', 'kurir')->first();
-            $kurirIdDefault = $kurirAktif ? $kurirAktif->id : null; 
-
-            $bankSampah = \App\Models\BankSampah::first();
-            $bankId = $bankSampah ? $bankSampah->id : 1;
-
-            // 1. Buat agenda rencana di tabel jadwal_penjemputans
-            $jadwal = new JadwalPenjemputan();
-            $jadwal->nasabah_id = $request->user_id;
-            $jadwal->kurir_id = $kurirIdDefault;
-            $jadwal->bank_sampah_id = $bankId;
-            $jadwal->alamat = $nasabah->alamat ?? 'Alamat tidak diisi nasabah';
-            $jadwal->tanggal_penjemputan = Carbon::today()->format('Y-m-d');
-            $jadwal->tanggal = Carbon::today()->format('Y-m-d'); 
-            $jadwal->status = 'proses';
-            $jadwal->catatan = $request->catatan ?? 'Request jemput lewat aplikasi nasabah';
-            $jadwal->save();
-
             // 2. Buat draf nota gantung di tabel setor_sampahs
             $setor = new SetorSampah();
             $setor->user_id = $request->user_id;
-            $setor->kurir_id = $kurirIdDefault;
-            $setor->jadwal_id = $jadwal->id;
+            $setor->kurir_id = null;          // Belum ada kurir yang mengambil
             $setor->total = 0;
-            $setor->foto_sampah = null;
-            $setor->catatan = $request->catatan ?? 'Request jemput mandiri nasabah';
-            $setor->status = 'proses';
+            $setor->catatan = $request->catatan;
+            $setor->status = 'pending';
             $setor->save();
 
             // 3. 🛠️ PERBAIKAN UTAMA: Mengurai data array JSON murni `[1, 2, 3]` hasil kiriman `selectedJenisIds` UI Nasabah
@@ -236,14 +226,16 @@ class SetorSampahController extends Controller
                 if ($jenisSampahId) {
                     // Ambil harga aktif saat ini dari tabel master jenis sampah agar kalkulasi kurir tidak null/NaN
                     $masterSampah = \App\Models\JenisSampah::find($jenisSampahId);
-                    $hargaSaatIni = $masterSampah ? ($masterSampah->harga ?? $masterSampah->harga_beli ?? 2000) : 2000;
+                    $hargaSaatIni = $masterSampah
+                        ? (int) $masterSampah->harga_per_kg
+                        : 0;
 
                     $detail = new DetailSetorSampah();
                     $detail->setor_sampah_id = $setor->id;
                     $detail->jenis_sampah_id = $jenisSampahId;
                     $detail->berat           = 0; // Inisialisasi awal 0 agar scannable di keranjang kurir
                     $detail->harga_per_kg    = $hargaSaatIni; // Mengunci harga pasaran terkini
-                    $detail->total_harga     = 0; 
+                    $detail->subtotal = 0;
                     $detail->save();
                 }
             }
@@ -251,11 +243,8 @@ class SetorSampahController extends Controller
             DB::commit();
             return response()->json([
                 'success' => true,
-                'message' => '✅ Request penjemputan & draf manifes kategori sampah berhasil didaftarkan!',
-                'data' => [
-                    'jadwal' => $jadwal,
-                    'setor'  => $setor->load('details')
-                ]
+                'message' => 'Request penjemputan berhasil dikirim.',
+                'data' => $setor->load('details'),
             ], 201);
 
         } catch (\Exception $e) {
@@ -273,10 +262,11 @@ class SetorSampahController extends Controller
     public function showRequestDetail($nasabah_id)
     {
         try {
-            $setorMaster = SetorSampah::where('user_id', $nasabah_id)
-                ->where('status', 'proses')
-                ->latest()
-                ->first();
+            $setorMaster = SetorSampah::where('user_id',$nasabah_id)
+            ->whereNull('jadwal_id')
+            ->where('status','pending')
+            ->latest()
+            ->first();
 
             if (!$setorMaster) {
                 return response()->json([
@@ -292,10 +282,10 @@ class SetorSampahController extends Controller
             $formAutoload = [];
             foreach ($details as $item) {
                 if ($item->jenisSampah) {
-                    $hargaBeliTerupdate = $item->harga_per_kg 
-                                        ?? $item->jenisSampah->harga_beli
-                                        ?? $item->jenisSampah->harga
-                                        ?? 2000;
+                    $hargaBeliTerupdate =
+                        $item->harga_per_kg
+                        ?? $item->jenisSampah->harga_per_kg
+                        ?? 0;
 
                     $formAutoload[] = [
                         'jenis_sampah_id' => $item->jenis_sampah_id,
@@ -350,7 +340,7 @@ class SetorSampahController extends Controller
                 $detail->jenis_sampah_id = $item['jenis_sampah_id'];
                 $detail->berat           = $item['berat'];
                 $detail->harga_per_kg    = $item['harga_per_kg'];
-                $detail->total_harga     = $item['total_item']; 
+                $detail->subtotal = $item['total_item']; 
                 $detail->save();
             }
         }

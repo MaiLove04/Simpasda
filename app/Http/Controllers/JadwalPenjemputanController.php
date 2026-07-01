@@ -1,9 +1,12 @@
 <?php
 
 namespace App\Http\Controllers;
+use App\Models\SetorSampah;
 
+use Illuminate\Support\Facades\DB;
 use App\Models\JadwalPenjemputan;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class JadwalPenjemputanController extends Controller
 {
@@ -11,31 +14,127 @@ class JadwalPenjemputanController extends Controller
     // AMBIL JADWAL KURIR (DIPANGGIL FLUTTER)
     // ==========================================
     public function jadwalKurir($id)
-    {
-        try {
-            $jadwal = JadwalPenjemputan::with([
+{
+    try {
+
+        /*
+        |--------------------------------------------------------------------------
+        | 1. AMBIL JADWAL DARI ADMIN
+        |--------------------------------------------------------------------------
+        */
+
+        $jadwalAdmin = JadwalPenjemputan::with([
                 'nasabah',
                 'kurir',
                 'bankSampah'
             ])
             ->where('kurir_id', $id)
-            ->latest()
-            ->get();
+            ->whereIn('status', ['terjadwal', 'proses'])
+            ->get()
+            ->map(function ($item) {
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Data jadwal berhasil diambil',
-                'data'    => $jadwal
-            ], 200);
+                return [
 
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal mengambil jadwal',
-                'error'   => $e->getMessage(),
-            ], 500);
-        }
+                    'tipe_tugas' => 'jadwal',
+
+                    'referensi_id' => $item->id,
+
+                    'jadwal_id' => $item->id,
+
+                    'setor_sampah_id' => null,
+
+                    'tanggal' => $item->tanggal_penjemputan,
+
+                    'status' => $item->status,
+
+                    'nasabah' => $item->nasabah,
+
+                    'alamat' => $item->alamat,
+
+                    'catatan' => $item->catatan,
+
+                ];
+            });
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | 2. AMBIL REQUEST DARI NASABAH
+        |--------------------------------------------------------------------------
+        */
+
+        $requestNasabah = SetorSampah::with([
+                'nasabah',
+                'details.jenisSampah'
+            ])
+            ->where('kurir_id', $id)
+            ->whereNull('jadwal_id')
+            ->where('status', 'pending')
+            ->get()
+            ->map(function ($item) {
+
+                return [
+
+                    'tipe_tugas' => 'request',
+
+                    'referensi_id' => $item->id,
+
+                    'jadwal_id' => null,
+
+                    'setor_sampah_id' => $item->id,
+
+                    'tanggal' => $item->created_at,
+
+                    'status' => $item->status,
+
+                    'nasabah' => $item->nasabah,
+
+                    'alamat' => $item->nasabah->alamat ?? '',
+
+                    'catatan' => $item->catatan,
+
+                ];
+            });
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | 3. GABUNGKAN
+        |--------------------------------------------------------------------------
+        */
+
+        $semuaTugas = $jadwalAdmin
+            ->merge($requestNasabah)
+            ->sortBy('tanggal')
+            ->values();
+
+
+        return response()->json([
+
+            'success' => true,
+
+            'message' => 'Daftar tugas berhasil dimuat.',
+
+            'total' => $semuaTugas->count(),
+
+            'data' => $semuaTugas
+
+        ], 200);
+
+    } catch (\Exception $e) {
+
+        return response()->json([
+
+            'success' => false,
+
+            'message' => 'Gagal mengambil daftar tugas.',
+
+            'error' => $e->getMessage(),
+
+        ], 500);
+
     }
+}
 
     // ==========================================
     // SIMPAN JADWAL PENJEMPUTAN (DIPANGGIL API/ADMIN)

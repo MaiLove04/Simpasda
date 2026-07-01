@@ -3,14 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use App\Traits\SendsPushNotifications;
+// use App\Traits\SendsPushNotifications;
 use App\Models\JadwalPenjemputan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class JadwalWebController extends Controller
 {
-    use SendsPushNotifications;
+    // use SendsPushNotifications;
 
     public function index()
     {
