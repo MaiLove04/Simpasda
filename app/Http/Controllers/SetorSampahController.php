@@ -54,32 +54,24 @@ class SetorSampahController extends Controller
             $setor = SetorSampah::where('jadwal_id', $id)->first();
 
             if (!$setor) {
-
                 $setor = new SetorSampah();
-
-                $setor->jadwal_id = $id;
-
-                $setor->jadwal_id = $id;
             }
 
-            $setor->user_id = $request->user_id;
-
-            $defaultKurir = User::where('role', 'kurir')->first();
-            $setor->kurir_id = $request->kurir_id ?? ($defaultKurir ? $defaultKurir->id : 14);
-            $setor->total = $request->grand_total;
-            $setor->foto_sampah = $pathFoto ?? $setor->foto_sampah ?? "";
-            $setor->catatan = $request->catatan ?? 'Selesai ditimbang oleh kurir lapangan (Jadwal Admin)';
-            $setor->status = 'selesai';
             $setor->jadwal_id = $id;
+            $setor->user_id   = $request->user_id;
+            $setor->kurir_id  = $request->kurir_id;
+            $setor->total     = $request->grand_total;
+            $setor->foto_sampah = $pathFoto ?? $setor->foto_sampah ?? '';
+            $setor->catatan   = $request->catatan ?? 'Selesai ditimbang oleh kurir lapangan (Jadwal Admin)';
+            $setor->status    = 'selesai';
             $setor->save();
 
             $this->simpanDetailSampah($setor->id, $request->sampah_list);
             $this->tambahSaldoNasabah($request->user_id, $request->grand_total);
             $this->catatMutasi($request->user_id, $setor->id, $request->grand_total);
 
-            if ($request->filled('jadwal_id')) {
-                JadwalPenjemputan::where('id', $request->jadwal_id)->update(['status' => 'selesai']);
-            }
+            // Selalu update jadwal dari $id URL — bukan dari request body
+            JadwalPenjemputan::where('id', $id)->update(['status' => 'selesai']);
 
             DB::commit();
 
@@ -124,26 +116,21 @@ class SetorSampahController extends Controller
             $setor = SetorSampah::findOrFail($setor_sampah_id);
             $pathFoto = $this->uploadFoto($request);
 
-            $setor->user_id = $request->user_id;
-            $defaultKurir = User::where('role', 'kurir')->first();
+            $setor->user_id  = $request->user_id;
             $setor->kurir_id = $request->kurir_id;
-            $setor->total = $request->grand_total;
+            $setor->total    = $request->grand_total;
 
             if ($pathFoto) {
                 $setor->foto_sampah = $pathFoto;
             }
 
             $setor->catatan = $request->catatan ?? 'Berat di-update dan diselesaikan oleh kurir lapangan';
-            $setor->status = 'selesai';
+            $setor->status  = 'selesai';
             $setor->save();
 
             $this->simpanDetailSampah($setor->id, $request->sampah_list);
             $this->tambahSaldoNasabah($request->user_id, $request->grand_total);
             $this->catatMutasi($request->user_id, $setor->id, $request->grand_total);
-
-            if ($request->filled('jadwal_id')) {
-                JadwalPenjemputan::where('id', $request->jadwal_id)->update(['status' => 'selesai']);
-            }
 
             DB::commit();
 

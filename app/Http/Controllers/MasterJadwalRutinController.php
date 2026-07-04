@@ -65,6 +65,54 @@ class MasterJadwalRutinController extends Controller
     }
 
     /**
+     * Tampilkan Form Edit Pola Rutin
+     */
+    public function edit($id)
+    {
+        $master = MasterJadwalRutin::with(['nasabah', 'kurir'])->findOrFail($id);
+        $nasabahs = User::where('role', 'nasabah')->get();
+        $kurirs = User::where('role', 'kurir')->get();
+        $hariOptions = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
+
+        return view('admin.master-jadwal.edit', compact('master', 'nasabahs', 'kurirs', 'hariOptions'));
+    }
+
+    /**
+     * Simpan Perubahan Pola Rutin
+     */
+    public function update(Request $request, $id)
+    {
+        $master = MasterJadwalRutin::findOrFail($id);
+
+        $request->validate([
+            'nasabah_id'       => 'required|exists:users,id',
+            'kurir_id'         => 'required|exists:users,id',
+            'tipe_jadwal'      => 'required|in:mingguan,interval',
+            'hari_penjemputan' => 'required_if:tipe_jadwal,mingguan|nullable|string',
+            'interval_hari'    => 'required_if:tipe_jadwal,interval|nullable|integer|min:2|max:30',
+            'tanggal_mulai'    => 'required_if:tipe_jadwal,interval|nullable|date',
+            'jam_estimasi'     => 'required',
+        ]);
+
+        $hari         = $request->tipe_jadwal === 'mingguan'  ? $request->hari_penjemputan : null;
+        $interval     = $request->tipe_jadwal === 'interval'  ? $request->interval_hari   : null;
+        $tanggalMulai = $request->tipe_jadwal === 'interval'  ? $request->tanggal_mulai   : null;
+
+        $master->update([
+            'nasabah_id'       => $request->nasabah_id,
+            'kurir_id'         => $request->kurir_id,
+            'tipe_jadwal'      => $request->tipe_jadwal,
+            'hari_penjemputan' => $hari,
+            'interval_hari'    => $interval,
+            'tanggal_mulai'    => $tanggalMulai,
+            'jam_estimasi'     => $request->jam_estimasi,
+            'is_aktif'         => $request->boolean('is_aktif'),
+        ]);
+
+        return redirect()->route('master-jadwal.index')->with('success', 'Pola penjemputan rutin berhasil diperbarui!');
+    }
+
+    /**
      * Menghapus Pola Rutin
      */
     public function destroy($id)

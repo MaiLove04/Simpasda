@@ -182,12 +182,28 @@ class KurirController extends Controller
             ->where('kurir_id', $id)
             ->whereDate('tanggal_penjemputan', Carbon::today())
             ->where('status', '!=', 'selesai')
-            ->orderBy('tanggal_penjemputan', 'asc') 
+            ->orderBy('tanggal_penjemputan', 'asc')
             ->first();
 
-        $totalPesanan = JadwalPenjemputan::where('kurir_id', $id)
+        // Tugas aktif dari jadwal admin (terjadwal + proses, hari ini)
+        $totalJadwalAktif = JadwalPenjemputan::where('kurir_id', $id)
             ->whereDate('tanggal_penjemputan', Carbon::today())
+            ->whereIn('status', ['terjadwal', 'proses'])
             ->count();
+
+        // Tugas aktif dari request nasabah (pending, bank sampah yang sama)
+        $totalRequestPending = SetorSampah::whereNull('kurir_id')
+            ->whereNull('jadwal_id')
+            ->where('status', 'pending')
+            ->when($user->bank_sampah_id, function ($q) use ($user) {
+                $q->whereHas('nasabah', function ($q2) use ($user) {
+                    $q2->where('bank_sampah_id', $user->bank_sampah_id);
+                });
+            })
+            ->count();
+
+        // Total tugas aktif = jadwal + request nasabah
+        $totalTugasAktif = $totalJadwalAktif + $totalRequestPending;
 
         $totalPesananSelesai = JadwalPenjemputan::where('kurir_id', $id)
             ->whereDate('tanggal_penjemputan', Carbon::today())
@@ -222,7 +238,7 @@ class KurirController extends Controller
                 $beratTransaksi = DetailSetorSampah::where('setor_sampah_id', $item->id)->sum('berat');
 
                 $detailPertama = DetailSetorSampah::with('jenisSampah')
-                    ?->where('setor_sampah_id', $item->id)
+                    ->where('setor_sampah_id', $item->id)
                     ->first();
 
                 $namaJenis = $detailPertama && $detailPertama->jenisSampah
@@ -251,7 +267,10 @@ class KurirController extends Controller
             'email'                     => $user->email ?? '-',
             'no_hp'                     => $user->no_hp ?? '-',
             'alamat'                    => $user->alamat ?? '-',
-            'total_pesanan'             => $totalPesanan,
+            'total_tugas_aktif'         => $totalTugasAktif,
+            'total_pesanan'             => $totalTugasAktif,          // alias (backward compat Flutter)
+            'total_request_pending'     => $totalRequestPending,
+            'total_jadwal_aktif'        => $totalJadwalAktif,
             'total_pesanan_selesai'     => $totalPesananSelesai,
             'total_berat_hari_ini'      => round($totalBeratHariIni, 1),
             'total_pendapatan_hari_ini' => number_format($totalPendapatanHariIni, 0, ',', '.'),

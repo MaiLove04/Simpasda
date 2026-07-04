@@ -84,9 +84,9 @@
                         </td>
                         <td class="py-3 text-center">
                             <div class="d-flex justify-content-center gap-2">
-                                <button class="btn btn-sm" style="border-radius: 6px; padding: 6px 14px; font-weight: 600; background-color: #3b82f6; color: white; border: none;">
+                                <a href="{{ route('master-jadwal.edit', $master->id) }}" class="btn btn-sm" style="border-radius: 6px; padding: 6px 14px; font-weight: 600; background-color: #3b82f6; color: white; border: none;">
                                     ✏️ Edit
-                                </button>
+                                </a>
 
                                 <form action="{{ route('master-jadwal.destroy', $master->id) }}" method="POST" onsubmit="return confirm('Hapus pola rutin penjemputan nasabah ini?')">
                                     @csrf
