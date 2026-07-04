@@ -44,6 +44,10 @@ Route::get('/riwayat-kurir/{kurir_id}', [SetorSampahController::class, 'getRiway
 
 // 🔥 SCAN QR (Tetap POST sesuai kodingan Flutter)
 Route::post('/kurir/scan-qr', [KurirController::class, 'scanQrNasabah']);
+Route::get(
+    '/jadwal/scan/{id}',
+    [JadwalPenjemputanController::class,'scanQr']
+);
 
 // 🔄 UBAH KE PATCH: Mengubah Status Alur Penjemputan
 // Proses alur jemput oleh kurir lapangan

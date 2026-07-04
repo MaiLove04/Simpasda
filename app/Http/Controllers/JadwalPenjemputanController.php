@@ -10,6 +10,29 @@ use Carbon\Carbon;
 
 class JadwalPenjemputanController extends Controller
 {
+
+        public function scanQr($id)
+    {
+        $jadwal = JadwalPenjemputan::with([
+            'nasabah',
+            'kurir',
+            'bankSampah'
+        ])->find($id);
+
+        if (!$jadwal) {
+
+            return response()->json([
+                'success'=>false,
+                'message'=>'QR tidak valid'
+            ],404);
+
+        }
+
+        return response()->json([
+            'success'=>true,
+            'data'=>$jadwal
+        ]);
+    }
     // ==========================================
     // AMBIL JADWAL KURIR (DIPANGGIL FLUTTER)
     // ==========================================

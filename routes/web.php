@@ -21,6 +21,16 @@ use App\Http\Controllers\DlhAduanWebController;
  * ======================================================================
  */
 
+//migrate:fress
+Route::get('/migrate-fresh', function () {
+
+    Artisan::call('migrate:fresh', [
+        '--force' => true,
+    ]);
+
+    return nl2br(Artisan::output());
+});
+
 // Menyegarkan seluruh sistem cache
 Route::get('/system-refresh-6285', function () {
     Artisan::call('optimize:clear');

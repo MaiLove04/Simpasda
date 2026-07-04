@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 // use App\Traits\SendsPushNotifications;
+use Illuminate\Support\Facades\DB;
+use App\Models\SetorSampah;
 use App\Models\JadwalPenjemputan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -46,34 +48,35 @@ class JadwalWebController extends Controller
         ]);
 
         DB::beginTransaction();
+
         try {
-            // 1. Buat agenda rencana di tabel jadwal_penjemputans
+
+            $nasabah = User::findOrFail($request->nasabah_id);
+
             $jadwal = new JadwalPenjemputan();
+            $jadwal->bank_sampah_id = Auth::user()->bank_sampah_id;
             $jadwal->nasabah_id = $request->nasabah_id;
             $jadwal->kurir_id = $request->kurir_id;
-            $jadwal->bank_sampah_id = 1; // Sesuaikan default ID Bank Sampah kamu
-            $jadwal->alamat = \App\Models\User::find($request->nasabah_id)->alamat ?? 'Alamat tidak diisi';
             $jadwal->tanggal_penjemputan = $request->tanggal;
-            $jadwal->status = 'terjadwal'; // Status rencana awal
-            $jadwal->catatan = $request->catatan ?? 'Jadwal dibuat oleh Admin Kantor';
+            $jadwal->alamat = $nasabah->alamat;
+            $jadwal->catatan = $request->catatan;
+            $jadwal->status = 'terjadwal';
+
             $jadwal->save();
 
-            // 2. 🔥 IDE KAMU: Otomatis buat draf nota kosong di tabel setor_sampahs
-            $setor = new SetorSampah();
-            $setor->user_id = $request->nasabah_id;
-            $setor->kurir_id = $request->kurir_id;
-            $setor->jadwal_id = $jadwal->id; // Kunci relasi antar tabel
-            $setor->total = 0;
-            $setor->foto_sampah = "";
-            $setor->catatan = 'Draf timbangan otomatis dari Jadwal Admin';
-            $setor->status = 'proses'; // Berstatus 'proses' (Menunggu kurir timbang di lapangan)
-            $setor->save();
-
             DB::commit();
-            return redirect()->back()->with('success', '✅ Jadwal Kerja dan Draf Transaksi Berhasil Dibuat!');
+
+            return redirect()
+                ->route('admin.jadwal.index')
+                ->with('success', 'Jadwal berhasil dibuat.');
+
         } catch (\Exception $e) {
+
             DB::rollBack();
-            return redirect()->back()->with('error', 'Gagal memproses data: ' . $e->getMessage());
+
+            return back()
+                ->withInput()
+                ->with('error', $e->getMessage());
         }
     }
 

@@ -12,8 +12,8 @@ return new class extends Migration
             'jadwal_penjemputans',
             function (Blueprint $table) {
 
-                $table->id();
-
+                $table->uuid('id')->primary();
+                
                 // Bank sampah yang membuat jadwal
                 $table->foreignId('bank_sampah_id')
                     ->constrained('bank_sampahs')

@@ -12,12 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('setor_sampahs', function (Blueprint $table) {
-            $table->foreignId('jadwal_id')
-                ->nullable()
-                ->after('kurir_id')
-                ->constrained('jadwal_penjemputans')
+            $table->uuid('jadwal_id')->nullable();
+
+            $table->foreign('jadwal_id')
+                ->references('id')
+                ->on('jadwal_penjemputans')
                 ->nullOnDelete();
-        });
+                    });
     }
 
     /**
