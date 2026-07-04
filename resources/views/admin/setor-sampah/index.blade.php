@@ -96,15 +96,7 @@
                         </td>
 
                         <td class="py-2 font-weight-bold text-success" style="font-size: 14px; font-weight: 700;">Rp {{ number_format($setor->total, 0, ',', '.') }}</td>
-                        <td class="py-2">
-                            @if($setor->foto_sampah)
-                                <a href="{{ asset($setor->foto_sampah) }}" target="_blank">
-                                    <img src="{{ asset($setor->foto_sampah) }}" alt="Foto" class="img-thumbnail p-0" style="max-height: 32px; width: 32px; border-radius: 4px; object-fit: cover;">
-                                </a>
-                            @else
-                                <span class="text-muted font-italic" style="font-size: 11px;">-</span>
-                            @endif
-                        </td>
+                        
                         <td class="py-2 pe-3">
                             <span class="badge" style="border-radius: 4px; padding: 4px 8px; font-weight: 600; font-size: 11px; background-color: #dcfce7; color: #16a34a; border: 1px solid #bbf7d0;">
                                 Selesai

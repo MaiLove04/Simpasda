@@ -12,6 +12,8 @@ class JadwalPenjemputan extends Model
 
     public $incrementing = false;
     protected $keyType = 'string';
+    
+    use HasUuids;
 
     protected $fillable = [
         'bank_sampah_id',

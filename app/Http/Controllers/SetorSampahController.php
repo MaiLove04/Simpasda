@@ -35,7 +35,6 @@ class SetorSampahController extends Controller
             'user_id'     => 'required',
             'grand_total' => 'required',
             'sampah_list' => 'required',
-            'foto_sampah' => 'nullable',
             'jadwal_id'   => 'nullable'
         ]);
 
@@ -49,8 +48,6 @@ class SetorSampahController extends Controller
         DB::beginTransaction();
 
         try {
-            $pathFoto = $this->uploadFoto($request);
-
             $setor = SetorSampah::where('jadwal_id', $id)->first();
 
             if (!$setor) {
@@ -61,7 +58,6 @@ class SetorSampahController extends Controller
             $setor->user_id   = $request->user_id;
             $setor->kurir_id  = $request->kurir_id;
             $setor->total     = $request->grand_total;
-            $setor->foto_sampah = $pathFoto ?? $setor->foto_sampah ?? '';
             $setor->catatan   = $request->catatan ?? 'Selesai ditimbang oleh kurir lapangan (Jadwal Admin)';
             $setor->status    = 'selesai';
             $setor->save();
@@ -99,7 +95,6 @@ class SetorSampahController extends Controller
             'user_id'     => 'required',
             'grand_total' => 'required',
             'sampah_list' => 'required',
-            'foto_sampah' => 'nullable',
             'jadwal_id'   => 'nullable'
         ]);
 
@@ -114,15 +109,10 @@ class SetorSampahController extends Controller
 
         try {
             $setor = SetorSampah::findOrFail($setor_sampah_id);
-            $pathFoto = $this->uploadFoto($request);
 
             $setor->user_id  = $request->user_id;
             $setor->kurir_id = $request->kurir_id;
             $setor->total    = $request->grand_total;
-
-            if ($pathFoto) {
-                $setor->foto_sampah = $pathFoto;
-            }
 
             $setor->catatan = $request->catatan ?? 'Berat di-update dan diselesaikan oleh kurir lapangan';
             $setor->status  = 'selesai';
@@ -303,17 +293,6 @@ class SetorSampahController extends Controller
      * 🛠️ INTERNAL HELPER PRIVATE METHODS
      * =========================================================================
      */
-
-    private function uploadFoto(Request $request)
-    {
-        if ($request->hasFile('foto_sampah')) {
-            $file = $request->file('foto_sampah');
-            $namaFile = time() . '_' . $file->getClientOriginalName();
-            $file->move(public_path('uploads/sampah'), $namaFile);
-            return 'uploads/sampah/' . $namaFile;
-        }
-        return null;
-    }
 
     private function simpanDetailSampah($setorId, $sampahListJson)
     {

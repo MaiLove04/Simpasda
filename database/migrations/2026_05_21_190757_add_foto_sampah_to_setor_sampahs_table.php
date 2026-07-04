@@ -11,10 +11,7 @@ return new class extends Migration
      */
     public function up()
 {
-    Schema::table('setor_sampahs', function (Blueprint $table) {
-        // Ganti total_harga menjadi total sesuai nama kolom di database kamu
-        $table->string('foto_sampah')->nullable()->after('total'); 
-    });
+    // Fitur 'foto_sampah' telah dihapus.
 }
 
     /**

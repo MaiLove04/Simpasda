@@ -74,6 +74,10 @@ class JadwalPenjemputanController extends Controller
                     'alamat' => $item->alamat ?? null,
 
                     'catatan' => $item->catatan ?? null,
+                    
+                    'id' => $item->id ?? null,
+                    
+                    'created_at' => $item->created_at ?? null,
 
                 ];
             });
@@ -125,6 +129,10 @@ class JadwalPenjemputanController extends Controller
                     'alamat' => $item->nasabah->alamat ?? null,
 
                     'catatan' => $item->catatan ?? null,
+                    
+                    'id' => $item->id ?? null,
+                    
+                    'created_at' => $item->created_at ?? null,
 
                 ];
             });
@@ -374,7 +382,6 @@ class JadwalPenjemputanController extends Controller
                             'foto' => $item->kurir->foto,
                         ] : null,
                         'catatan'           => $item->catatan,
-                        'foto_sampah'       => $item->foto_sampah,
                         'items_sampah'      => $item->details->map(fn($d) => [
                             'nama'       => $d->jenisSampah->nama ?? '-',
                             'berat'      => (float) $d->berat,

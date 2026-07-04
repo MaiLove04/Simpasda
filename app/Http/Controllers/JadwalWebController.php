@@ -42,23 +42,22 @@ class JadwalWebController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nasabah_id' => 'required|exists:users,id',
-            'kurir_id'   => 'required|exists:users,id',
-            'tanggal'    => 'required|date',
+            'nasabah_id'          => 'required|exists:users,id',
+            'kurir_id'            => 'required|exists:users,id',
+            'tanggal_penjemputan' => 'required|date',
+            'alamat'              => 'required|string',
         ]);
 
         DB::beginTransaction();
 
         try {
 
-            $nasabah = User::findOrFail($request->nasabah_id);
-
             $jadwal = new JadwalPenjemputan();
             $jadwal->bank_sampah_id = Auth::user()->bank_sampah_id;
             $jadwal->nasabah_id = $request->nasabah_id;
             $jadwal->kurir_id = $request->kurir_id;
-            $jadwal->tanggal_penjemputan = $request->tanggal;
-            $jadwal->alamat = $nasabah->alamat;
+            $jadwal->tanggal_penjemputan = $request->tanggal_penjemputan;
+            $jadwal->alamat = $request->alamat;
             $jadwal->catatan = $request->catatan;
             $jadwal->status = 'terjadwal';
 
@@ -66,8 +65,7 @@ class JadwalWebController extends Controller
 
             DB::commit();
 
-            return redirect()
-                ->route('admin.jadwal.index')
+            return redirect('/admin/jadwal')
                 ->with('success', 'Jadwal berhasil dibuat.');
 
         } catch (\Exception $e) {
