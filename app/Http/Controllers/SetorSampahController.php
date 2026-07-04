@@ -32,10 +32,10 @@ class SetorSampahController extends Controller
     public function setorJadwalAdmin(Request $request, $id)
     {
         $validator = \Validator::make($request->all(), [
-            'user_id'     => 'required',
-            'grand_total' => 'required',
+            'user_id'     => 'required|integer',
+            'grand_total' => 'required|numeric',
             'sampah_list' => 'required',
-            'jadwal_id'   => 'nullable'
+            'jadwal_id'   => 'nullable|uuid'
         ]);
 
         if ($validator->fails()) {
@@ -48,25 +48,29 @@ class SetorSampahController extends Controller
         DB::beginTransaction();
 
         try {
-            $setor = SetorSampah::where('jadwal_id', $id)->first();
+            $setor = SetorSampah::firstOrNew(['jadwal_id' => $id]);
 
-            if (!$setor) {
-                $setor = new SetorSampah();
-            }
+            // 🛠️ Urai list sampah terlebih dahulu untuk mengambil data item pertama sebagai fallback database
+            $sampahList = json_decode($request->sampah_list, true) ?? [];
+            $itemPertama = count($sampahList) > 0 ? $sampahList[0] : null;
 
-            $setor->jadwal_id = $id;
             $setor->user_id   = $request->user_id;
             $setor->kurir_id  = $request->kurir_id;
             $setor->total     = $request->grand_total;
             $setor->catatan   = $request->catatan ?? 'Selesai ditimbang oleh kurir lapangan (Jadwal Admin)';
             $setor->status    = 'selesai';
-            $setor->save();
+
+            // 🔥 ISI KOLOM WAJIB DATABASE BERDASARKAN ITEM PERTAMA AGAR TIDAK ERROR 1364
+            $setor->jenis_sampah_id = $itemPertama ? $itemPertama['jenis_sampah_id'] : null;
+            $setor->berat           = $itemPertama ? $itemPertama['berat'] : 0;
+            $setor->harga_per_kg    = $itemPertama ? ($itemPertama['harga_per_kg'] ?? 0) : 0;
+
+            $setor->save(); // UUID otomatis terinjeksi di sini
 
             $this->simpanDetailSampah($setor->id, $request->sampah_list);
             $this->tambahSaldoNasabah($request->user_id, $request->grand_total);
             $this->catatMutasi($request->user_id, $setor->id, $request->grand_total);
 
-            // Selalu update jadwal dari $id URL — bukan dari request body
             JadwalPenjemputan::where('id', $id)->update(['status' => 'selesai']);
 
             DB::commit();
@@ -92,10 +96,10 @@ class SetorSampahController extends Controller
     public function setorRequestNasabah(Request $request, $setor_sampah_id)
     {
         $validator = \Validator::make($request->all(), [
-            'user_id'     => 'required',
-            'grand_total' => 'required',
+            'user_id'     => 'required|integer',
+            'grand_total' => 'required|numeric',
             'sampah_list' => 'required',
-            'jadwal_id'   => 'nullable'
+            'jadwal_id'   => 'nullable|uuid'
         ]);
 
         if ($validator->fails()) {
@@ -110,12 +114,21 @@ class SetorSampahController extends Controller
         try {
             $setor = SetorSampah::findOrFail($setor_sampah_id);
 
+            // 🛠️ Urai list sampah terlebih dahulu untuk fallback database
+            $sampahList = json_decode($request->sampah_list, true) ?? [];
+            $itemPertama = count($sampahList) > 0 ? $sampahList[0] : null;
+
             $setor->user_id  = $request->user_id;
             $setor->kurir_id = $request->kurir_id;
             $setor->total    = $request->grand_total;
+            $setor->catatan  = $request->catatan ?? 'Berat di-update dan diselesaikan oleh kurir lapangan';
+            $setor->status   = 'selesai';
 
-            $setor->catatan = $request->catatan ?? 'Berat di-update dan diselesaikan oleh kurir lapangan';
-            $setor->status  = 'selesai';
+            // 🔥 ISI KOLOM WAJIB DATABASE BERDASARKAN ITEM PERTAMA AGAR TIDAK ERROR 1364
+            $setor->jenis_sampah_id = $itemPertama ? $itemPertama['jenis_sampah_id'] : $setor->jenis_sampah_id;
+            $setor->berat           = $itemPertama ? $itemPertama['berat'] : $setor->berat;
+            $setor->harga_per_kg    = $itemPertama ? ($itemPertama['harga_per_kg'] ?? 0) : $setor->harga_per_kg;
+
             $setor->save();
 
             $this->simpanDetailSampah($setor->id, $request->sampah_list);
@@ -135,6 +148,89 @@ class SetorSampahController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Gagal memperbarui berat request: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * 📥 CREATE REQUEST PENJEMPUTAN (NASABAH) - DUKUNG LEBIH DARI 1 JENIS SAMPAH
+     */
+    public function requestPenjemputan(Request $request)
+    {
+        $request->validate([
+            'user_id' => 'required',
+            'items'   => 'required',
+        ]);
+
+        // 🛠️ 1. Urai items di awal agar bisa mengintip ID jenis sampah yang pertama di-klik
+        $items = $request->json('items') ?? $request->items ?? [];
+        if (is_string($items)) {
+            $items = json_decode($items, true);
+        }
+
+        // Ambil elemen pertama dari list pilihan ikon nasabah
+        $itemPertama = !empty($items) ? $items[0] : null;
+        $jenisSampahIdPertama = is_array($itemPertama) ? ($itemPertama['jenis_sampah_id'] ?? null) : $itemPertama;
+
+        // Validasi pengaman jika array kiriman kosong
+        if (!$jenisSampahIdPertama) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal memproses: Kategori sampah yang dipilih tidak valid.'
+            ], 422);
+        }
+
+        DB::beginTransaction();
+        try {
+            $setor = new SetorSampah();
+            $setor->user_id = $request->user_id;
+            $setor->kurir_id = null;
+            $setor->total = 0;
+            $setor->catatan = $request->catatan;
+            $setor->status = 'pending';
+
+            // 🔥 FIX: Masukkan ID pertama di sini agar lolos proteksi 'NOT NULL' database MySQL
+            $setor->jenis_sampah_id = $jenisSampahIdPertama;
+            $setor->berat = 0;
+            $setor->harga_per_kg = 0;
+
+            // Masukkan tanggal_penjemputan otomatis jika dikirimkan dari validasi jam kerja Flutter
+            if ($request->has('tanggal_penjemputan')) {
+                $setor->tanggal_penjemputan = $request->tanggal_penjemputan;
+            }
+
+            $setor->save();
+
+            // 🛠️ 2. Simpan semua data jenis sampah ke tabel detail pecahan (Mendukung > 1 Jenis)
+            foreach ($items as $item) {
+                $jenisSampahId = is_array($item) ? ($item['jenis_sampah_id'] ?? null) : $item;
+
+                if ($jenisSampahId) {
+                    $masterSampah = \App\Models\JenisSampah::find($jenisSampahId);
+                    $hargaSaatIni = $masterSampah ? (int) $masterSampah->harga_per_kg : 0;
+
+                    $detail = new DetailSetorSampah();
+                    $detail->setor_sampah_id = $setor->id;
+                    $detail->jenis_sampah_id = $jenisSampahId;
+                    $detail->berat           = 0;
+                    $detail->harga_per_kg    = $hargaSaatIni;
+                    $detail->subtotal        = 0;
+                    $detail->save();
+                }
+            }
+
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'message' => 'Request penjemputan berhasil dikirim.',
+                'data' => $setor->load('details'),
+            ], 201);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal memproses di server: ' . $e->getMessage()
             ], 500);
         }
     }
@@ -167,73 +263,6 @@ class SetorSampahController extends Controller
     }
 
     /**
-     * 📥 =========================================================================
-     * 🔥 SINKRONISASI TOTAL DENGAN SCREEN REQUEST FORMULIR NASABAH FLUTTER
-     * =========================================================================
-     */
-    public function requestPenjemputan(Request $request)
-    {
-        // Melonggarkan validasi array agar fleksibel membaca request JSON murni dari Flutter
-        $request->validate([
-            'user_id' => 'required',
-            'items'   => 'required',
-        ]);
-
-        DB::beginTransaction();
-        try {
-            // 2. Buat draf nota gantung di tabel setor_sampahs
-            $setor = new SetorSampah();
-            $setor->user_id = $request->user_id;
-            $setor->kurir_id = null;          // Belum ada kurir yang mengambil
-            $setor->total = 0;
-            $setor->catatan = $request->catatan;
-            $setor->status = 'pending';
-            $setor->save();
-
-            // 3. 🛠️ PERBAIKAN UTAMA: Mengurai data array JSON murni `[1, 2, 3]` hasil kiriman `selectedJenisIds` UI Nasabah
-            $items = $request->json('items') ?? $request->items ?? [];
-            if (is_string($items)) {
-                $items = json_decode($items, true);
-            }
-
-            foreach ($items as $item) {
-                // Deteksi cerdas: mendukung objek kustom maupun angka ID murni langsung dari item_sampah UI
-                $jenisSampahId = is_array($item) ? ($item['jenis_sampah_id'] ?? null) : $item;
-
-                if ($jenisSampahId) {
-                    // Ambil harga aktif saat ini dari tabel master jenis sampah agar kalkulasi kurir tidak null/NaN
-                    $masterSampah = \App\Models\JenisSampah::find($jenisSampahId);
-                    $hargaSaatIni = $masterSampah
-                        ? (int) $masterSampah->harga_per_kg
-                        : 0;
-
-                    $detail = new DetailSetorSampah();
-                    $detail->setor_sampah_id = $setor->id;
-                    $detail->jenis_sampah_id = $jenisSampahId;
-                    $detail->berat           = 0; // Inisialisasi awal 0 agar scannable di keranjang kurir
-                    $detail->harga_per_kg    = $hargaSaatIni; // Mengunci harga pasaran terkini
-                    $detail->subtotal = 0;
-                    $detail->save();
-                }
-            }
-
-            DB::commit();
-            return response()->json([
-                'success' => true,
-                'message' => 'Request penjemputan berhasil dikirim.',
-                'data' => $setor->load('details'),
-            ], 201);
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal memproses di server: ' . $e->getMessage()
-            ], 500);
-        }
-    }
-
-    /**
      * 🔍 AMBIL MANIFES REQUEST NASABAH (AUTOLOAD UNTUK KURIR)
      */
     public function showRequestDetail($nasabah_id)
@@ -259,10 +288,7 @@ class SetorSampahController extends Controller
             $formAutoload = [];
             foreach ($details as $item) {
                 if ($item->jenisSampah) {
-                    $hargaBeliTerupdate =
-                        $item->harga_per_kg
-                        ?? $item->jenisSampah->harga_per_kg
-                        ?? 0;
+                    $hargaBeliTerupdate = $item->harga_per_kg ?? $item->jenisSampah->harga_per_kg ?? 0;
 
                     $formAutoload[] = [
                         'jenis_sampah_id' => $item->jenis_sampah_id,
@@ -306,7 +332,7 @@ class SetorSampahController extends Controller
                 $detail->jenis_sampah_id = $item['jenis_sampah_id'];
                 $detail->berat           = $item['berat'];
                 $detail->harga_per_kg    = $item['harga_per_kg'];
-                $detail->subtotal = $item['total_item']; 
+                $detail->subtotal        = $item['total_item']; 
                 $detail->save();
             }
         }

@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 class SetorSampah extends Model
 {
     use HasFactory;
-    use
+    use HasUuids;
 
     public $incrementing = false;
 
@@ -27,6 +27,7 @@ class SetorSampah extends Model
         'status',
         'jenis_sampah_id',
         'berat',
+        'harga_per_kg',
     ];
 
     /**
