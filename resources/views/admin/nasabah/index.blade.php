@@ -84,8 +84,10 @@
                         </td>
 
                         <td class="py-2">
+                            {{-- PERBAIKAN: Menggunakan method="POST" dengan spoofing @method('PATCH') --}}
                             <form method="POST" action="/admin/nasabah/{{ $nasabah->id }}/status" class="m-0 d-inline-block">
                                 @csrf
+                                @method('PATCH')
                                 <select name="status" onchange="this.form.submit()" class="form-select form-select-sm fw-bold px-2 py-1" 
                                     style="font-size: 12px; border-radius: 6px; width: 125px; cursor: pointer;
                                     @if($nasabah->status == 'aktif') background-color: #dcfce7; color: #16a34a; border-color: #bbf7d0;
@@ -106,9 +108,10 @@
                                     </a>
                                 @endif
 
-                                <a href="/admin/nasabah/{{ $nasabah->id }}" class="btn btn-sm text-white px-2 py-1" style="font-size: 11px; font-weight: 600; border-radius: 6px; height: 28px; background-color: #0284c7; border: none; display: inline-flex; align-items: center; gap: 4px;" title="Detail Profile">
+                                {{-- FITUR MODAL POP-UP: Mengganti link halaman ke pemicu modal --}}
+                                <button type="button" class="btn btn-sm text-white px-2 py-1" data-bs-toggle="modal" data-bs-target="#nasabahModal{{ $nasabah->id }}" style="font-size: 11px; font-weight: 600; border-radius: 6px; height: 28px; background-color: #0284c7; border: none; display: inline-flex; align-items: center; gap: 4px;" title="Detail Profile">
                                     <i class="fas fa-eye"></i> Detail
-                                </a>
+                                </button>
 
                                 <form method="POST" action="/admin/nasabah/{{ $nasabah->id }}" class="m-0 d-inline-block">
                                     @csrf
@@ -120,6 +123,65 @@
                             </div>
                         </td>
                     </tr>
+
+                    {{-- POP-UP MODAL DETAIL NASABAH --}}
+                    <div class="modal fade" id="nasabahModal{{ $nasabah->id }}" tabindex="-1" aria-labelledby="nasabahModalLabel{{ $nasabah->id }}" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content" style="border-radius: 12px; border: none; overflow: hidden;">
+                                <div class="modal-header text-white px-3 py-3" style="background-color: #1E521E;">
+                                    <h5 class="modal-title h6 mb-0 font-weight-bold" id="nasabahModalLabel{{ $nasabah->id }}"><i class="fas fa-user-circle me-2"></i>Profil Detail Nasabah</h5>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body p-3 text-start" style="font-size: 13px;">
+                                    <div class="text-center mb-3 pb-3 border-bottom">
+                                        @if($nasabah->kode_nasabah)
+                                            <div class="p-2 d-inline-block bg-white border rounded mb-2 shadow-sm">
+                                                {!! QrCode::size(120)->generate($nasabah->kode_nasabah) !!}
+                                            </div>
+                                            <div class="h6 mb-0 font-weight-bold text-success">{{ $nasabah->kode_nasabah }}</div>
+                                        @else
+                                            <span class="badge bg-light text-danger border p-2 mb-2">QR Code Belum Tersedia</span>
+                                        @endif
+                                    </div>
+
+                                    <div class="mb-2">
+                                        <span class="text-muted d-block" style="font-size: 11px;">Nama Lengkap</span>
+                                        <strong style="color: #0f172a; font-size: 14px;">{{ $nasabah->name }}</strong>
+                                    </div>
+
+                                    <div class="mb-2">
+                                        <span class="text-muted d-block" style="font-size: 11px;">Email / Kontak</span>
+                                        <span class="text-dark font-weight-600">{{ $nasabah->email ?? '-' }}</span>
+                                    </div>
+
+                                    <div class="mb-2">
+                                        <span class="text-muted d-block" style="font-size: 11px;">Alamat Tempat Tinggal</span>
+                                        <span class="text-dark"><i class="fas fa-map-marker-alt text-danger me-1"></i>{{ $nasabah->alamat ?? 'Alamat belum diisi oleh nasabah' }}</span>
+                                    </div>
+
+                                    <div class="mb-2">
+                                        <span class="text-muted d-block" style="font-size: 11px;">Terdaftar Sejak</span>
+                                        <span class="text-dark">{{ \Carbon\Carbon::parse($nasabah->created_at)->format('d F Y, H:i') }} WIB</span>
+                                    </div>
+
+                                    <div class="mt-3 pt-2 border-top d-flex justify-content-between align-items-center">
+                                        <span class="text-muted" style="font-size: 11px;">Status Verifikasi Saat Ini:</span>
+                                        <span class="badge px-3 py-1 text-capitalize fw-bold" 
+                                            style="font-size: 11px; border-radius: 4px;
+                                            @if($nasabah->status == 'aktif') background-color: #dcfce7; color: #16a34a;
+                                            @elseif($nasabah->status == 'pending') background-color: #fef3c7; color: #d97706;
+                                            @else background-color: #fee2e2; color: #dc2626; @endif">
+                                            {{ $nasabah->status }}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="modal-footer bg-light px-3 py-2 border-top">
+                                    <button type="button" class="btn btn-sm btn-secondary px-3" data-bs-dismiss="modal" style="border-radius: 6px;">Tutup</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     @empty
                     <tr>
                         <td colspan="7" class="text-center py-4 text-muted" style="font-size: 13px;">

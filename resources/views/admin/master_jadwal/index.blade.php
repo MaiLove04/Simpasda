@@ -56,20 +56,29 @@
                             {{ $master->kurir->name ?? 'Belum Ditugaskan' }}
                         </td>
                         <td class="py-3">
-                            @if(($master->tipe_jadwal ?? '') === 'interval' || !empty($master->interval_hari))
-                                <span class="badge px-2 py-2" style="font-size: 13px; border-radius: 6px; background-color: #ede9fe; color: #7c3aed; border: 1px solid #ddd6fe;">
-                                    🔄 Setiap {{ $master->interval_hari }} Hari
-                                </span>
-                                @if(!empty($master->tanggal_mulai))
-                                <br>
-                                <small class="text-muted" style="font-size: 11px;">
-                                    Mulai: {{ \Carbon\Carbon::parse($master->tanggal_mulai)->format('d M Y') }}
+                            @if(($master->tipe_jadwal ?? '') === 'interval')
+                                <div class="mb-1">
+                                    <span class="badge px-2 py-2" style="font-size: 13px; border-radius: 6px; background-color: #ede9fe; color: #7c3aed; border: 1px solid #ddd6fe;">
+                                        🔄 Setiap {{ $master->interval_hari }} Hari
+                                    </span>
+                                </div>
+                                <small class="text-muted d-block" style="font-size: 11px; line-height: 1.4;">
+                                    Mulai: {{ $master->tanggal_mulai ? \Carbon\Carbon::parse($master->tanggal_mulai)->format('d M Y') : '-' }}
                                 </small>
-                                @endif
                             @else
-                                <span class="badge px-2 py-2" style="font-size: 13px; border-radius: 6px; background-color: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd;">
-                                    📅 Mingguan ({{ $master->hari_penjemputan ?? 'Hari Belum Set' }})
-                                </span>
+                                <div class="mb-1">
+                                    <span class="badge px-2 py-2" style="font-size: 13px; border-radius: 6px; background-color: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd;">
+                                        📅 Mingguan ({{ $master->hari_penjemputan ?? 'Belum Set' }})
+                                    </span>
+                                </div>
+                            @endif
+
+                            @if(!empty($master->tanggal_penjemputan_berikutnya))
+                                <div class="mt-2 pt-1" style="border-top: 1px dashed #e2e8f0;">
+                                    <small class="d-block text-success" style="font-size: 12px; font-weight: 600;">
+                                        📅 Next: {{ \Carbon\Carbon::parse($master->tanggal_penjemputan_berikutnya)->locale('id')->isoFormat('dddd, D MMM Y') }}
+                                    </small>
+                                </div>
                             @endif
                         </td>
                         <td class="py-3">
