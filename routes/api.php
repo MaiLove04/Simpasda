@@ -119,4 +119,5 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/nasabah/{id}/approve', [UserController::class, 'approveNasabah']);
     });
 
+    
 }); // Kurung penutup middleware utama berada di sini sekarang
