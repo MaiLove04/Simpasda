@@ -36,146 +36,244 @@ class JadwalPenjemputanController extends Controller
     // ==========================================
     // AMBIL JADWAL KURIR (DIPANGGIL FLUTTER)
     // ==========================================
+    // public function jadwalKurir($id)
+    // {
+    //     try {
+
+    //         /*
+    //         |--------------------------------------------------------------------------
+    //         | 1. AMBIL JADWAL DARI ADMIN (terjadwal + proses)
+    //         |--------------------------------------------------------------------------
+    //         */
+
+    //         $jadwalAdmin = JadwalPenjemputan::with([
+    //                 'nasabah',
+    //                 'kurir',
+    //                 'bankSampah'
+    //             ])
+    //             ->where('kurir_id', $id)
+    //             ->whereIn('status', ['terjadwal', 'proses'])
+    //             ->get()
+    //             ->map(function ($item) {
+
+    //                 return [
+    //                     'tipe_tugas' => 'jadwal',
+
+    //                     'referensi_id' => $item->id ?? null,
+
+    //                     'jadwal_id' => $item->id ?? null,
+
+    //                     'setor_sampah_id' => null,
+
+    //                     'tanggal' => $item->tanggal_penjemputan ?? null,
+
+    //                     'status' => $item->status ?? null,
+
+    //                     'nasabah' => $item->nasabah ?? null,
+
+    //                     'alamat' => $item->alamat ?? null,
+
+    //                     'catatan' => $item->catatan ?? null,
+                        
+    //                     'id' => $item->id ?? null,
+                        
+    //                     'created_at' => $item->created_at ?? null,
+
+    //                 ];
+    //             });
+
+
+    //         /*
+    //         |--------------------------------------------------------------------------
+    //         | 2. AMBIL REQUEST DARI NASABAH
+    //         | Request masuk dengan kurir_id = NULL. Tampil ke semua kurir di bank
+    //         | sampah yang sama. Kurir pertama yang scan QR nasabah akan mengambilnya.
+    //         |--------------------------------------------------------------------------
+    //         */
+
+    //         $kurir = \App\Models\User::find($id);
+    //         $bankSampahId = $kurir?->bank_sampah_id;
+
+    //         $requestNasabah = SetorSampah::with([
+    //                 'nasabah',
+    //                 'details.jenisSampah'
+    //             ])
+    //             ->whereNull('kurir_id')
+    //             ->whereNull('jadwal_id')
+    //             ->where('status', 'pending')
+    //             ->when($bankSampahId, function ($q) use ($bankSampahId) {
+    //                 // Batasi ke nasabah yang satu bank sampah dengan kurir ini
+    //                 $q->whereHas('nasabah', function ($q2) use ($bankSampahId) {
+    //                     $q2->where('bank_sampah_id', $bankSampahId);
+    //                 });
+    //             })
+    //             ->get()
+    //             ->map(function ($item) {
+
+    //                 return [
+
+    //                     'tipe_tugas' => 'request',
+
+    //                     'referensi_id' => $item->id ?? null,
+
+    //                     'jadwal_id' => null,
+
+    //                     'setor_sampah_id' => $item->id ?? null,
+
+    //                     'tanggal' => $item->created_at ?? null,
+
+    //                     'status' => $item->status ?? null,
+
+    //                     'nasabah' => $item->nasabah ?? null,
+
+    //                     'alamat' => $item->nasabah->alamat ?? null,
+
+    //                     'catatan' => $item->catatan ?? null,
+                        
+    //                     'id' => $item->id ?? null,
+                        
+    //                     'created_at' => $item->created_at ?? null,
+
+    //                 ];
+    //             });
+
+
+    //         /*
+    //         |--------------------------------------------------------------------------
+    //         | 3. GABUNGKAN: Jadwal Admin + Request Nasabah, urutkan by tanggal
+    //         |--------------------------------------------------------------------------
+    //         */
+
+    //         $semuaTugas = $jadwalAdmin
+    //             ->merge($requestNasabah)
+    //             ->sortBy('tanggal')
+    //             ->values();
+
+
+    //         return response()->json([
+
+    //             'success' => true,
+
+    //             'message' => 'Daftar tugas berhasil dimuat.',
+
+    //             'total' => $semuaTugas->count(),
+
+    //             'data' => $semuaTugas
+
+    //         ], 200);
+
+    //     } catch (\Exception $e) {
+
+    //         return response()->json([
+
+    //             'success' => false,
+
+    //             'message' => 'Gagal mengambil daftar tugas.',
+
+    //             'error' => $e->getMessage(),
+
+    //         ], 500);
+
+    //     }
+    // }
+
+    //baru jadwal kurir
+    // ==========================================
+    // AMBIL JADWAL KURIR (DIPANGGIL FLUTTER) - FIXED ARRAY VERSION
+    // ==========================================
     public function jadwalKurir($id)
-{
-    try {
+    {
+        try {
+            /*
+            |--------------------------------------------------------------------------
+            | 1. AMBIL JADWAL DARI ADMIN (terjadwal + proses)
+            |--------------------------------------------------------------------------
+            */
+            $jadwalAdmin = JadwalPenjemputan::with(['nasabah', 'kurir', 'bankSampah'])
+                ->where('kurir_id', $id)
+                ->whereIn('status', ['terjadwal', 'proses'])
+                ->get()
+                ->map(function ($item) {
+                    return [
+                        'tipe_tugas'      => 'jadwal',
+                        'referensi_id'    => $item->id ?? null,
+                        'jadwal_id'       => $item->id ?? null,
+                        'setor_sampah_id' => null,
+                        'tanggal'         => $item->tanggal_penjemputan ?? null,
+                        'status'          => $item->status ?? null,
+                        'nasabah'         => $item->nasabah ?? null,
+                        'alamat'          => $item->alamat ?? null,
+                        'catatan'         => $item->catatan ?? null,
+                        'id'              => $item->id ?? null,
+                        'created_at'      => $item->created_at ?? null,
+                    ];
+                })
+                ->toArray(); // 🔥 Ubah ke array murni PHP
 
-        /*
-        |--------------------------------------------------------------------------
-        | 1. AMBIL JADWAL DARI ADMIN (terjadwal + proses)
-        |--------------------------------------------------------------------------
-        */
+            /*
+            |--------------------------------------------------------------------------
+            | 2. AMBIL REQUEST DARI NASABAH
+            |--------------------------------------------------------------------------
+            */
+            $kurir = \App\Models\User::find($id);
+            $bankSampahId = $kurir?->bank_sampah_id;
 
-        $jadwalAdmin = JadwalPenjemputan::with([
-                'nasabah',
-                'kurir',
-                'bankSampah'
-            ])
-            ->where('kurir_id', $id)
-            ->whereIn('status', ['terjadwal', 'proses'])
-            ->get()
-            ->map(function ($item) {
+            $requestNasabah = SetorSampah::with(['nasabah', 'details.jenisSampah'])
+                ->whereNull('kurir_id')
+                ->whereNull('jadwal_id')
+                ->where('status', 'pending')
+                ->when($bankSampahId, function ($q) use ($bankSampahId) {
+                    $q->whereHas('nasabah', function ($q2) use ($bankSampahId) {
+                        $q2->where('bank_sampah_id', $bankSampahId);
+                    });
+                })
+                ->get()
+                ->map(function ($item) {
+                    return [
+                        'tipe_tugas'      => 'request',
+                        'referensi_id'    => $item->id ?? null,
+                        'jadwal_id'       => null,
+                        'setor_sampah_id' => $item->id ?? null,
+                        'tanggal'         => $item->created_at ?? null,
+                        'status'          => $item->status ?? null,
+                        'nasabah'         => $item->nasabah ?? null,
+                        'alamat'          => $item->nasabah?->alamat ?? 'Alamat tidak diisi',
+                        'catatan'         => $item->catatan ?? null,
+                        'id'              => $item->id ?? null,
+                        'created_at'      => $item->created_at ?? null,
+                    ];
+                })
+                ->toArray(); // 🔥 Ubah ke array murni PHP
 
-                return [
-                    'tipe_tugas' => 'jadwal',
+            /*
+            |--------------------------------------------------------------------------
+            | 3. GABUNGKAN & URUTKAN (Menggunakan Helper Collect Biasa)
+            |--------------------------------------------------------------------------
+            */
+            // Gabungkan dua array murni PHP menggunakan array_merge
+            $gabungArray = array_merge($jadwalAdmin, $requestNasabah);
 
-                    'referensi_id' => $item->id ?? null,
+            // Bungkus ke helper collect() biasa agar proses sort tidak memicu error Eloquent
+            $semuaTugas = collect($gabungArray)
+                ->sortBy('tanggal')
+                ->values();
 
-                    'jadwal_id' => $item->id ?? null,
+            return response()->json([
+                'success' => true,
+                'message' => 'Daftar tugas berhasil dimuat.',
+                'total'   => $semuaTugas->count(),
+                'data'    => $semuaTugas
+            ], 200);
 
-                    'setor_sampah_id' => null,
-
-                    'tanggal' => $item->tanggal_penjemputan ?? null,
-
-                    'status' => $item->status ?? null,
-
-                    'nasabah' => $item->nasabah ?? null,
-
-                    'alamat' => $item->alamat ?? null,
-
-                    'catatan' => $item->catatan ?? null,
-                    
-                    'id' => $item->id ?? null,
-                    
-                    'created_at' => $item->created_at ?? null,
-
-                ];
-            });
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | 2. AMBIL REQUEST DARI NASABAH
-        | Request masuk dengan kurir_id = NULL. Tampil ke semua kurir di bank
-        | sampah yang sama. Kurir pertama yang scan QR nasabah akan mengambilnya.
-        |--------------------------------------------------------------------------
-        */
-
-        $kurir = \App\Models\User::find($id);
-        $bankSampahId = $kurir?->bank_sampah_id;
-
-        $requestNasabah = SetorSampah::with([
-                'nasabah',
-                'details.jenisSampah'
-            ])
-            ->whereNull('kurir_id')
-            ->whereNull('jadwal_id')
-            ->where('status', 'pending')
-            ->when($bankSampahId, function ($q) use ($bankSampahId) {
-                // Batasi ke nasabah yang satu bank sampah dengan kurir ini
-                $q->whereHas('nasabah', function ($q2) use ($bankSampahId) {
-                    $q2->where('bank_sampah_id', $bankSampahId);
-                });
-            })
-            ->get()
-            ->map(function ($item) {
-
-                return [
-
-                    'tipe_tugas' => 'request',
-
-                    'referensi_id' => $item->id ?? null,
-
-                    'jadwal_id' => null,
-
-                    'setor_sampah_id' => $item->id ?? null,
-
-                    'tanggal' => $item->created_at ?? null,
-
-                    'status' => $item->status ?? null,
-
-                    'nasabah' => $item->nasabah ?? null,
-
-                    'alamat' => $item->nasabah->alamat ?? null,
-
-                    'catatan' => $item->catatan ?? null,
-                    
-                    'id' => $item->id ?? null,
-                    
-                    'created_at' => $item->created_at ?? null,
-
-                ];
-            });
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | 3. GABUNGKAN: Jadwal Admin + Request Nasabah, urutkan by tanggal
-        |--------------------------------------------------------------------------
-        */
-
-        $semuaTugas = $jadwalAdmin
-            ->merge($requestNasabah)
-            ->sortBy('tanggal')
-            ->values();
-
-
-        return response()->json([
-
-            'success' => true,
-
-            'message' => 'Daftar tugas berhasil dimuat.',
-
-            'total' => $semuaTugas->count(),
-
-            'data' => $semuaTugas
-
-        ], 200);
-
-    } catch (\Exception $e) {
-
-        return response()->json([
-
-            'success' => false,
-
-            'message' => 'Gagal mengambil daftar tugas.',
-
-            'error' => $e->getMessage(),
-
-        ], 500);
-
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mengambil daftar tugas.',
+                'error'   => $e->getMessage(),
+            ], 500);
+        }
     }
-}
+
 
     // ==========================================
     // SIMPAN JADWAL PENJEMPUTAN (DIPANGGIL API/ADMIN)

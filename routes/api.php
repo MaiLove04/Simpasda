@@ -59,7 +59,7 @@ Route::patch('/jadwal-penjemputan/{id}/batal', [JadwalPenjemputanController::cla
 // =========================================================================
 
 // 1. Kurir isi Jenis & Berat untuk JADWAL dari ADMIN
-Route::patch('/setor-sampah/jadwal-admin/{id}', [SetorSampahController::class, 'setorJadwalAdmin']);
+Route::post('/setor-sampah/jadwal-admin/{id}', [SetorSampahController::class, 'setorJadwalAdmin']);
 
 // 2. Kurir update Berat untuk REQUEST dari NASABAH
 Route::patch('/setor-sampah/request-nasabah/{setor_sampah_id}', [SetorSampahController::class, 'setorRequestNasabah']);

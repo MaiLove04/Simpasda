@@ -187,45 +187,86 @@ class SetorSampahController extends Controller
     }
 
     
-    /**
-     * 📥 CREATE REQUEST PENJEMPUTAN (NASABAH) - DUKUNG LEBIH DARI 1 JENIS SAMPAH
-     */
-        public function requestPenjemputan(Request $request)
-        {
-            $request->validate([
-                'user_id' => 'required',
-                'items'   => 'required',
-            ]);
+    public function requestPenjemputan(Request $request)
+    {
+        // 1. Validasi input basic
+        $validator = \Validator::make($request->all(), [
+            'user_id' => 'required',
+            'items'   => 'required|array',
+        ]);
 
-            // 🔍 AMBIL TANGGAL TARGET (Default hari ini jika Flutter tidak mengirimkan)
-            $tanggalTarget = $request->tanggal_penjemputan ?? Carbon::today()->toDateString();
-
-            // 🔥 PENGUNCI: Jika hari ini masuk plot jadwal rutin/admin, langsung tolak!
-            if ($this->cekJadwalHariIni($request->user_id, $tanggalTarget)) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Maaf, Anda tidak dapat melakukan request mandiri. Hari ini rumah Anda sudah masuk ke dalam daftar plot jadwal penjemputan rutin/petugas. Mohon tunggu kurir datang ke lokasi Anda.'
-                ], 422);
-            }
-
-            // 🛠️ 1. Urai items di awal agar bisa mengintip ID jenis sampah yang pertama di-klik
-            $items = $request->json('items') ?? $request->items ?? [];
-            if (is_string($items)) {
-                $items = json_decode($items, true);
-            }
-
-            // ... (Sisa kode fungsi requestPenjemputan di bawahnya tetap sama persis seperti bawaan kamu)
-            $itemPertama = !empty($items) ? $items[0] : null;
-            // ...
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal Validasi: ' . implode(', ', $validator->errors()->all())
+            ], 422);
         }
 
-    /**
-     * =========================================================================
-     * 🛠️ INTERNAL HELPER PRIVATE METHODS (Taruh di bagian bawah controller)
-     * =========================================================================
-     */
+        // 🔒 PENGUNCI JADWAL RUTIN: Tetap mendeteksi hari ini berdasarkan tanggal server
+        // (Fungsi cekJadwalHariIni tetap berjalan normal di latar belakang memakai tanggal hari ini)
+        if ($this->cekJadwalHariIni($request->user_id, Carbon::today()->toDateString())) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Maaf, Anda tidak dapat melakukan request mandiri. Hari ini rumah Anda sudah masuk ke dalam daftar plot jadwal penjemputan rutin/petugas. Mohon tunggu kurir datang ke lokasi Anda.'
+            ], 422);
+        }
 
+        $items = $request->input('items', []);
+        if (is_string($items)) {
+            $items = json_decode($items, true) ?? [];
+        }
 
+        if (empty($items)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Kategori sampah belum dipilih.'
+            ], 422);
+        }
+
+        DB::beginTransaction();
+        try {
+            $itemPertama = $items[0];
+
+            $setor = new SetorSampah();
+            $setor->user_id = $request->user_id;
+            $setor->catatan = $request->catatan ?? 'Permintaan penjemputan mandiri oleh nasabah';
+            $setor->status  = 'pending';
+            
+            // ❌ HAPUS TOTAL: Tidak ada lagi assignment ke tanggal_penjemputan di sini!
+            
+            // Isi kolom fallback bawaan database lama kamu
+            $setor->jenis_sampah_id = $itemPertama['jenis_sampah_id'] ?? null;
+            $setor->berat           = 0;
+            $setor->harga_per_kg    = 0;
+            $setor->total           = 0;
+            $setor->save(); // 💾 Aman dikirim ke MySQL tanpa memicu error 1054
+
+            // Loop untuk simpan detail item sampah ke detail_setor_sampahs
+            foreach ($items as $item) {
+                $detail = new DetailSetorSampah();
+                $detail->setor_sampah_id = $setor->id;
+                $detail->jenis_sampah_id = $item['jenis_sampah_id'];
+                $detail->berat           = 0;
+                $detail->harga_per_kg    = 0;
+                $detail->subtotal        = 0;
+                $detail->save();
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => '✅ Permintaan penjemputan sampah berhasil dibuat!'
+            ], 200);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal memproses ke database: ' . $e->getMessage()
+            ], 500);
+        }
+    }
     /**
      * 🛠️ VALIDASI APAKAH HARI INI NASABAH MEMILIKI JADWAL RUTIN / ADMIN
      */
@@ -302,6 +343,7 @@ class SetorSampahController extends Controller
 
     //     return false;
     // }
+    
 
     /**
      * 📊 AMBIL DATA COUNTER REAL-TIME UNTUK DASHBOARD KURIR
@@ -336,19 +378,23 @@ class SetorSampahController extends Controller
     public function showRequestDetail($nasabah_id)
     {
         try {
-            $setorMaster = SetorSampah::where('user_id',$nasabah_id)
-            ->whereNull('jadwal_id')
-            ->where('status','pending')
-            ->latest()
-            ->first();
+            // 1. Cari data induk transaksi request milik nasabah yang statusnya 'pending'
+            $setorMaster = SetorSampah::where('user_id', $nasabah_id)
+                ->whereNull('jadwal_id')
+                ->where('status', 'pending')
+                ->latest()
+                ->first();
 
             if (!$setorMaster) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Tidak ada manifes request aktif untuk nasabah ini.'
-                ], 404);
+                    'message' => 'Tidak ada manifes request aktif untuk nasabah ini.',
+                    'setor_sampah_id' => '',
+                    'items' => []
+                ], 200);
             }
 
+            // 2. Ambil detail item sampah beserta relasi jenis sampahnya
             $details = DetailSetorSampah::where('setor_sampah_id', $setorMaster->id)
                 ->with('jenisSampah')
                 ->get();
@@ -356,18 +402,20 @@ class SetorSampahController extends Controller
             $formAutoload = [];
             foreach ($details as $item) {
                 if ($item->jenisSampah) {
-                    $hargaBeliTerupdate = $item->harga_per_kg ?? $item->jenisSampah->harga_per_kg ?? 0;
+                    // Ambil harga terupdate dari master jenis sampah jika kolom di detail kosong
+                    $hargaBeli = $item->harga_per_kg ?? $item->jenisSampah->harga_per_kg ?? 0;
 
                     $formAutoload[] = [
-                        'jenis_sampah_id' => $item->jenis_sampah_id,
-                        'nama_sampah'     => $item->jenisSampah->nama,
-                        'harga_per_kg'    => (int) $hargaBeliTerupdate,
-                        'berat'           => 0,
+                        'jenis_sampah_id' => (int) $item->jenis_sampah_id,
+                        'nama_sampah'     => (string) $item->jenisSampah->nama,
+                        'harga_per_kg'    => (int) $hargaBeli,
+                        'berat'           => 0.0, // Dipaksa double agar klop dengan kodingan Flutter
                         'total_item'      => 0
                     ];
                 }
             }
 
+            // 🚀 Return data dengan struktur tingkat utama (items) sesuai ekspektasi Flutter
             return response()->json([
                 'success'         => true,
                 'setor_sampah_id' => $setorMaster->id,
@@ -377,7 +425,9 @@ class SetorSampahController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal meload data request: ' . $e->getMessage()
+                'message' => 'Gagal meload data request: ' . $e->getMessage(),
+                'setor_sampah_id' => '',
+                'items' => []
             ], 500);
         }
     }

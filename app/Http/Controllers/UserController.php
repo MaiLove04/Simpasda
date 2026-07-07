@@ -232,7 +232,7 @@ class UserController extends Controller
         $user->update(['pin_attempts' => 0, 'pin_locked_until' => null]);
         return true;
     }
-
+//ubah dikit
     public function tarikTunai(Request $request)
     {
         $request->validate([
