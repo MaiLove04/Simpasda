@@ -58,6 +58,8 @@ Route::patch('/jadwal-penjemputan/{id}/batal', [JadwalPenjemputanController::cla
 // ♻️ PROSES SETOR / INPUT DATA TIMBANGAN OLEH KURIR (UBAH KE PATCH)
 // =========================================================================
 
+
+
 // 1. Kurir isi Jenis & Berat untuk JADWAL dari ADMIN
 Route::post('/setor-sampah/jadwal-admin/{id}', [SetorSampahController::class, 'setorJadwalAdmin']);
 
@@ -96,7 +98,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Fitur Tarik Tunai
     Route::get('/tarik-tunai', [TarikTunaiController::class, 'index']);
-    Route::post('/tarik-tunai', [TarikTunaiController::class, 'store']);
+    Route::post('/tarik-tunai', [UserController::class, 'tarikTunai']);
+    // Route::post('/tarik-tunai', [UserContr::class, 'store']);
     Route::patch('/tarik-tunai/{id}/approve', [TarikTunaiController::class, 'approve']);
     Route::patch('/tarik-tunai/{id}/reject', [TarikTunaiController::class, 'reject']);
 

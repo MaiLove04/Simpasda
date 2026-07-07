@@ -105,19 +105,13 @@ class UserController extends Controller
     public function dashboard_nasabah($user_id)
     {
         try {
-            // 1. Ambil data profil dasar nasabah
             $nasabah = User::find($user_id);
 
             if (!$nasabah) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Nasabah tidak ditemukan.'
-                ], 404);
+                return response()->json(['success' => false, 'message' => 'Nasabah tidak ditemukan.'], 404);
             }
 
-            // 2. HITUNG AKUMULASI BERAT SAMPAH (METODE MURNI & AMAN)
             $setorIds = DB::table('setor_sampahs')->where('user_id', $user_id)->pluck('id');
-
             $totalBeratSampah = 0;
             if (!empty($setorIds) && count($setorIds) > 0) {
                 $totalBeratSampah = DB::table('detail_setor_sampahs')
@@ -126,26 +120,26 @@ class UserController extends Controller
                     ->sum('berat') ?? 0;
             }
 
-            // 3. AMBIL RIWAYAT MUTASI SALDO TANPA PENGUNCI RELASI JOIN (100% AMAN)
             $mutasi = DB::table('mutasi_saldos')
                 ->where('user_id', $user_id)
                 ->orderBy('id', 'desc')
                 ->get()
                 ->map(function($item) {
                     Carbon::setLocale('id');
-
-                    // Format tanggal indonesia dari Carbon
                     $item->tanggal_formatted = Carbon::parse($item->created_at)->translatedFormat('d F Y, H:i') . ' WIB';
-
-                    // Penamaan default yang instan dan aman untuk sidang skripsi
                     $isMasuk = strtolower($item->jenis_transaksi) === 'masuk';
                     $item->judul_dinamis = $isMasuk ? 'Setor Sampah Nasabah' : 'Tarik Tunai Dana';
                     $item->total_berat = $isMasuk ? 'Lihat Detail' : '0';
-
                     return $item;
                 });
 
-            // 4. KIRIM BALIK RESPONS UTUH KE FLUTTER
+            // 🔥 Hitung saldo pending (hanya untuk tampilan indikator di HP saja, tidak memotong saldo utama)
+            $saldoPending = DB::table('mutasi_saldos')
+                ->where('user_id', $user_id)
+                ->where('sumber', 'tarik_tunai')
+                ->where('status', 'pending')
+                ->sum('nominal') ?? 0;
+
             return response()->json([
                 'success' => true,
                 'message' => 'Data dashboard nasabah berhasil dimuat.',
@@ -154,6 +148,8 @@ class UserController extends Controller
                     'name' => $nasabah->name,
                     'email' => $nasabah->email,
                     'alamat' => $nasabah->alamat,
+                    'saldo_aktif' => (int) ($nasabah->saldo ?? 0), // Saldo utuh tidak berkurang saat pending
+                    'saldo_pending' => (int) $saldoPending,       // Menampilkan jumlah yang sedang diajukan
                     'saldo' => (int) ($nasabah->saldo ?? 0),
                     'total_berat_kg' => round((double)$totalBeratSampah, 1),
                     'has_pin' => !empty($nasabah->pin_hash),
@@ -162,13 +158,14 @@ class UserController extends Controller
             ], 200);
 
         } catch (\Exception $e) {
-            // Jika ada eror, kembalikan data default agar aplikasi Flutter kamu TIDAK IKUT BLANK
             return response()->json([
                 'success' => true,
                 'message' => 'Safe Mode Aktif: ' . $e->getMessage(),
                 'nasabah' => [
                     'id' => (int)$user_id,
                     'name' => 'Nasabah',
+                    'saldo_aktif' => 0,
+                    'saldo_pending' => 0,
                     'saldo' => 0,
                     'total_berat_kg' => 0.0,
                 ],
@@ -232,27 +229,38 @@ class UserController extends Controller
         $user->update(['pin_attempts' => 0, 'pin_locked_until' => null]);
         return true;
     }
-//ubah dikit
+
+    /**
+     * PERBAIKAN TOTAL: Pengajuan penarikan via aplikasi berstatus pending
+     */
     public function tarikTunai(Request $request)
     {
         $request->validate([
-            'user_id' => 'required',
-            'nominal' => 'required|integer|min:10000',
-            'metode'  => 'required',
-            'nomor_hp' => 'required',
-            'pin'     => 'required|digits:6',
-        ]);
+        'user_id'  => 'required',
+        'nominal'  => [
+            'required',
+            'integer',
+            'min:5000',
+            function ($attribute, $value, $fail) {
+                if ($value % 500 !== 0) {
+                    $fail('Nominal penarikan harus kelipatan Rp 500 (Contoh: 5.000, 5.500).');
+                }
+            },
+        ],
+        'metode'   => 'required',
+        'nomor_hp' => 'required'
+        ,
+    ]);
 
-        $user = $request->user();
-
+    $user = $request->user();
         if ($user->id != $request->user_id) {
             return response()->json(['success' => false, 'message' => 'ID Nasabah tidak valid.'], 403);
         }
 
         try {
-            // VERIFIKASI PIN
             $this->verifyTransactionPin($user, $request->pin);
 
+            // Cek apakah saldo mencukupi
             if ($user->saldo < $request->nominal) {
                 return response()->json(['success' => false, 'message' => 'Saldo tidak mencukupi.'], 400);
             }
@@ -261,27 +269,25 @@ class UserController extends Controller
 
             $externalId = 'WD-' . time() . '-' . $user->id;
 
-            // 1. Kurangi Saldo User
-            $user->saldo -= $request->nominal;
-            $user->save();
+            // 🔥 SALDO TIDAK DIPOTONG DI SINI (Dibiarkan utuh)
 
-            // 2. Catat ke Mutasi Saldo
+            // Catat ke Mutasi Saldo dengan STATUS PENDING
             $mutasi = new MutasiSaldo();
             $mutasi->user_id = $user->id;
             $mutasi->jenis_transaksi = 'keluar';
             $mutasi->sumber = 'tarik_tunai';
             $mutasi->nominal = $request->nominal;
-            $mutasi->status = 'success';
-            $mutasi->keterangan = "Penarikan via {$request->metode} ke {$request->nomor_hp}";
+            $mutasi->status = 'pending'; 
+            $mutasi->keterangan = "Penarikan via {$request->metode} ke {$request->nomor_hp} (Menunggu Persetujuan)";
             $mutasi->save();
 
             DB::commit();
 
             return response()->json([
                 'success' => true,
-                'message' => 'Penarikan berhasil diproses oleh sistem.',
+                'message' => 'Pengajuan penarikan berhasil dikirim. Menunggu persetujuan admin.',
                 'transaction_id' => $externalId,
-                'saldo_terakhir' => $user->saldo
+                'saldo_terakhir' => $user->saldo // Saldo yang dikirim masih saldo utuh
             ], 200);
 
         } catch (\Exception $e) {
