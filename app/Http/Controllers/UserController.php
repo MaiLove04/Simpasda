@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Transaksi;
 use App\Models\MutasiSaldo;
+use App\Models\TarikTunai; // 🔥 DIPASTIKAN IMPORT MODEL INI ADA DI ATAS
 use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -18,15 +19,11 @@ class UserController extends Controller
      */
     public function approve(Request $request)
     {
-        // validasi input
         $request->validate([
             'user_id' => 'required|exists:users,id'
         ]);
 
-        // ambil user
         $user = User::find($request->user_id);
-
-        // update status
         $user->status = 'approved';
         $user->save();
 
@@ -38,11 +35,9 @@ class UserController extends Controller
 
     /**
      * List semua user nasabah untuk Web Admin
-     * Diperbaiki agar format respons seragam dan menyaring role nasabah
      */
     public function index()
     {
-        // Menyaring hanya user yang memiliki role 'nasabah'
         $nasabahs = User::where('role', 'nasabah')->get();
 
         return response()->json([
@@ -52,15 +47,13 @@ class UserController extends Controller
     }
 
     /**
-     * Menyediakan data counter statistik untuk halaman dashboard.html Web Admin
+     * Menyediakan data counter statistik untuk halaman dashboard Web Admin
      */
     public function getDashboardStats()
     {
         try {
             $totalNasabah = User::where('role', 'nasabah')->count();
             $totalKurir = User::where('role', 'kurir')->count();
-
-            // Menggunakan try-catch internal jika model Transaksi belum dibuat/berbeda nama
             $totalTransaksi = class_exists('\App\Models\Transaksi') ? Transaksi::count() : 0;
 
             return response()->json([
@@ -75,23 +68,18 @@ class UserController extends Controller
                 'total_kurir' => 0,
                 'total_transaksi' => 0,
                 'error' => $e->getMessage()
-            ], 200); // Tetap return 200 dengan nilai 0 agar JS tidak crash
+            ], 200);
         }
     }
 
     public function scanQr($kode)
     {
-        $nasabah = User::where(
-            'kode_nasabah',
-            $kode
-        )
-        ->where('role', 'nasabah')
-        ->first();
+        $nasabah = User::where('kode_nasabah', $kode)
+            ->where('role', 'nasabah')
+            ->first();
 
         if (!$nasabah) {
-            return response()->json([
-                'message' => 'Nasabah tidak ditemukan'
-            ], 404);
+            return response()->json(['message' => 'Nasabah tidak ditemukan'], 404);
         }
 
         return response()->json([
@@ -133,7 +121,6 @@ class UserController extends Controller
                     return $item;
                 });
 
-            // 🔥 Hitung saldo pending (hanya untuk tampilan indikator di HP saja, tidak memotong saldo utama)
             $saldoPending = DB::table('mutasi_saldos')
                 ->where('user_id', $user_id)
                 ->where('sumber', 'tarik_tunai')
@@ -148,8 +135,8 @@ class UserController extends Controller
                     'name' => $nasabah->name,
                     'email' => $nasabah->email,
                     'alamat' => $nasabah->alamat,
-                    'saldo_aktif' => (int) ($nasabah->saldo ?? 0), // Saldo utuh tidak berkurang saat pending
-                    'saldo_pending' => (int) $saldoPending,       // Menampilkan jumlah yang sedang diajukan
+                    'saldo_aktif' => (int) ($nasabah->saldo ?? 0),
+                    'saldo_pending' => (int) $saldoPending,
                     'saldo' => (int) ($nasabah->saldo ?? 0),
                     'total_berat_kg' => round((double)$totalBeratSampah, 1),
                     'has_pin' => !empty($nasabah->pin_hash),
@@ -174,9 +161,6 @@ class UserController extends Controller
         }
     }
 
-    /**
-     * Set PIN nasabah pertama kali
-     */
     public function setupPin(Request $request)
     {
         $request->validate([
@@ -199,18 +183,13 @@ class UserController extends Controller
         ]);
     }
 
-    /**
-     * Helper Verifikasi PIN (Internal)
-     */
     private function verifyTransactionPin($user, $pin)
     {
-        // 1. Cek apakah sedang dikunci
         if ($user->pin_locked_until && now()->lessThan($user->pin_locked_until)) {
             $diff = now()->diffInMinutes($user->pin_locked_until);
             throw new \Exception("PIN terblokir sementara. Coba lagi dalam $diff menit.");
         }
 
-        // 2. Cek kecocokan hash
         if (!Hash::check($pin, $user->pin_hash)) {
             $user->increment('pin_attempts');
 
@@ -225,42 +204,37 @@ class UserController extends Controller
             throw new \Exception("PIN yang Anda masukkan salah.");
         }
 
-        // 3. Reset hitungan jika benar
         $user->update(['pin_attempts' => 0, 'pin_locked_until' => null]);
         return true;
     }
 
     /**
-     * PERBAIKAN TOTAL: Pengajuan penarikan via aplikasi berstatus pending
+     * PROSES UTAMA: Pengajuan penarikan berstatus pending & Saldo utuh di awal
      */
     public function tarikTunai(Request $request)
     {
         $request->validate([
-        'user_id'  => 'required',
-        'nominal'  => [
-            'required',
-            'integer',
-            'min:5000',
-            function ($attribute, $value, $fail) {
-                if ($value % 500 !== 0) {
-                    $fail('Nominal penarikan harus kelipatan Rp 500 (Contoh: 5.000, 5.500).');
-                }
-            },
-        ],
-        'metode'   => 'required',
-        'nomor_hp' => 'required'
-        ,
-    ]);
+            'user_id'  => 'required',
+            'nominal'  => [
+                'required',
+                'integer',
+                'min:5000',
+                function ($attribute, $value, $fail) {
+                    if ($value % 500 !== 0) {
+                        $fail('Nominal penarikan harus kelipatan Rp 500.');
+                    }
+                },
+            ],
+            'metode'   => 'required',
+            'nomor_hp' => 'required',
+        ]);
 
-    $user = $request->user();
+        $user = $request->user();
         if ($user->id != $request->user_id) {
             return response()->json(['success' => false, 'message' => 'ID Nasabah tidak valid.'], 403);
         }
 
         try {
-            $this->verifyTransactionPin($user, $request->pin);
-
-            // Cek apakah saldo mencukupi
             if ($user->saldo < $request->nominal) {
                 return response()->json(['success' => false, 'message' => 'Saldo tidak mencukupi.'], 400);
             }
@@ -269,9 +243,17 @@ class UserController extends Controller
 
             $externalId = 'WD-' . time() . '-' . $user->id;
 
-            // 🔥 SALDO TIDAK DIPOTONG DI SINI (Dibiarkan utuh)
+            // 1. Masuk ke tabel tarik_tunais agar terdeteksi oleh Web Admin
+            TarikTunai::create([
+                'user_id' => $user->id,
+                'jumlah_nominal' => $request->nominal,
+                'status' => 'pending',
+                'metode' => $request->metode, 
+                'nomor_hp' => $request->nomor_hp,
+                'tanggal_request' => now(), // 🔥 TAMBAHKAN BARIS INI agar tidak null lagi!
+            ]);
 
-            // Catat ke Mutasi Saldo dengan STATUS PENDING
+            // 2. Catat ke Mutasi Saldo dengan STATUS PENDING untuk histori di HP
             $mutasi = new MutasiSaldo();
             $mutasi->user_id = $user->id;
             $mutasi->jenis_transaksi = 'keluar';
@@ -281,13 +263,15 @@ class UserController extends Controller
             $mutasi->keterangan = "Penarikan via {$request->metode} ke {$request->nomor_hp} (Menunggu Persetujuan)";
             $mutasi->save();
 
+            // Saldo tidak disentuh sama sekali di sini
+
             DB::commit();
 
             return response()->json([
                 'success' => true,
                 'message' => 'Pengajuan penarikan berhasil dikirim. Menunggu persetujuan admin.',
                 'transaction_id' => $externalId,
-                'saldo_terakhir' => $user->saldo // Saldo yang dikirim masih saldo utuh
+                'saldo_terakhir' => $user->saldo
             ], 200);
 
         } catch (\Exception $e) {

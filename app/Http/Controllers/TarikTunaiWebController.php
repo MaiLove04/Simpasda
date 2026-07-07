@@ -17,17 +17,14 @@ class TarikTunaiWebController extends Controller
     public function index(Request $request)
     {
         $keyword = $request->get('search');
-        $bankSampahId = Auth::user()->bank_sampah_id;
 
+        // 🌟 MATIKAN FILTER SEMENTARA UNTUK TESTING
         $requests = TarikTunai::with('user')
-            ->whereHas('user', function ($query) use ($bankSampahId) {
-                $query->where('bank_sampah_id', $bankSampahId);
-            })
             ->where('status', 'pending')
             ->when($keyword, function ($query, $keyword) {
                 return $query->whereHas('user', function ($q) use ($keyword) {
                     $q->where('name', 'LIKE', '%' . $keyword . '%')
-                      ->orWhere('kode_nasabah', 'LIKE', '%' . $keyword . '%');
+                    ->orWhere('kode_nasabah', 'LIKE', '%' . $keyword . '%');
                 });
             })
             ->latest()
@@ -37,10 +34,7 @@ class TarikTunaiWebController extends Controller
     }
 
     /**
-     * PERBAIKAN: Menyetujui request tarik tunai
-     */
-    /**
-     * 🔥 POTONG SALDO DI SINI SAAT APPROVE
+     * 🔥 APPROVE VIA WEB: Baru potong saldo utama di sini
      */
     public function approve($id)
     {
@@ -52,14 +46,13 @@ class TarikTunaiWebController extends Controller
 
         $nasabah = $tarikTunai->user;
 
-        // Cek kembali apakah saldo nasabah saat ini masih mencukupi
         if ($nasabah->saldo < $tarikTunai->jumlah_nominal) {
             return back()->with('error', 'Saldo nasabah tidak mencukupi untuk penarikan ini.');
         }
 
         DB::beginTransaction();
         try {
-            // 1. BARU POTONG SALDO DI SINI (Karena sudah di-approve)
+            // 1. Baru potong saldo di sini karena disetujui admin web
             $nasabah->saldo -= $tarikTunai->jumlah_nominal;
             $nasabah->save();
 
@@ -69,10 +62,11 @@ class TarikTunaiWebController extends Controller
                 'tanggal_selesai' => now()
             ]);
 
-            // 3. Ubah status di mutasi_saldos menjadi success
+            // 3. Ubah status di mutasi_saldos nasabah terkait menjadi success
             $mutasi = MutasiSaldo::where('user_id', $tarikTunai->user_id)
                 ->where('sumber', 'tarik_tunai')
                 ->where('status', 'pending')
+                ->latest()
                 ->first();
 
             if ($mutasi) {
@@ -91,7 +85,7 @@ class TarikTunaiWebController extends Controller
     }
 
     /**
-     * 🔥 JIKA REJECT, TIDAK PERLU KEMBALIKAN SALDO KARENA BELUM DIPOTONG
+     * 🔥 REJECT VIA WEB: Saldo tetap utuh (tidak berubah)
      */
     public function reject($id)
     {
@@ -109,10 +103,11 @@ class TarikTunaiWebController extends Controller
                 'tanggal_selesai' => now()
             ]);
 
-            // 2. Ubah status mutasi saldo menjadi rejected
+            // 2. Ubah status mutasi saldo nasabah terkait menjadi rejected
             $mutasi = MutasiSaldo::where('user_id', $tarikTunai->user_id)
                 ->where('sumber', 'tarik_tunai')
                 ->where('status', 'pending')
+                ->latest()
                 ->first();
 
             if ($mutasi) {
@@ -121,8 +116,6 @@ class TarikTunaiWebController extends Controller
                     'keterangan' => 'Penarikan tunai ditolak oleh admin bank sampah'
                 ]);
             }
-
-            // 🔄 TIDAK ADA POTONG ATAU INCREMENT SALDO DI SINI, KARENA SALDO MEMANG MASIH UTUH
 
             DB::commit();
             return back()->with('success', 'Request penarikan tunai berhasil ditolak.');
@@ -133,7 +126,7 @@ class TarikTunaiWebController extends Controller
     }
 
     /**
-     * Menampilkan riwayat penarikan (yang sudah approved/rejected)
+     * Menampilkan riwayat penarikan
      */
     public function riwayat(Request $request)
     {

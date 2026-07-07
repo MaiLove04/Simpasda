@@ -31,7 +31,7 @@ class TransaksiController extends Controller
     }
 
     /**
-     * 🔥 SINKRONISASI APPROVE: Potong saldo utama nasabah di sini
+     * 🔥 APPROVE VIA API: Potong saldo utama nasabah di sini
      */
     public function approveTarikTunai($id)
     {
@@ -49,16 +49,15 @@ class TransaksiController extends Controller
 
         DB::beginTransaction();
         try {
-            // 1. POTONG SALDO DI SINI KARENA DI-APPROVE
             $user = User::find($mutasi->user_id);
             if (!$user || $user->saldo < $mutasi->nominal) {
                 return response()->json(['success' => false, 'message' => 'Saldo nasabah tidak mencukupi.'], 400);
             }
             
+            // Potong saldo asli
             $user->saldo -= $mutasi->nominal;
             $user->save();
 
-            // 2. Ubah status mutasi menjadi sukses
             $mutasi->status = 'success';
             $mutasi->keterangan = str_replace(' (Menunggu Persetujuan)', '', $mutasi->keterangan);
             $mutasi->save();
@@ -76,7 +75,7 @@ class TransaksiController extends Controller
     }
 
     /**
-     * 🔥 SINKRONISASI REJECT: Jangan ubah saldo karena dari awal belum dipotong
+     * 🔥 REJECT VIA API: Saldo tetap utuh
      */
     public function rejectTarikTunai($id)
     {
@@ -92,7 +91,6 @@ class TransaksiController extends Controller
             ], 404);
         }
 
-        // Cukup ubah status mutasi menjadi rejected tanpa menyentuh kolom saldo user
         $mutasi->status = 'rejected';
         $mutasi->keterangan = "Ditolak Admin: " . str_replace(' (Menunggu Persetujuan)', '', $mutasi->keterangan);
         $mutasi->save();
