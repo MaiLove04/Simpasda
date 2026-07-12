@@ -16,7 +16,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'admin_dlh' => \App\Http\Middleware\AdminDlhMiddleware::class,
         ]);
-    })
+    })->withCommands([
+        \App\Console\Commands\SetupProject::class, // Tambahkan baris in
+    ])
     ->withExceptions(function (Exceptions $exceptions): void {
         //
     })->create();

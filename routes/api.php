@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\IotTimbanganController;
 use App\Http\Controllers\AduanController;
 use App\Http\Controllers\Api\TarikTunaiController;
 use App\Http\Controllers\OtpController;
+use App\Http\Controllers\NotifikasiController;
 
 // Public Routes
 Route::get('/test', fn() => response()->json(['message' => 'API Bank Sampah ASRI Berjalan Lancar']));
@@ -70,6 +71,11 @@ Route::patch('/setor-sampah/request-nasabah/{setor_sampah_id}', [SetorSampahCont
 Route::get('/setor-sampah', [SetorSampahController::class, 'index']); 
 Route::post('/request-penjemputan', [SetorSampahController::class, 'requestPenjemputan']);
 Route::get('/request-detail/{nasabah_id}', [SetorSampahController::class, 'showRequestDetail']);
+
+// Notifikasi
+Route::get('/notifikasi-kurir/{userId}', [NotifikasiController::class, 'getNotifikasiKurir']);
+Route::get('/notifikasi-nasabah/{userId}', [NotifikasiController::class, 'getNotifikasiNasabah']);
+Route::post('/notifikasi/{id}/read', [NotifikasiController::class, 'markAsRead']);
 
 // Aduan
 Route::post('/aduan', [AduanController::class, 'store']);

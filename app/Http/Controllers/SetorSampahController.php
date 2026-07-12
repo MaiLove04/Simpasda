@@ -121,6 +121,8 @@ class SetorSampahController extends Controller
                 'pesan' => 'Sampah Anda telah selesai ditimbang dengan berat total ' . $totalBerat . ' Kg. Saldo Anda bertambah sebesar Rp ' . number_format($request->grand_total, 0, ',', '.') . '.',
                 'type' => 'setoran',
                 'is_read' => false,
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
             ]);
 
             // Notifikasi untuk Kurir
@@ -130,6 +132,8 @@ class SetorSampahController extends Controller
                 'pesan' => 'Berhasil memproses setoran sampah untuk nasabah ' . ($nasabah->name ?? 'Nasabah') . ' dengan total Rp ' . number_format($request->grand_total, 0, ',', '.') . '.',
                 'type' => 'setoran',
                 'is_read' => false,
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
             ]);
 
             DB::commit();
@@ -192,6 +196,34 @@ class SetorSampahController extends Controller
             $this->simpanDetailSampah($setor->id, $request->sampah_list);
             $this->tambahSaldoNasabah($request->user_id, $request->grand_total);
             $this->catatMutasi($request->user_id, $setor->id, $request->grand_total);
+
+            // TAMBAH NOTIFIKASI
+            // Notifikasi untuk Nasabah
+            $totalBerat = 0;
+            foreach ($sampahList as $item) {
+                $totalBerat += $item['berat'] ?? 0;
+            }
+            $nasabah = User::find($request->user_id);
+            DB::table('notifikasis')->insert([
+                'user_id' => $request->user_id,
+                'judul' => 'Sampah Selesai Ditimbang',
+                'pesan' => 'Sampah Anda telah selesai ditimbang dengan berat total ' . $totalBerat . ' Kg. Saldo Anda bertambah sebesar Rp ' . number_format($request->grand_total, 0, ',', '.') . '.',
+                'type' => 'setoran',
+                'is_read' => false,
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ]);
+
+            // Notifikasi untuk Kurir
+            DB::table('notifikasis')->insert([
+                'user_id' => $request->kurir_id,
+                'judul' => 'Setoran Sampah Sukses',
+                'pesan' => 'Berhasil memproses setoran sampah untuk nasabah ' . ($nasabah->name ?? 'Nasabah') . ' dengan total Rp ' . number_format($request->grand_total, 0, ',', '.') . '.',
+                'type' => 'setoran',
+                'is_read' => false,
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ]);
 
             DB::commit();
 
@@ -274,6 +306,33 @@ class SetorSampahController extends Controller
                 $detail->harga_per_kg    = 0;
                 $detail->subtotal        = 0;
                 $detail->save();
+            }
+
+            // TAMBAH NOTIFIKASI
+            // Notifikasi untuk Nasabah
+            $nasabah = User::find($request->user_id);
+            DB::table('notifikasis')->insert([
+                'user_id' => $request->user_id,
+                'judul' => 'Permintaan Penjemputan Terkirim',
+                'pesan' => 'Permintaan penjemputan sampah Anda telah berhasil dikirim. Menunggu kurir mengambil tugas.',
+                'type' => 'penjemputan',
+                'is_read' => false,
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ]);
+
+            // Notifikasi untuk Semua Kurir
+            $couriers = User::where('role', 'kurir')->get();
+            foreach ($couriers as $courier) {
+                DB::table('notifikasis')->insert([
+                    'user_id' => $courier->id,
+                    'judul' => 'Tugas Penjemputan Baru',
+                    'pesan' => 'Ada request penjemputan sampah baru dari nasabah ' . ($nasabah->name ?? 'Nasabah') . ' di ' . ($nasabah->alamat ?? 'alamat nasabah') . '.',
+                    'type' => 'penjemputan',
+                    'is_read' => false,
+                    'created_at' => Carbon::now(),
+                    'updated_at' => Carbon::now(),
+                ]);
             }
 
             DB::commit();
