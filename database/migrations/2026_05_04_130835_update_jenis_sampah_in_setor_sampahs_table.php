@@ -13,8 +13,11 @@ return new class extends Migration
             function (Blueprint $table) {
 
                 // hapus kolom lama
+                $table->dropForeign([
+                    'jenis_sampah_id'
+                ]);
                 $table->dropColumn(
-                    'jenis_sampah'
+                    'jenis_sampah_id'
                 );
 
 

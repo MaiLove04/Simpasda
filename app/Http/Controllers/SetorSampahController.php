@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Models\MutasiSaldo;
 use App\Models\JadwalPenjemputan;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
 
 class SetorSampahController extends Controller
@@ -34,7 +35,7 @@ class SetorSampahController extends Controller
      */
     public function setorJadwalAdmin(Request $request, $id)
     {
-        $validator = \Validator::make($request->all(), [
+        $validator = Validator::make($request->all(), [
             'user_id'     => 'required|integer',
             'grand_total' => 'required|numeric',
             'sampah_list' => 'required',
@@ -102,11 +103,38 @@ class SetorSampahController extends Controller
                 }
 
                 // 🔨 PAKSA PAKAI SQL MENTAH (Bypass Cache, Properti Model, dan Aturan Framework)
-                \DB::statement("UPDATE master_jadwal_rutins SET tanggal_penjemputan_berikutnya = ? WHERE nasabah_id = ?", [
+                DB::statement("UPDATE master_jadwal_rutins SET tanggal_penjemputan_berikutnya = ? WHERE nasabah_id = ?", [
                     $nextDate, 
                     (int)$request->user_id
                 ]);
             }
+
+            // 7. TAMBAH NOTIFIKASI
+            // Notifikasi untuk Nasabah
+            $totalBerat = 0;
+            foreach ($sampahList as $item) {
+                $totalBerat += $item['berat'] ?? 0;
+            }
+            DB::table('notifikasis')->insert([
+                'user_id' => $request->user_id,
+                'judul' => 'Sampah Selesai Ditimbang',
+                'pesan' => 'Sampah Anda telah selesai ditimbang dengan berat total ' . $totalBerat . ' Kg. Saldo Anda bertambah sebesar Rp ' . number_format($request->grand_total, 0, ',', '.') . '.',
+                'type' => 'setoran',
+                'is_read' => false,
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ]);
+
+            // Notifikasi untuk Kurir
+            DB::table('notifikasis')->insert([
+                'user_id' => $setor->kurir_id,
+                'judul' => 'Setoran Sampah Sukses',
+                'pesan' => 'Berhasil memproses setoran sampah untuk nasabah ' . ($nasabah->name ?? 'Nasabah') . ' dengan total Rp ' . number_format($request->grand_total, 0, ',', '.') . '.',
+                'type' => 'setoran',
+                'is_read' => false,
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ]);
 
             DB::commit();
             
@@ -129,7 +157,7 @@ class SetorSampahController extends Controller
      */
     public function setorRequestNasabah(Request $request, $setor_sampah_id)
     {
-        $validator = \Validator::make($request->all(), [
+        $validator = Validator::make($request->all(), [
             'user_id'     => 'required|integer',
             'grand_total' => 'required|numeric',
             'sampah_list' => 'required',
@@ -169,6 +197,34 @@ class SetorSampahController extends Controller
             $this->tambahSaldoNasabah($request->user_id, $request->grand_total);
             $this->catatMutasi($request->user_id, $setor->id, $request->grand_total);
 
+            // TAMBAH NOTIFIKASI
+            // Notifikasi untuk Nasabah
+            $totalBerat = 0;
+            foreach ($sampahList as $item) {
+                $totalBerat += $item['berat'] ?? 0;
+            }
+            $nasabah = User::find($request->user_id);
+            DB::table('notifikasis')->insert([
+                'user_id' => $request->user_id,
+                'judul' => 'Sampah Selesai Ditimbang',
+                'pesan' => 'Sampah Anda telah selesai ditimbang dengan berat total ' . $totalBerat . ' Kg. Saldo Anda bertambah sebesar Rp ' . number_format($request->grand_total, 0, ',', '.') . '.',
+                'type' => 'setoran',
+                'is_read' => false,
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ]);
+
+            // Notifikasi untuk Kurir
+            DB::table('notifikasis')->insert([
+                'user_id' => $request->kurir_id,
+                'judul' => 'Setoran Sampah Sukses',
+                'pesan' => 'Berhasil memproses setoran sampah untuk nasabah ' . ($nasabah->name ?? 'Nasabah') . ' dengan total Rp ' . number_format($request->grand_total, 0, ',', '.') . '.',
+                'type' => 'setoran',
+                'is_read' => false,
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ]);
+
             DB::commit();
 
             return response()->json([
@@ -190,7 +246,7 @@ class SetorSampahController extends Controller
     public function requestPenjemputan(Request $request)
     {
         // 1. Validasi input basic
-        $validator = \Validator::make($request->all(), [
+        $validator = Validator::make($request->all(), [
             'user_id' => 'required',
             'items'   => 'required|array',
         ]);
@@ -250,6 +306,33 @@ class SetorSampahController extends Controller
                 $detail->harga_per_kg    = 0;
                 $detail->subtotal        = 0;
                 $detail->save();
+            }
+
+            // TAMBAH NOTIFIKASI
+            // Notifikasi untuk Nasabah
+            $nasabah = User::find($request->user_id);
+            DB::table('notifikasis')->insert([
+                'user_id' => $request->user_id,
+                'judul' => 'Permintaan Penjemputan Terkirim',
+                'pesan' => 'Permintaan penjemputan sampah Anda telah berhasil dikirim. Menunggu kurir mengambil tugas.',
+                'type' => 'penjemputan',
+                'is_read' => false,
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ]);
+
+            // Notifikasi untuk Semua Kurir
+            $couriers = User::where('role', 'kurir')->get();
+            foreach ($couriers as $courier) {
+                DB::table('notifikasis')->insert([
+                    'user_id' => $courier->id,
+                    'judul' => 'Tugas Penjemputan Baru',
+                    'pesan' => 'Ada request penjemputan sampah baru dari nasabah ' . ($nasabah->name ?? 'Nasabah') . ' di ' . ($nasabah->alamat ?? 'alamat nasabah') . '.',
+                    'type' => 'penjemputan',
+                    'is_read' => false,
+                    'created_at' => Carbon::now(),
+                    'updated_at' => Carbon::now(),
+                ]);
             }
 
             DB::commit();

@@ -69,6 +69,15 @@ Route::post('/setup-pin', function (\Illuminate\Http\Request $request) {
 });
 
 
+Route::get('/bersihkan-ingatan-rute', function () {
+    \Illuminate\Support\Facades\Artisan::call('route:clear');
+    \Illuminate\Support\Facades\Artisan::call('config:clear');
+    \Illuminate\Support\Facades\Artisan::call('cache:clear');
+
+    return "Ingatan rute lama dihapus! Sekarang silakan buka: pht.my.id/up-db";
+});
+
+
 /**
  * ======================================================================
  * 🔐 AUTHENTICATION
@@ -89,9 +98,7 @@ Route::post('/logout', [AdminWebController::class, 'logout'])->middleware('auth'
  * ======================================================================
  */
 Route::prefix('admin')->middleware('auth')->group(function () {
-
     Route::get('/dashboard', [AdminWebController::class, 'dashboard'])->name('admin.dashboard');
-
     Route::resource('kurir', KurirWebController::class);
     Route::resource('jenis-sampah', JenisSampahWebController::class);
     Route::resource('jadwal', JadwalWebController::class);
@@ -154,7 +161,6 @@ Route::prefix('admin')->middleware('auth')->group(function () {
  * ======================================================================
  */
 Route::prefix('dlh')->middleware(['auth', 'admin_dlh'])->group(function () {
-
     Route::get('/dashboard', [DlhDashboardController::class, 'index'])->name('dlh.dashboard');
 
     Route::prefix('bank-sampah')->name('dlh.bank-sampah.')->group(function () {
