@@ -128,6 +128,9 @@ class TarikTunaiWebController extends Controller
     /**
      * Menampilkan riwayat penarikan
      */
+    /**
+     * PERBAIKAN: Menampilkan semua riwayat penarikan (Pending, Approved, Rejected)
+     */
     public function riwayat(Request $request)
     {
         $keyword = $request->get('search');
@@ -135,16 +138,20 @@ class TarikTunaiWebController extends Controller
 
         $riwayat = TarikTunai::with('user')
             ->whereHas('user', function ($query) use ($bankSampahId) {
+                // Jika ingin mematikan filter bank sampah seperti halaman index, 
+                // kamu bisa mengomentari baris di bawah ini dengan (//)
                 $query->where('bank_sampah_id', $bankSampahId);
             })
-            ->whereIn('status', ['approved', 'rejected'])
+            // 🔥 PERUBAHAN UTAMA: Izinkan status 'pending' ikut masuk ke dalam list riwayat
+            ->whereIn('status', ['pending', 'approved', 'rejected'])
             ->when($keyword, function ($query, $keyword) {
                 return $query->whereHas('user', function ($q) use ($keyword) {
                     $q->where('name', 'LIKE', '%' . $keyword . '%')
                       ->orWhere('kode_nasabah', 'LIKE', '%' . $keyword . '%');
                 });
             })
-            ->latest('tanggal_selesai')
+            // Urutkan berdasarkan data yang paling baru dibuat atau diajukan
+            ->latest('created_at')
             ->paginate(15);
 
         return view('admin.tarik-tunai.riwayat', compact('riwayat'));

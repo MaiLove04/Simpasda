@@ -116,11 +116,26 @@ class UserController extends Controller
                     Carbon::setLocale('id');
                     $item->tanggal_formatted = Carbon::parse($item->created_at)->translatedFormat('d F Y, H:i') . ' WIB';
                     $isMasuk = strtolower($item->jenis_transaksi) === 'masuk';
-                    $item->judul_dinamis = $isMasuk ? 'Setor Sampah Nasabah' : 'Tarik Tunai Dana';
-                    $item->total_berat = $isMasuk ? 'Lihat Detail' : '0';
+                    
+                    // 🌟 PERBAIKAN DI SINI: Judul dinamis disesuaikan dengan Status Transaksi
+                    if ($isMasuk) {
+                        $item->judul_dinamis = 'Setor Sampah Nasabah';
+                        $item->total_berat = 'Lihat Detail';
+                    } else {
+                        // Jika transaksi keluar (Tarik Tunai), cek statusnya
+                        $status = strtolower($item->status ?? 'pending');
+                        if ($status === 'pending') {
+                            $item->judul_dinamis = 'Tarik Tunai Dana (Pending)';
+                        } elseif ($status === 'rejected') {
+                            $item->judul_dinamis = 'Tarik Tunai Dana (Ditolak)';
+                        } else {
+                            $item->judul_dinamis = 'Tarik Tunai Dana'; // Jika sukses/approved
+                        }
+                        $item->total_berat = '0';
+                    }
+                    
                     return $item;
                 });
-
             $saldoPending = DB::table('mutasi_saldos')
                 ->where('user_id', $user_id)
                 ->where('sumber', 'tarik_tunai')
@@ -206,6 +221,31 @@ class UserController extends Controller
 
         $user->update(['pin_attempts' => 0, 'pin_locked_until' => null]);
         return true;
+    }
+
+    /**
+     * Endpoint API untuk memuat riwayat lengkap nasabah di mobile (Pending, Approved, Rejected)
+     */
+    public function riwayatLengkapMobile(Request $request)
+    {
+        $user = $request->user();
+
+        // Mengambil semua riwayat mutasi tarik tunai milik nasabah tersebut
+        $riwayat = DB::table('mutasi_saldos')
+            ->where('user_id', $user->id)
+            ->where('sumber', 'tarik_tunai')
+            ->orderBy('id', 'desc')
+            ->get()
+            ->map(function($item) {
+                // Pastikan status dikirim dalam format teks kecil agar seragam dibaca Flutter
+                $item->status = strtolower($item->status ?? 'pending');
+                return $item;
+            });
+
+        return response()->json([
+            'success' => true,
+            'data' => $riwayat
+        ], 200);
     }
 
     /**
