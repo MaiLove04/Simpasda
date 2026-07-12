@@ -7,7 +7,9 @@ use App\Models\SetorSampah;
 use App\Models\DetailSetorSampah;
 use App\Models\User;
 use App\Models\MutasiSaldo;
+use App\Models\JadwalPenjemputan;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class SetorSampahController extends Controller
 {
@@ -25,84 +27,85 @@ class SetorSampahController extends Controller
     }
 
     /**
-     * ⚖️ STORE SIMPAN TIMBANGAN KURIR: OTOMATISASI SALDO & UPDATE JADWAL SELESAI
+     * ⚖️ PATCH 1: KURIR SETOR JADWAL ADMIN (Edit Jenis & Berat Sekaligus)
      */
-    public function store(Request $request)
+   /**
+     * ⚖️ PATCH 1: KURIR SETOR JADWAL ADMIN (Edit Jenis & Berat Sekaligus)
+     */
+    public function setorJadwalAdmin(Request $request, $id)
     {
-        $request->validate([
-            'user_id'     => 'required',
-            'grand_total' => 'required',
+        $validator = \Validator::make($request->all(), [
+            'user_id'     => 'required|integer',
+            'grand_total' => 'required|numeric',
             'sampah_list' => 'required',
-            'foto_sampah' => 'nullable|image|mimes:jpeg,png,jpg|max:2048'
+            'jadwal_id'   => 'nullable|uuid'
         ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal Validasi Input: ' . implode(', ', $validator->errors()->all())
+            ], 422);
+        }
 
         DB::beginTransaction();
 
         try {
-            // 1. Olah upload gambar bukti penimbangan sampah
-            $pathFoto = null;
-            if ($request->hasFile('foto_sampah')) {
-                $file = $request->file('foto_sampah');
-                $namaFile = time() . '_' . $file->getClientOriginalName();
-                $file->move(public_path('uploads/sampah'), $namaFile);
-                $pathFoto = 'uploads/sampah/' . $namaFile;
+            // 🔥 PEMBERSIH & FIX UUID: Pastikan ID bersih dari karakter kurung kurawal jika ada
+            $cleanId = trim($id, '{} ');
+
+            // Cari berdasarkan jadwal_id, jika tidak ada buat instansiasi baru
+            $setor = SetorSampah::where('jadwal_id', $cleanId)->first();
+            
+            if (!$setor) {
+                $setor = new SetorSampah();
+                $setor->jadwal_id = $cleanId;
             }
 
-            // 2. Simpan Data Induk Master Setor Sampah
-            $setor = new SetorSampah();
-            $setor->user_id = $request->user_id;
+            $sampahList = json_decode($request->sampah_list, true) ?? [];
+            $itemPertama = count($sampahList) > 0 ? $sampahList[0] : null;
 
-            // Cari kurir pengganti jika ID 14 tidak ada
-            $defaultKurir = User::where('role', 'kurir')->first();
-            $setor->kurir_id = $request->kurir_id ?? ($defaultKurir ? $defaultKurir->id : 14);
+            $setor->user_id   = $request->user_id;
+            $setor->kurir_id  = $request->kurir_id;
+            $setor->total     = $request->grand_total;
+            $setor->catatan   = $request->catatan ?? 'Selesai ditimbang oleh kurir lapangan (Jadwal Admin)';
+            $setor->status    = 'selesai';
 
-            $setor->total = $request->grand_total;
-            $setor->foto_sampah = $pathFoto;
-            $setor->catatan = $request->catatan ?? 'Disetor massal lewat aplikasi kurir';
-            $setor->save();
+            $setor->jenis_sampah_id = $itemPertama ? $itemPertama['jenis_sampah_id'] : null;
+            $setor->berat           = $itemPertama ? $itemPertama['berat'] : 0;
+            $setor->harga_per_kg    = $itemPertama ? ($itemPertama['harga_per_kg'] ?? 0) : 0;
 
-            // 3. Bongkar paket Array JSON dari Flutter & Simpan ke Details (Tabel Anak)
-            $sampahList = json_decode($request->sampah_list, true);
-            if (!is_array($sampahList)) {
-                return response()->json(['success' => false, 'message' => 'Format sampah_list tidak valid.'], 400);
+            $setor->save(); 
+
+            $this->simpanDetailSampah($setor->id, $request->sampah_list);
+            $this->tambahSaldoNasabah($request->user_id, $request->grand_total);
+            $this->catatMutasi($request->user_id, $setor->id, $request->grand_total);
+
+            // 🔍 AMBIL DATA JADWAL HARIAN UNTUK ESTIMASI TANGGAL KELUARAN
+            // 🔍 AMBIL DATA JADWAL HARIAN UNTUK ESTIMASI TANGGAL KELUARAN
+            $jadwalHarian = JadwalPenjemputan::where('id', $cleanId)->first();
+            if ($jadwalHarian) {
+                $jadwalHarian->update(['status' => 'selesai']);
             }
 
-            foreach ($sampahList as $item) {
-                $detail = new DetailSetorSampah();
-                $detail->setor_sampah_id = $setor->id;
-                $detail->jenis_sampah_id = $item['jenis_sampah_id'];
-                $detail->berat           = $item['berat'];
-                $detail->harga_per_kg    = $item['harga_per_kg'];
-                $detail->subtotal        = $item['total_item'];
-                $detail->save();
-            }
-
-            // 4. PROSES FINANSIAL: UPDATE SALDO NASABAH
-            $nasabah = User::find($request->user_id);
-            if ($nasabah) {
-                $nominalMasuk = (int) $request->grand_total;
-                $nasabah->saldo = $nasabah->saldo + $nominalMasuk;
-                $nasabah->save();
-            }
-
-            // 5. CATAT HISTORI KE TABEL MUTASI SALDO
-            $mutasi = new MutasiSaldo();
-            $mutasi->user_id         = $request->user_id;
-            $mutasi->jenis_transaksi = 'masuk';
-            $mutasi->sumber          = 'setor_sampah';
-            $mutasi->referensi_id    = $setor->id;
-            $mutasi->nominal         = (int) $request->grand_total;
-            $mutasi->status          = 'success';
-            $mutasi->keterangan      = 'Uang masuk dari penimbangan sampah multi-item';
-            $mutasi->save();
-
-            // 6. SINKRONISASI UPDATE STATUS JADWAL JADI SELESAI
-            if ($request->has('jadwal_id') && !empty($request->jadwal_id)) {
-                $jadwal = \App\Models\JadwalPenjemputan::find($request->jadwal_id);
-                if ($jadwal) {
-                    $jadwal->status = 'selesai';
-                    $jadwal->save();
+            // 🔥 HITUNG MURNI HARI INI (5 Juli 2026) + INTERVAL HARI
+            $masterJadwal = \App\Models\MasterJadwalRutin::where('nasabah_id', (int)$request->user_id)->first();
+            
+            if ($masterJadwal) {
+                $interval = (int)($masterJadwal->interval_hari ?? 2);
+                
+                if ($masterJadwal->tipe_jadwal === 'interval') {
+                    // Murni Hari ini + interval hari (5 Juli + 2 = 7 Juli 2026)
+                    $nextDate = Carbon::today()->addDays($interval)->toDateString();
+                } else {
+                    $nextDate = Carbon::today()->addDays(7)->toDateString();
                 }
+
+                // 🔨 PAKSA PAKAI SQL MENTAH (Bypass Cache, Properti Model, dan Aturan Framework)
+                \DB::statement("UPDATE master_jadwal_rutins SET tanggal_penjemputan_berikutnya = ? WHERE nasabah_id = ?", [
+                    $nextDate, 
+                    (int)$request->user_id
+                ]);
             }
 
             // 7. TAMBAH NOTIFIKASI
@@ -129,12 +132,12 @@ class SetorSampahController extends Controller
             ]);
 
             DB::commit();
-
+            
             return response()->json([
                 'success' => true,
-                'message' => '✅ Setoran sukses! Saldo bertambah & status jadwal otomatis SELESAI.',
+                'message' => '✅ Setoran dari jadwal admin sukses diproses oleh kurir!',
                 'data' => $setor->load('details')
-            ], 201);
+            ], 200);
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -144,6 +147,226 @@ class SetorSampahController extends Controller
             ], 500);
         }
     }
+    /**
+     * ⚖️ PATCH 2: KURIR SETOR REQUEST NASABAH (Hanya Update Berat)
+     */
+    public function setorRequestNasabah(Request $request, $setor_sampah_id)
+    {
+        $validator = \Validator::make($request->all(), [
+            'user_id'     => 'required|integer',
+            'grand_total' => 'required|numeric',
+            'sampah_list' => 'required',
+            'jadwal_id'   => 'nullable|uuid'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal Validasi Input: ' . implode(', ', $validator->errors()->all())
+            ], 422);
+        }
+
+        DB::beginTransaction();
+
+        try {
+            $setor = SetorSampah::findOrFail($setor_sampah_id);
+
+            // 🛠️ Urai list sampah terlebih dahulu untuk fallback database
+            $sampahList = json_decode($request->sampah_list, true) ?? [];
+            $itemPertama = count($sampahList) > 0 ? $sampahList[0] : null;
+
+            $setor->user_id  = $request->user_id;
+            $setor->kurir_id = $request->kurir_id;
+            $setor->total    = $request->grand_total;
+            $setor->catatan  = $request->catatan ?? 'Berat di-update dan diselesaikan oleh kurir lapangan';
+            $setor->status   = 'selesai';
+
+            // 🔥 ISI KOLOM WAJIB DATABASE BERDASARKAN ITEM PERTAMA AGAR TIDAK ERROR 1364
+            $setor->jenis_sampah_id = $itemPertama ? $itemPertama['jenis_sampah_id'] : $setor->jenis_sampah_id;
+            $setor->berat           = $itemPertama ? $itemPertama['berat'] : $setor->berat;
+            $setor->harga_per_kg    = $itemPertama ? ($itemPertama['harga_per_kg'] ?? 0) : $setor->harga_per_kg;
+
+            $setor->save();
+
+            $this->simpanDetailSampah($setor->id, $request->sampah_list);
+            $this->tambahSaldoNasabah($request->user_id, $request->grand_total);
+            $this->catatMutasi($request->user_id, $setor->id, $request->grand_total);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => '✅ Berat request nasabah berhasil diperbarui dan diselesaikan!',
+                'data' => $setor->load('details')
+            ], 200);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal memperbarui berat request: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    
+    public function requestPenjemputan(Request $request)
+    {
+        // 1. Validasi input basic
+        $validator = \Validator::make($request->all(), [
+            'user_id' => 'required',
+            'items'   => 'required|array',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal Validasi: ' . implode(', ', $validator->errors()->all())
+            ], 422);
+        }
+
+        // 🔒 PENGUNCI JADWAL RUTIN: Tetap mendeteksi hari ini berdasarkan tanggal server
+        // (Fungsi cekJadwalHariIni tetap berjalan normal di latar belakang memakai tanggal hari ini)
+        if ($this->cekJadwalHariIni($request->user_id, Carbon::today()->toDateString())) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Maaf, Anda tidak dapat melakukan request mandiri. Hari ini rumah Anda sudah masuk ke dalam daftar plot jadwal penjemputan rutin/petugas. Mohon tunggu kurir datang ke lokasi Anda.'
+            ], 422);
+        }
+
+        $items = $request->input('items', []);
+        if (is_string($items)) {
+            $items = json_decode($items, true) ?? [];
+        }
+
+        if (empty($items)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Kategori sampah belum dipilih.'
+            ], 422);
+        }
+
+        DB::beginTransaction();
+        try {
+            $itemPertama = $items[0];
+
+            $setor = new SetorSampah();
+            $setor->user_id = $request->user_id;
+            $setor->catatan = $request->catatan ?? 'Permintaan penjemputan mandiri oleh nasabah';
+            $setor->status  = 'pending';
+            
+            // ❌ HAPUS TOTAL: Tidak ada lagi assignment ke tanggal_penjemputan di sini!
+            
+            // Isi kolom fallback bawaan database lama kamu
+            $setor->jenis_sampah_id = $itemPertama['jenis_sampah_id'] ?? null;
+            $setor->berat           = 0;
+            $setor->harga_per_kg    = 0;
+            $setor->total           = 0;
+            $setor->save(); // 💾 Aman dikirim ke MySQL tanpa memicu error 1054
+
+            // Loop untuk simpan detail item sampah ke detail_setor_sampahs
+            foreach ($items as $item) {
+                $detail = new DetailSetorSampah();
+                $detail->setor_sampah_id = $setor->id;
+                $detail->jenis_sampah_id = $item['jenis_sampah_id'];
+                $detail->berat           = 0;
+                $detail->harga_per_kg    = 0;
+                $detail->subtotal        = 0;
+                $detail->save();
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => '✅ Permintaan penjemputan sampah berhasil dibuat!'
+            ], 200);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal memproses ke database: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+    /**
+     * 🛠️ VALIDASI APAKAH HARI INI NASABAH MEMILIKI JADWAL RUTIN / ADMIN
+     */
+    private function cekJadwalHariIni($userId, $tanggalTarget)
+    {
+        $date = Carbon::parse($tanggalTarget)->toDateString();
+
+        // 1. Cek apakah sudah digenerate di JadwalPenjemputan harian (Status: terjadwal/proses)
+        $adaJadwalHarian = \App\Models\JadwalPenjemputan::where('nasabah_id', $userId)
+            ->whereDate('tanggal_penjemputan', $date)
+            ->whereIn('status', ['terjadwal', 'proses'])
+            ->exists();
+
+        if ($adaJadwalHarian) {
+            return true; 
+        }
+
+        // 2. Cek langsung ke Master Pola: Apakah tanggal_penjemputan_berikutnya cocok dengan hari ini?
+        $adaMasterHariIni = \App\Models\MasterJadwalRutin::where('nasabah_id', $userId)
+            ->where('is_aktif', true)
+            ->whereDate('tanggal_penjemputan_berikutnya', $date)
+            ->exists();
+
+        if ($adaMasterHariIni) {
+            return true;
+        }
+
+        return false;
+    }
+
+    // /**
+    //  * 🛠️ VALIDASI APAKAH HARI INI NASABAH MEMILIKI JADWAL RUTIN / ADMIN
+    //  */
+    // private function cekJadwalHariIni($userId, $tanggalTarget)
+    // {
+    //     $date = Carbon::parse($tanggalTarget);
+    //     $hariIni = $date->locale('id')->dayName; // Mengambil 'Senin', 'Selasa', dst.
+
+    //     // Kondisi A: Cek apakah sudah digenerate di tabel JadwalPenjemputan harian (Aktif/Proses)
+    //     $adaJadwalHarian = \App\Models\JadwalPenjemputan::where('nasabah_id', $userId)
+    //         ->whereDate('tanggal_penjemputan', $date->toDateString())
+    //         ->whereIn('status', ['terjadwal', 'proses'])
+    //         ->exists();
+
+    //     if ($adaJadwalHarian) {
+    //         return true; 
+    //     }
+
+    //     // Kondisi B: Antisipasi jika Admin belum menekan tombol Force Sync (Cek langsung pola Master)
+    //     $masterJadwals = \App\Models\MasterJadwalRutin::where('nasabah_id', $userId)
+    //         ->where('is_aktif', true)
+    //         ->get();
+
+    //     foreach ($masterJadwals as $master) {
+    //         // 1. Cek jika polanya Mingguan
+    //         if ($master->tipe_jadwal === 'mingguan' && $master->hari_penjemputan === $hariIni) {
+    //             return true;
+    //         }
+
+    //         // 2. Cek jika polanya Interval Hari
+    //         if ($master->tipe_jadwal === 'interval' && $master->tanggal_mulai) {
+    //             $tanggalMulai = Carbon::parse($master->tanggal_mulai)->startOfDay();
+    //             $tanggalSekarang = $date->copy()->startOfDay();
+
+    //             if ($tanggalSekarang->greaterThanOrEqualTo($tanggalMulai)) {
+    //                 $selisihHari = $tanggalSekarang->diffInDays($tanggalMulai);
+    //                 // Jika selisih hari habis dibagi angka interval, berarti hari ini jadwalnya
+    //                 if ($selisihHari % $master->interval_hari === 0) {
+    //                     return true;
+    //                 }
+    //             }
+    //         }
+    //     }
+
+    //     return false;
+    // }
+    
 
     /**
      * 📊 AMBIL DATA COUNTER REAL-TIME UNTUK DASHBOARD KURIR
@@ -151,23 +374,16 @@ class SetorSampahController extends Controller
     public function getDashboardKurir($kurir_id)
     {
         try {
-            // 1. Hitung berapa kali kurir sukses menangani transaksi
             $totalTransaksi = SetorSampah::where('kurir_id', $kurir_id)->count();
-
-            // 2. Ambil semua ID setor sampah milik kurir ini
             $setorIds = SetorSampah::where('kurir_id', $kurir_id)->pluck('id');
-
-            // 3. Hitung akumulasi BERAT BERSIH (Kg) dari tabel anak detail_setor_sampahs
-            $totalKgSampah = \App\Models\DetailSetorSampah::whereIn('setor_sampah_id', $setorIds)->sum('berat');
-
-            // 4. Hitung akumulasi total uang rupiah yang sudah diproses oleh kurir ini
+            $totalKgSampah = DetailSetorSampah::whereIn('setor_sampah_id', $setorIds)->sum('berat');
             $totalUangDiproses = SetorSampah::where('kurir_id', $kurir_id)->sum('total');
 
             return response()->json([
-                'success' => true,
-                'kurir_id' => $kurir_id,
-                'total_transaksi' => $totalTransaksi,
-                'total_kg_sampah' => round($totalKgSampah, 2),
+                'success'             => true,
+                'kurir_id'            => $kurir_id,
+                'total_transaksi'     => $totalTransaksi,
+                'total_kg_sampah'     => round($totalKgSampah, 2),
                 'total_uang_diproses' => (int) $totalUangDiproses
             ], 200);
 
@@ -180,158 +396,109 @@ class SetorSampahController extends Controller
     }
 
     /**
-     * 📥 FIX SINKRONISASI FLUTTER NASABAH: REQUEST JEMPUT SAMPAH (MEMBACA STRUKTUR ITEMS)
-     */
-    /**
-     * 📥 ALUR FINAL NASABAH: REQUEST JEMPUT & DAFTARKAN MANIFES JENIS SAMPAH KOSONG
-     */
-    public function requestPenjemputan(Request $request)
-    {
-        // Validasi murni melacak data bawaan dari Flutter kamu
-        $request->validate([
-            'user_id' => 'required|exists:users,id',
-            'items'   => 'required|array',
-        ]);
-
-        DB::beginTransaction();
-
-        try {
-            // 1. Ambil data profil nasabah untuk mendeteksi alamat aslinya
-            $nasabah = User::find($request->user_id);
-
-            // 🔥 PERBAIKAN: Cari kurir yang benar-benar ada di database (dinamis)
-            $kurirAktif = User::where('role', 'kurir')->first();
-            $kurirIdDefault = $kurirAktif ? $kurirAktif->id : 14;
-
-            // 2. SIMPAN KE TABEL jadwal_penjemputans (Murni Catatan Nasabah)
-            $jadwal = new \App\Models\JadwalPenjemputan();
-            $jadwal->nasabah_id = $request->user_id;
-            $jadwal->kurir_id = $kurirIdDefault;
-            $jadwal->bank_sampah_id = 1; // Default Lokasi Bank Sampah Basayan Bestari
-            $jadwal->alamat = $nasabah->alamat ?? 'Alamat tidak diisi nasabah';
-            $jadwal->tanggal_penjemputan = \Carbon\Carbon::today()->format('Y-m-d');
-            $jadwal->status = 'terjadwal'; // Status awal: Menunggu kurir bergerak
-            $jadwal->catatan = $request->catatan ?? 'Disetor lewat aplikasi nasabah'; // 🔥 MURNI CATATAN NASABAH
-            $jadwal->save();
-
-            // 3. SIMPAN KE TABEL INDUK setor_sampahs (Manifes Awal)
-            $setor = new SetorSampah();
-            $setor->user_id = $request->user_id;
-            $setor->kurir_id = $kurirIdDefault;
-            $setor->total = 0; // Masih 0 karena belum ditimbang kurir
-            $setor->foto_sampah = null; // Belum ada foto bukti timbangan
-            $setor->catatan = $request->catatan ?? 'Request jemput lewat aplikasi';
-            $setor->status = 'menunggu_verifikasi'; // 🔥 Sesuai status di phpMyAdmin kamu!
-            $setor->save();
-
-            // 4. BONGKAR ARRAY ITEMS FLUTTER & SIMPAN KE detail_setor_sampahs (Berat = NULL / 0)
-            foreach ($request->items as $item) {
-                if (isset($item['jenis_sampah_id'])) {
-                    $detail = new DetailSetorSampah();
-                    $detail->setor_sampah_id = $setor->id; // Hubungkan ke ID induk barusan
-                    $detail->jenis_sampah_id = $item['jenis_sampah_id'];
-                    $detail->berat           = null; // 🔥 Kosong, nanti di-update oleh Kurir via IoT
-                    $detail->harga_per_kg    = null; // 🔥 Kosong, di-update otomatis saat kurir nimbang
-                    $detail->subtotal        = 0;
-                    $detail->save();
-                }
-            }
-
-            // TAMBAH NOTIFIKASI
-            // Notifikasi untuk Courier
-            \App\Models\Notifikasi::create([
-                'user_id' => $kurirIdDefault,
-                'judul' => 'Tugas Penjemputan Baru',
-                'pesan' => 'Ada request penjemputan sampah baru dari nasabah ' . ($nasabah->name ?? 'Nasabah') . ' di alamat: ' . $jadwal->alamat . '.',
-                'type' => 'penjemputan',
-                'is_read' => false,
-            ]);
-
-            // Notifikasi untuk Nasabah
-            \App\Models\Notifikasi::create([
-                'user_id' => $request->user_id,
-                'judul' => 'Permintaan Penjemputan Terkirim',
-                'pesan' => 'Permintaan penjemputan sampah Anda telah terkirim. Kurir akan segera datang ke lokasi Anda.',
-                'type' => 'penjemputan',
-                'is_read' => false,
-            ]);
-
-            DB::commit();
-
-            return response()->json([
-                'success' => true,
-                'message' => '✅ Request penjemputan & manifes kategori sampah berhasil didaftarkan!',
-                'data' => [
-                    'jadwal' => $jadwal,
-                    'setor' => $setor->load('details')
-                ]
-            ], 201);
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal memproses di server: ' . $e->getMessage()
-            ], 500);
-        }
-    }
-
-    //request detail
-    /**
-     * 🔍 BARU: AMBIL MANIFES REQUEST NASABAH UNTUK OTOMATISASI FORM TIMBANG KURIR
+     * 🔍 AMBIL MANIFES REQUEST NASABAH (AUTOLOAD UNTUK KURIR)
      */
     public function showRequestDetail($nasabah_id)
     {
         try {
-            // Cari transaksi terakhir nasabah yang statusnya masih 'menunggu_verifikasi'
+            // 1. Cari data induk transaksi request milik nasabah yang statusnya 'pending'
             $setorMaster = SetorSampah::where('user_id', $nasabah_id)
-                ->where('status', 'menunggu_verifikasi')
+                ->whereNull('jadwal_id')
+                ->where('status', 'pending')
                 ->latest()
                 ->first();
 
             if (!$setorMaster) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Tidak ada manifes request aktif untuk nasabah ini.'
-                ], 404);
+                    'message' => 'Tidak ada manifes request aktif untuk nasabah ini.',
+                    'setor_sampah_id' => '',
+                    'items' => []
+                ], 200);
             }
 
-            // Ambil rincian jenis sampah kosong yang dititipkan nasabah kemarin
-            $details = \App\Models\DetailSetorSampah::where('setor_sampah_id', $setorMaster->id)
-                ->with('jenisSampah') // Relasi ke tabel jenis_sampahs
+            // 2. Ambil detail item sampah beserta relasi jenis sampahnya
+            $details = DetailSetorSampah::where('setor_sampah_id', $setorMaster->id)
+                ->with('jenisSampah')
                 ->get();
 
-            // Susun data agar Flutter Kurir bisa langsung me-mapping ke keranjang setorannya
             $formAutoload = [];
             foreach ($details as $item) {
                 if ($item->jenisSampah) {
-                    // 🔥 DETEKSI OTOMATIS: Mengantisipasi segala nama kolom harga di database kamu
-                    $hargaBeliTerupdate = $item->jenisSampah->harga_beli
-                                        ?? $item->jenisSampah->harga
-                                        ?? $item->jenisSampah->harga_per_kg
-                                        ?? 2000; // Fallback aman angka 2000 jika semua kolom null
+                    // Ambil harga terupdate dari master jenis sampah jika kolom di detail kosong
+                    $hargaBeli = $item->harga_per_kg ?? $item->jenisSampah->harga_per_kg ?? 0;
 
                     $formAutoload[] = [
-                        'jenis_sampah_id' => $item->jenis_sampah_id,
-                        'nama_sampah'     => $item->jenisSampah->nama,
-                        'harga_per_kg'    => (int) $hargaBeliTerupdate,
-                        'berat'           => 0,
+                        'jenis_sampah_id' => (int) $item->jenis_sampah_id,
+                        'nama_sampah'     => (string) $item->jenisSampah->nama,
+                        'harga_per_kg'    => (int) $hargaBeli,
+                        'berat'           => 0.0, // Dipaksa double agar klop dengan kodingan Flutter
                         'total_item'      => 0
                     ];
                 }
             }
 
+            // 🚀 Return data dengan struktur tingkat utama (items) sesuai ekspektasi Flutter
             return response()->json([
-                'success' => true,
-                'setor_sampah_id' => $setorMaster->id, // ID Induk untuk nanti kurir update
-                'items' => $formAutoload
+                'success'         => true,
+                'setor_sampah_id' => $setorMaster->id,
+                'items'           => $formAutoload
             ], 200);
 
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal meload data request: ' . $e->getMessage()
+                'message' => 'Gagal meload data request: ' . $e->getMessage(),
+                'setor_sampah_id' => '',
+                'items' => []
             ], 500);
         }
+    }
+
+    /**
+     * =========================================================================
+     * 🛠️ INTERNAL HELPER PRIVATE METHODS
+     * =========================================================================
+     */
+
+    private function simpanDetailSampah($setorId, $sampahListJson)
+    {
+        $sampahList = json_decode($sampahListJson, true);
+        if (is_array($sampahList)) {
+            DetailSetorSampah::where('setor_sampah_id', $setorId)->delete();
+
+            foreach ($sampahList as $item) {
+                $detail = new DetailSetorSampah();
+                $detail->setor_sampah_id = $setorId;
+                $detail->jenis_sampah_id = $item['jenis_sampah_id'];
+                $detail->berat           = $item['berat'];
+                $detail->harga_per_kg    = $item['harga_per_kg'];
+                $detail->subtotal        = $item['total_item']; 
+                $detail->save();
+            }
+        }
+    }
+
+    private function tambahSaldoNasabah($userId, $grandTotal)
+    {
+        $nasabah = User::find($userId);
+        if ($nasabah) {
+            $nominalMasuk = (int) $grandTotal;
+            $nasabah->saldo = $nasabah->saldo + $nominalMasuk;
+            $nasabah->save();
+        }
+    }
+
+    private function catatMutasi($userId, $referensiId, $grandTotal)
+    {
+        $mutasi = new MutasiSaldo();
+        $mutasi->user_id         = $userId;
+        $mutasi->jenis_transaksi = 'masuk';
+        $mutasi->sumber          = 'setor_sampah';
+        $mutasi->referensi_id    = $referensiId;
+        $mutasi->nominal         = (int) $grandTotal;
+        $mutasi->status          = 'success';
+        $mutasi->keterangan      = 'Uang masuk dari penimbangan sampah lapangan';
+        $mutasi->save();
     }
 }

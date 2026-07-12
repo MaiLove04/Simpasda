@@ -14,7 +14,15 @@ class MasterJadwalRutin extends Model
         'kurir_id',
         'hari_penjemputan',
         'jam_estimasi',
-        'is_aktif'
+        'is_aktif',
+        'tipe_jadwal',
+        'interval_hari',
+        'tanggal_mulai',
+    ];
+
+    protected $casts = [
+        'tanggal_mulai' => 'date',
+        'is_aktif' => 'boolean',
     ];
 
     // Relasi ke data Nasabah

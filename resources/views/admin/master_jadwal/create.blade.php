@@ -22,11 +22,11 @@
             @csrf
 
             <div class="mb-3">
-                <label Brief for="nasabah_id" class="form-label" style="font-weight: 600; color: #334155;">Nama Nasabah</label>
+                <label for="nasabah_id" class="form-label" style="font-weight: 600; color: #334155;">Nama Nasabah</label>
                 <select class="form-select" id="nasabah_id" name="nasabah_id" required style="border-radius: 8px; padding: 10px; border: 1px solid #cbd5e1;">
                     <option value="" disabled selected>-- Pilih Nasabah --</option>
                     @foreach($nasabahs as $nasabah)
-                        <option value="{{ $nasabah->id }}">
+                        <option value="{{ $nasabah->id }}" {{ old('nasabah_id') == $nasabah->id ? 'selected' : '' }}>
                             {{ $nasabah->name }} ({{ $nasabah->alamat ?? 'Alamat Belum Diisi' }})
                         </option>
                     @endforeach
@@ -38,24 +38,59 @@
                 <select class="form-select" id="kurir_id" name="kurir_id" required style="border-radius: 8px; padding: 10px; border: 1px solid #cbd5e1;">
                     <option value="" disabled selected>-- Pilih Kurir --</option>
                     @foreach($kurirs as $kurir)
-                        <option value="{{ $kurir->id }}">{{ $kurir->name }}</option>
+                        <option value="{{ $kurir->id }}" {{ old('kurir_id') == $kurir->id ? 'selected' : '' }}>{{ $kurir->name }}</option>
                     @endforeach
                 </select>
             </div>
 
+            {{-- ====== TIPE JADWAL ====== --}}
             <div class="mb-3">
+                <label class="form-label" style="font-weight: 600; color: #334155;">Tipe Jadwal</label>
+                <div class="d-flex gap-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="tipe_jadwal" id="tipe_mingguan" value="mingguan" {{ old('tipe_jadwal', 'mingguan') === 'mingguan' ? 'checked' : '' }} onchange="toggleTipeJadwal()">
+                        <label class="form-check-label" for="tipe_mingguan" style="font-weight: 500; color: #334155;">📅 Mingguan</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="tipe_jadwal" id="tipe_interval" value="interval" {{ old('tipe_jadwal') === 'interval' ? 'checked' : '' }} onchange="toggleTipeJadwal()">
+                        <label class="form-check-label" for="tipe_interval" style="font-weight: 500; color: #334155;">🔄 Interval Hari</label>
+                    </div>
+                </div>
+                <small class="text-muted">Mingguan = pilih hari tetap. Interval = setiap N hari sekali.</small>
+            </div>
+
+            {{-- ====== FIELD MINGGUAN ====== --}}
+            <div class="mb-3" id="field-mingguan">
                 <label for="hari_penjemputan" class="form-label" style="font-weight: 600; color: #334155;">Hari Penjemputan Rutin</label>
-                <select class="form-select" id="hari_penjemputan" name="hari_penjemputan" required style="border-radius: 8px; padding: 10px; border: 1px solid #cbd5e1;">
+                <select class="form-select" id="hari_penjemputan" name="hari_penjemputan" style="border-radius: 8px; padding: 10px; border: 1px solid #cbd5e1;">
                     <option value="" disabled selected>-- Pilih Hari --</option>
                     @foreach($hariOptions as $hari)
-                        <option value="{{ $hari }}">{{ $hari }}</option>
+                        <option value="{{ $hari }}" {{ old('hari_penjemputan') === $hari ? 'selected' : '' }}>{{ $hari }}</option>
                     @endforeach
                 </select>
+            </div>
+
+            {{-- ====== FIELD INTERVAL ====== --}}
+            <div id="field-interval" style="display: none;">
+                <div class="mb-3">
+                    <label for="interval_hari" class="form-label" style="font-weight: 600; color: #334155;">Setiap Berapa Hari?</label>
+                    <div class="input-group" style="max-width: 250px;">
+                        <span class="input-group-text" style="border-radius: 8px 0 0 8px; background-color: #f8fafc; border: 1px solid #cbd5e1;">Setiap</span>
+                        <input type="number" class="form-control" id="interval_hari" name="interval_hari" min="2" max="30" value="{{ old('interval_hari', 2) }}" style="border: 1px solid #cbd5e1; text-align: center;">
+                        <span class="input-group-text" style="border-radius: 0 8px 8px 0; background-color: #f8fafc; border: 1px solid #cbd5e1;">hari sekali</span>
+                    </div>
+                    <small class="text-muted">Minimal 2 hari, maksimal 30 hari.</small>
+                </div>
+                <div class="mb-3">
+                    <label for="tanggal_mulai" class="form-label" style="font-weight: 600; color: #334155;">Tanggal Mulai</label>
+                    <input type="date" class="form-control" id="tanggal_mulai" name="tanggal_mulai" value="{{ old('tanggal_mulai', date('Y-m-d')) }}" style="border-radius: 8px; padding: 10px; border: 1px solid #cbd5e1; max-width: 250px;">
+                    <small class="text-muted">Tanggal pertama penjemputan dimulai.</small>
+                </div>
             </div>
 
             <div class="mb-4">
                 <label for="jam_estimasi" class="form-label" style="font-weight: 600; color: #334155;">Estimasi Jam Penjemputan</label>
-                <input type="time" class="form-control" id="jam_estimasi" name="jam_estimasi" value="09:00" required style="border-radius: 8px; padding: 10px; border: 1px solid #cbd5e1;">
+                <input type="time" class="form-control" id="jam_estimasi" name="jam_estimasi" value="{{ old('jam_estimasi', '09:00') }}" required style="border-radius: 8px; padding: 10px; border: 1px solid #cbd5e1;">
             </div>
 
             <div class="d-flex gap-2">
@@ -69,4 +104,29 @@
         </form>
     </div>
 </div>
+
+<script>
+    function toggleTipeJadwal() {
+        const tipe = document.querySelector('input[name="tipe_jadwal"]:checked').value;
+        const fieldMingguan = document.getElementById('field-mingguan');
+        const fieldInterval = document.getElementById('field-interval');
+
+        if (tipe === 'mingguan') {
+            fieldMingguan.style.display = 'block';
+            fieldInterval.style.display = 'none';
+            document.getElementById('hari_penjemputan').setAttribute('required', '');
+            document.getElementById('interval_hari').removeAttribute('required');
+            document.getElementById('tanggal_mulai').removeAttribute('required');
+        } else {
+            fieldMingguan.style.display = 'none';
+            fieldInterval.style.display = 'block';
+            document.getElementById('hari_penjemputan').removeAttribute('required');
+            document.getElementById('interval_hari').setAttribute('required', '');
+            document.getElementById('tanggal_mulai').setAttribute('required', '');
+        }
+    }
+
+    // Inisialisasi saat halaman dimuat
+    document.addEventListener('DOMContentLoaded', toggleTipeJadwal);
+</script>
 @endsection

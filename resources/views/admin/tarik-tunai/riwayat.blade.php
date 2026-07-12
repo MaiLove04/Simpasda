@@ -1,81 +1,115 @@
 @extends('layouts.admin')
 
 @section('content')
-<div class="container-fluid">
+<div class="container-fluid py-4">
 
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h2 class="fw-bold text-dark mb-1">
+            <h3 class="fw-bold text-dark mb-1">
                 <i class="bi bi-clock-history text-primary me-2"></i>Riwayat Request Penarikan
-            </h2>
-            <p class="text-muted mb-0">Laporan transaksi pencairan saldo yang telah diproses oleh admin.</p>
+            </h3>
+            <p class="text-muted small mb-0">Laporan komprehensif seluruh transaksi pencairan saldo nasabah bank sampah.</p>
         </div>
     </div>
 
-    <div class="card shadow-sm border-0 mb-4" style="border-radius: 16px;">
-        <div class="card-body p-3 bg-light" style="border-radius: 16px;">
-            <form action="{{ route('admin.tarik-tunai.riwayat') }}" method="GET" class="row g-2">
-                <div class="col-md-10">
-                    <div class="input-group shadow-sm" style="border-radius: 8px; overflow: hidden;">
-                        <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
-                        <input type="text" name="search" class="form-control border-start-0 py-2" value="{{ request('search') }}" placeholder="Cari Nama Nasabah...">
+    <div class="card shadow-sm border-0 mb-4" style="border-radius: 12px;">
+        <div class="card-body p-3 bg-white" style="border-radius: 12px;">
+            <form action="{{ route('admin.tarik-tunai.riwayat') }}" method="GET" class="row g-3 align-items-center">
+                <div class="col-12 col-md-9">
+                    <div class="input-group" style="border-radius: 8px; overflow: hidden;">
+                        <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                        <input type="text" name="search" class="form-control bg-light border-start-0 py-2.5 small" value="{{ request('search') }}" placeholder="Cari berdasarkan nama nasabah atau kode unik...">
                     </div>
                 </div>
-                <div class="col-md-2 d-grid">
-                    <button type="submit" class="btn btn-primary fw-bold shadow-sm" style="border-radius: 8px;">
-                        Filter Laporan
+                <div class="col-12 col-md-3 d-grid">
+                    <button type="submit" class="btn btn-primary fw-semibold py-2.5" style="border-radius: 8px; letter-spacing: 0.3px;">
+                        <i class="bi bi-funnel me-1"></i> Saring Laporan
                     </button>
                 </div>
             </form>
         </div>
     </div>
 
-    <div class="card shadow-sm border-0" style="border-radius: 16px;">
+    <div class="card shadow-sm border-0" style="border-radius: 12px; overflow: hidden;">
         <div class="card-body p-0">
-            <div class="table-responsive" style="border-radius: 16px 16px 0 0;">
+            <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
-                    <thead class="table-light text-secondary fw-bold">
+                    <thead class="bg-light border-bottom text-uppercase text-secondary" style="font-size: 0.75rem; letter-spacing: 0.8px;">
                         <tr>
-                            <th class="ps-4 py-3">Nasabah</th>
-                            <th class="py-3">Nominal</th>
-                            <th class="py-3">Tgl Request</th>
-                            <th class="py-3">Tgl Selesai</th>
-                            <th class="pe-4 py-3 text-center">Status</th>
+                            <th class="ps-4 py-3.5">Informasi Nasabah</th>
+                            <th class="py-3.5">Nominal Penarikan</th>
+                            <th class="py-3.5">Waktu Request</th>
+                            <th class="py-3.5">Waktu Penyelesaian</th>
+                            <th class="pe-4 py-3.5 text-center">Status Transaksi</th>
                         </tr>
                     </thead>
-                    <tbody class="text-dark">
+                    <tbody class="text-secondary" style="font-size: 0.875rem;">
                         @forelse($riwayat as $item)
-                        <tr>
-                            <td class="ps-4">
-                                <h6 class="mb-0 fw-bold">{{ $item->user->name }}</h6>
-                                <span class="text-muted small">{{ $item->user->kode_nasabah }}</span>
+                        <tr class="border-bottom">
+                            <td class="ps-4 py-3">
+                                <div class="d-flex flex-column">
+                                    <span class="fw-semibold text-dark mb-0.5" style="font-size: 0.95rem;">{{ $item->user->name }}</span>
+                                    <span class="text-muted text-uppercase" style="font-size: 0.75rem; font-family: monospace;">{{ $item->user->kode_nasabah }}</span>
+                                </div>
                             </td>
-                            <td>
-                                <strong class="{{ $item->status == 'approved' ? 'text-success' : 'text-danger' }}">
-                                    Rp {{ number_format($item->jumlah_nominal, 0, ',', '.') }}
-                                </strong>
-                            </td>
-                            <td><small>{{ $item->tanggal_request->format('d/m/Y H:i') }}</small></td>
-                            <td><small>{{ $item->tanggal_selesai ? $item->tanggal_selesai->format('d/m/Y H:i') : '-' }}</small></td>
-                            <td class="pe-4 text-center">
+                            <td class="py-3">
                                 @if($item->status == 'approved')
-                                    <span class="badge bg-success-subtle text-success px-3 py-2" style="border-radius: 30px;">DISETUJUI</span>
+                                    <span class="fw-bold text-success" style="font-size: 0.95rem;">Rp {{ number_format($item->jumlah_nominal, 0, ',', '.') }}</span>
+                                @elseif($item->status == 'pending')
+                                    <span class="fw-bold text-warning" style="font-size: 0.95rem;">Rp {{ number_format($item->jumlah_nominal, 0, ',', '.') }}</span>
                                 @else
-                                    <span class="badge bg-danger-subtle text-danger px-3 py-2" style="border-radius: 30px;">DITOLAK</span>
+                                    <span class="fw-bold text-danger" style="font-size: 0.95rem;">Rp {{ number_format($item->jumlah_nominal, 0, ',', '.') }}</span>
+                                @endif
+                            </td>
+                            <td class="py-3 text-dark">
+                                <div>{{ $item->tanggal_request->format('d M Y') }}</div>
+                                <div class="text-muted small" style="font-size: 0.75rem;">{{ $item->tanggal_request->format('H:i') }} WIB</div>
+                            </td>
+                            <td class="py-3 text-dark">
+                                @if($item->tanggal_selesai)
+                                    <div>{{ $item->tanggal_selesai->format('d M Y') }}</div>
+                                    <div class="text-muted small" style="font-size: 0.75rem;">{{ $item->tanggal_selesai->format('H:i') }} WIB</div>
+                                @else
+                                    <span class="text-muted">—</span>
+                                @endif
+                            </td>
+                            <td class="pe-4 text-center py-3">
+                                @if($item->status == 'approved')
+                                    <span class="badge bg-success bg-opacity-10 text-success fw-bold px-3 py-2 text-uppercase" style="border-radius: 6px; font-size: 0.75rem; letter-spacing: 0.5px;">
+                                        <i class="bi bi-check-circle-fill me-1"></i> Selesai
+                                    </span>
+                                @elseif($item->status == 'pending')
+                                    <span class="badge bg-warning bg-opacity-10 text-warning fw-bold px-3 py-2 text-uppercase" style="border-radius: 6px; font-size: 0.75rem; letter-spacing: 0.5px;">
+                                        <i class="bi bi-hourglass-split me-1"></i> Pending
+                                    </span>
+                                @else
+                                    <span class="badge bg-danger bg-opacity-10 text-danger fw-bold px-3 py-2 text-uppercase" style="border-radius: 6px; font-size: 0.75rem; letter-spacing: 0.5px;">
+                                        <i class="bi bi-x-circle-fill me-1"></i> Ditolak
+                                    </span>
                                 @endif
                             </td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="5" class="text-center py-5">Belum ada riwayat penarikan.</td>
+                            <td colspan="5" class="text-center py-5 text-muted">
+                                <div class="mb-3">
+                                    <i class="bi bi-folder-x text-muted opacity-50" style="font-size: 3rem;"></i>
+                                </div>
+                                <h6 class="fw-semibold text-dark mb-1">Data Riwayat Kosong</h6>
+                                <p class="small text-muted mb-0">Tidak ditemukan rekaman transaksi penarikan saldo pada sistem.</p>
+                            </td>
                         </tr>
                         @endforelse
                     </tbody>
                 </table>
             </div>
         </div>
-        <div class="card-footer bg-white border-0 py-3 px-4 d-flex justify-content-end" style="border-radius: 0 0 16px 16px;">
-            {{ $riwayat->appends(request()->query())->links() }}
+        
+        <div class="card-footer bg-white border-0 py-3 px-4 d-flex justify-content-between align-items-center" style="border-radius: 0 0 12px 12px;">
+            <span class="text-muted small">Menampilkan data halaman ini</span>
+            <div>
+                {{ $riwayat->appends(request()->query())->links() }}
+            </div>
         </div>
     </div>
 </div>

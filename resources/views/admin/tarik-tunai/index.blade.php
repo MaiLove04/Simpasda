@@ -90,12 +90,15 @@
                                 <div class="d-flex justify-content-center gap-2">
                                     <form action="{{ route('admin.tarik-tunai.reject', $request->id) }}" method="POST" onsubmit="return confirm('Tolak request penarikan ini?')">
                                         @csrf
+                                        @method('PATCH') {{-- Mengubah request POST menjadi PATCH secara internal di Laravel --}}
                                         <button type="submit" class="btn btn-sm btn-outline-danger fw-bold px-3 py-2" style="border-radius: 30px; font-size: 13px;">
                                             Tolak
                                         </button>
                                     </form>
+
                                     <form action="{{ route('admin.tarik-tunai.approve', $request->id) }}" method="POST" onsubmit="return confirm('Serahkan uang tunai dan setujui penarikan ini?')">
                                         @csrf
+                                        @method('PATCH') {{-- Mengubah request POST menjadi PATCH secara internal di Laravel --}}
                                         <button type="submit" class="btn btn-sm btn-success fw-bold px-3 py-2 border-0 shadow-sm" style="background-color: #16a34a; border-radius: 30px; font-size: 13px;">
                                             <i class="bi bi-check-lg me-1"></i> Approve & Bayar
                                         </button>

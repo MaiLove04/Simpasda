@@ -3,12 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+// use App\Traits\SendsPushNotifications;
+use Illuminate\Support\Facades\DB;
+use App\Models\SetorSampah;
 use App\Models\JadwalPenjemputan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class JadwalWebController extends Controller
 {
+    // use SendsPushNotifications;
+
     public function index()
     {
         // Mengambil jadwal yang hanya dimiliki oleh bank sampah milik admin yang login
@@ -36,26 +41,41 @@ class JadwalWebController extends Controller
 
     public function store(Request $request)
     {
-        // Validasi diperketat untuk memastikan ID benar-benar valid
         $request->validate([
             'nasabah_id'          => 'required|exists:users,id',
             'kurir_id'            => 'required|exists:users,id',
             'tanggal_penjemputan' => 'required|date',
             'alamat'              => 'required|string',
-            'catatan'             => 'nullable|string',
         ]);
 
-        JadwalPenjemputan::create([
-            'bank_sampah_id'      => Auth::user()->bank_sampah_id,
-            'nasabah_id'          => $request->nasabah_id,
-            'kurir_id'            => $request->kurir_id,
-            'tanggal_penjemputan' => $request->tanggal_penjemputan,
-            'alamat'              => $request->alamat,
-            'catatan'             => $request->catatan,
-            'status'              => 'terjadwal',
-        ]);
+        DB::beginTransaction();
 
-        return redirect('/admin/jadwal')->with('success', 'Jadwal penjemputan berhasil dibuat!');
+        try {
+
+            $jadwal = new JadwalPenjemputan();
+            $jadwal->bank_sampah_id = Auth::user()->bank_sampah_id;
+            $jadwal->nasabah_id = $request->nasabah_id;
+            $jadwal->kurir_id = $request->kurir_id;
+            $jadwal->tanggal_penjemputan = $request->tanggal_penjemputan;
+            $jadwal->alamat = $request->alamat;
+            $jadwal->catatan = $request->catatan;
+            $jadwal->status = 'terjadwal';
+
+            $jadwal->save();
+
+            DB::commit();
+
+            return redirect('/admin/jadwal')
+                ->with('success', 'Jadwal berhasil dibuat.');
+
+        } catch (\Exception $e) {
+
+            DB::rollBack();
+
+            return back()
+                ->withInput()
+                ->with('error', $e->getMessage());
+        }
     }
 
     public function jadwalKurir($id)
@@ -104,6 +124,12 @@ class JadwalWebController extends Controller
         // Ubah status menjadi proses
         $jadwal->status = 'proses';
         $jadwal->save();
+
+        // Kirim notifikasi ke Nasabah
+        $nasabah = $jadwal->nasabah;
+        if ($nasabah && $nasabah->fcm_token) {
+            $this->sendPushNotification($nasabah->fcm_token, 'Kurir Dalam Perjalanan', 'Kurir sedang dalam perjalanan untuk menjemput sampah Anda.');
+        }
 
         return response()->json([
             'success' => true,

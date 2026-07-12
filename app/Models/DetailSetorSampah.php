@@ -12,4 +12,9 @@ class DetailSetorSampah extends Model
         return $this->belongsTo(JenisSampah::class, 'jenis_sampah_id');
     }
 
+    public function setorSampah()
+    {
+        return $this->belongsTo(SetorSampah::class, 'setor_sampah_id');
+    }
+
 }
