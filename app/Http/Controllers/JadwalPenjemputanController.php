@@ -64,6 +64,25 @@ class JadwalPenjemputanController extends Controller
                 'status'              => 'terjadwal',
             ]);
 
+            // TAMBAH NOTIFIKASI
+            // Notifikasi untuk Kurir
+            \App\Models\Notifikasi::create([
+                'user_id' => $request->kurir_id,
+                'judul' => 'Tugas Penjemputan Baru',
+                'pesan' => 'Jadwal penjemputan sampah baru telah ditugaskan kepada Anda untuk tanggal ' . $request->tanggal_penjemputan . ' di ' . $request->alamat . '.',
+                'type' => 'penjemputan',
+                'is_read' => false,
+            ]);
+
+            // Notifikasi untuk Nasabah
+            \App\Models\Notifikasi::create([
+                'user_id' => $request->nasabah_id,
+                'judul' => 'Jadwal Penjemputan Dibuat',
+                'pesan' => 'Jadwal penjemputan sampah Anda telah diatur untuk tanggal ' . $request->tanggal_penjemputan . '.',
+                'type' => 'penjemputan',
+                'is_read' => false,
+            ]);
+
             $jadwal->load(['nasabah', 'kurir', 'bankSampah']);
 
             return response()->json([
@@ -99,6 +118,16 @@ class JadwalPenjemputanController extends Controller
             // Ubah status menjadi proses penjemputan
             $jadwal->status = 'proses';
             $jadwal->save();
+
+            // TAMBAH NOTIFIKASI
+            // Notifikasi untuk Nasabah
+            \App\Models\Notifikasi::create([
+                'user_id' => $jadwal->nasabah_id,
+                'judul' => 'Kurir Sedang Menuju Lokasi',
+                'pesan' => 'Kurir sedang dalam perjalanan menuju lokasi Anda untuk menjemput sampah.',
+                'type' => 'penjemputan',
+                'is_read' => false,
+            ]);
 
             return response()->json([
                 'success' => true,

@@ -23,6 +23,7 @@ Route::post('/setup-pin', function (\Illuminate\Http\Request $request) {
         'status' => 'success',
         'message' => 'Rute setup-pin berhasil dihubungkan ke Laravel!'
     ], 200);
+});
 
 
 Route::get('/bersihkan-ingatan-rute', function () {
@@ -80,13 +81,10 @@ Route::post('/login', [AdminWebController::class, 'login']);
 Route::post('/logout', [AdminWebController::class, 'logout'])->middleware('auth')->name('logout');
 
 Route::prefix('admin')->middleware('auth')->group(function () {
-
     Route::get('/dashboard', [AdminWebController::class, 'dashboard'])->name('admin.dashboard');
-
     Route::resource('kurir', KurirWebController::class);
     Route::resource('jenis-sampah', JenisSampahWebController::class);
     Route::resource('jadwal', JadwalWebController::class);
-
     Route::resource('master-jadwal', MasterJadwalRutinController::class)->names([
         'index'   => 'master-jadwal.index',
         'create'  => 'master-jadwal.create',
@@ -122,11 +120,8 @@ Route::prefix('admin')->middleware('auth')->group(function () {
 });
 
 Route::prefix('dlh')->middleware(['auth', 'admin_dlh'])->group(function () {
-
     Route::get('/dashboard', [DlhDashboardController::class, 'index'])->name('dlh.dashboard');
-
     Route::prefix('bank-sampah')->group(function () {
-
         Route::get('/', [DlhBankSampahWebController::class, 'index'])
             ->name('dlh.bank-sampah.index');
 

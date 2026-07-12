@@ -105,6 +105,29 @@ class SetorSampahController extends Controller
                 }
             }
 
+            // 7. TAMBAH NOTIFIKASI
+            // Notifikasi untuk Nasabah
+            $totalBerat = 0;
+            foreach ($sampahList as $item) {
+                $totalBerat += $item['berat'] ?? 0;
+            }
+            \App\Models\Notifikasi::create([
+                'user_id' => $request->user_id,
+                'judul' => 'Sampah Selesai Ditimbang',
+                'pesan' => 'Sampah Anda telah selesai ditimbang dengan berat total ' . $totalBerat . ' Kg. Saldo Anda bertambah sebesar Rp ' . number_format($request->grand_total, 0, ',', '.') . '.',
+                'type' => 'setoran',
+                'is_read' => false,
+            ]);
+
+            // Notifikasi untuk Kurir
+            \App\Models\Notifikasi::create([
+                'user_id' => $setor->kurir_id,
+                'judul' => 'Setoran Sampah Sukses',
+                'pesan' => 'Berhasil memproses setoran sampah untuk nasabah ' . ($nasabah->name ?? 'Nasabah') . ' dengan total Rp ' . number_format($request->grand_total, 0, ',', '.') . '.',
+                'type' => 'setoran',
+                'is_read' => false,
+            ]);
+
             DB::commit();
 
             return response()->json([
@@ -213,6 +236,25 @@ class SetorSampahController extends Controller
                     $detail->save();
                 }
             }
+
+            // TAMBAH NOTIFIKASI
+            // Notifikasi untuk Courier
+            \App\Models\Notifikasi::create([
+                'user_id' => $kurirIdDefault,
+                'judul' => 'Tugas Penjemputan Baru',
+                'pesan' => 'Ada request penjemputan sampah baru dari nasabah ' . ($nasabah->name ?? 'Nasabah') . ' di alamat: ' . $jadwal->alamat . '.',
+                'type' => 'penjemputan',
+                'is_read' => false,
+            ]);
+
+            // Notifikasi untuk Nasabah
+            \App\Models\Notifikasi::create([
+                'user_id' => $request->user_id,
+                'judul' => 'Permintaan Penjemputan Terkirim',
+                'pesan' => 'Permintaan penjemputan sampah Anda telah terkirim. Kurir akan segera datang ke lokasi Anda.',
+                'type' => 'penjemputan',
+                'is_read' => false,
+            ]);
 
             DB::commit();
 

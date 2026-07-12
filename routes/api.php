@@ -15,7 +15,8 @@ use App\Http\Controllers\Api\IotTimbanganController;
 use App\Http\Controllers\AduanController;
 use App\Http\Controllers\Api\TarikTunaiController;
 use App\Http\Controllers\OtpController;
-
+use App\Http\Controllers\NotifikasiController;
+use Illuminate\Support\Facades\DB;
 
 
 /*
@@ -29,7 +30,7 @@ use App\Http\Controllers\OtpController;
 // ==========================================
 
 Route::get('/bank-sampah', function() {
-    return \DB::table('bank_sampahs')->get();
+    return DB::table('bank_sampahs')->get();
 });
 
 Route::get('/test', function () {
@@ -62,6 +63,11 @@ Route::get('/kurir/jadwal/{id}', [JadwalPenjemputanController::class, 'jadwalKur
 
 // Ambil jadwal aktif khusus nasabah (untuk halaman Lacak)
 Route::get('/nasabah/jadwal/{id}', [JadwalPenjemputanController::class, 'jadwalNasabah']);
+
+// Fitur Notifikasi
+Route::get('/notifikasi-kurir/{userId}', [NotifikasiController::class, 'getNotifikasiKurir']);
+Route::get('/notifikasi-nasabah/{userId}', [NotifikasiController::class, 'getNotifikasiNasabah']);
+Route::post('/notifikasi/{id}/read', [NotifikasiController::class, 'markAsRead']);
 
 // Aksi Kurir: Mengubah status penjemputan dari 'terjadwal' menjadi 'proses'
 Route::put('/jadwal-penjemputan/{id}/mulai', [JadwalPenjemputanController::class, 'mulaiJemput']);
