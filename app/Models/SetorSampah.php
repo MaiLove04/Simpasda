@@ -4,15 +4,31 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
 class SetorSampah extends Model
 {
     use HasFactory;
-    
-    protected $table = 'setor_sampahs'; 
+    use HasUuids;
+
+    public $incrementing = false;
+
+    protected $keyType = 'string';
+
+    protected $table = 'setor_sampahs';
 
     // Mass assignment guard (mengizinkan pengisian data masal dari controller)
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'user_id',
+        'kurir_id',
+        'jadwal_id',
+        'total',
+        'catatan',
+        'status',
+        'jenis_sampah_id',
+        'berat',
+        'harga_per_kg',
+    ];
 
     /**
      * RELASI: Menghubungkan ke Pemilik Sampah (Nasabah)

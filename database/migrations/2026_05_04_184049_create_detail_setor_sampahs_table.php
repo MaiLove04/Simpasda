@@ -17,14 +17,12 @@ return new class extends Migration {
 
                 $table->id();
 
+                $table->uuid('setor_sampah_id');
 
-                $table->foreignId(
-                    'setor_sampah_id'
-                )->constrained(
-                    'setor_sampahs'
-                )->onDelete(
-                    'cascade'
-                );
+                $table->foreign('setor_sampah_id')
+                    ->references('id')
+                    ->on('setor_sampahs')
+                    ->cascadeOnDelete();
 
 
                 $table->foreignId(

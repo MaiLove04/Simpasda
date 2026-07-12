@@ -10,14 +10,17 @@ return new class extends Migration
     {
         Schema::create('setor_sampahs', function (Blueprint $table) {
 
-            $table->id();
+            $table->uuid('id')->primary();
 
 
-            $table->foreignId('user_id');
-
+            $table->foreignId('user_id')
+                ->constrained()
+                ->cascadeOnDelete();
 
             $table->foreignId('kurir_id')
-                  ->nullable();
+                ->nullable()
+                ->constrained('users')
+                ->nullOnDelete();
 
 
             $table->foreignId(

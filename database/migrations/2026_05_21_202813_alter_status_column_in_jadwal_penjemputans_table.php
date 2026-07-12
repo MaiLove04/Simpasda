@@ -24,6 +24,8 @@ return new class extends Migration
     {
         Schema::table('jadwal_penjemputans', function (Blueprint $table) {
             //
+            // Mengembalikan opsi ENUM ke kondisi semula (tanpa 'proses')
+            $table->enum('status', ['terjadwal', 'selesai', 'batal'])->default('terjadwal')->change();
         });
     }
 };

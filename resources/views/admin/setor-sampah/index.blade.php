@@ -51,11 +51,11 @@
                         <th class="py-2" width="14%">Tanggal & Waktu</th>
                         <th class="py-2">Nama Nasabah</th>
                         <th class="py-2" style="color: #1E521E;">Nama Kurir</th>
-                        <th class="py-2" width="30%">Rincian Sampah</th>
+                        <th class="py-2" width="25%">Rincian Sampah</th>
                         <th class="py-2">Total Uang</th>
-                        <th class="py-2">Foto</th>
+                        <th class="py-2" width="10%">Foto</th>
                         <th class="py-2 pe-3" width="8%">Status</th>
-                        <th class="py-2 pe-3 text-center" width="8%">Aksi</th>
+                        <th class="py-2 pe-3 text-center" width="10%">Aksi</th>
                     </tr>
                 </thead>
                 <tbody style="color: #334155; font-size: 13px;">
@@ -70,15 +70,17 @@
                             <div class="d-flex flex-column gap-1">
                                 {{-- 1. Kondisi Data Baru Multi-Item --}}
                                 @if($setor->details && $setor->details->count() > 0)
-                                    @foreach($setor->details as $detail)
+                                    @foreach($setor->details->take(2) as $detail)
                                         <div class="d-flex justify-content-between align-items-center" style="font-size: 12px; line-height: 1.4;">
                                             <div>
                                                 <span style="font-weight: 600; color: #334155;">• {{ $detail->jenisSampah->nama ?? 'Jenis Sampah' }}</span>
                                                 <span class="text-muted ms-1">({{ $detail->berat }} Kg)</span>
                                             </div>
-                                            <span class="text-muted" style="font-size: 11px; font-family: monospace;">@Rp{{ number_format($detail->harga_per_kg, 0, ',', '.') }}</span>
                                         </div>
                                     @endforeach
+                                    @if($setor->details->count() > 2)
+                                        <small class="text-muted text-italic" style="font-size: 11px;">+{{ $setor->details->count() - 2 }} item lainnya...</small>
+                                    @endif
 
                                 {{-- 2. Fallback Data Lama Single-Item --}}
                                 @elseif($setor->berat)
@@ -87,7 +89,6 @@
                                             <span style="font-weight: 600;">• {{ $setor->jenis_sampah->nama ?? 'Sampah' }}</span>
                                             <span class="ms-1">({{ $setor->berat }} Kg)</span>
                                         </div>
-                                        <span style="font-size: 11px; font-family: monospace;">@Rp{{ number_format($setor->harga_per_kg, 0, ',', '.') }}</span>
                                     </div>
                                 @else
                                     <span class="text-muted font-italic" style="font-size: 11px;">Tidak ada rincian</span>
@@ -96,15 +97,18 @@
                         </td>
 
                         <td class="py-2 font-weight-bold text-success" style="font-size: 14px; font-weight: 700;">Rp {{ number_format($setor->total, 0, ',', '.') }}</td>
+                        
+                        {{-- Kolom Foto yang Diperbaiki --}}
                         <td class="py-2">
-                            @if($setor->foto_sampah)
-                                <a href="{{ asset($setor->foto_sampah) }}" target="_blank">
-                                    <img src="{{ asset($setor->foto_sampah) }}" alt="Foto" class="img-thumbnail p-0" style="max-height: 32px; width: 32px; border-radius: 4px; object-fit: cover;">
+                            @if($setor->foto)
+                                <a href="{{ asset('storage/' . $setor->foto) }}" target="_blank">
+                                    <img src="{{ asset('storage/' . $setor->foto) }}" alt="Foto Bukti" class="img-thumbnail" style="max-height: 40px; max-width: 60px; object-fit: cover; border-radius: 4px;">
                                 </a>
                             @else
-                                <span class="text-muted font-italic" style="font-size: 11px;">-</span>
+                                <span class="text-muted" style="font-size: 11px;">Tidak ada foto</span>
                             @endif
                         </td>
+
                         <td class="py-2 pe-3">
                             <span class="badge" style="border-radius: 4px; padding: 4px 8px; font-weight: 600; font-size: 11px; background-color: #dcfce7; color: #16a34a; border: 1px solid #bbf7d0;">
                                 Selesai
@@ -112,9 +116,11 @@
                         </td>
                         <td class="py-2 pe-3">
                             <div class="d-flex gap-1 justify-content-center">
-                                <a href="{{ route('admin.setor.show', $setor->id) }}" class="btn btn-sm btn-light border px-2" style="border-radius: 6px;" title="Lihat Detail">
+                                {{-- Tombol Detail memicu Modal Pop-up --}}
+                                <button type="button" class="btn btn-sm btn-light border px-2" style="border-radius: 6px;" title="Lihat Detail" data-bs-toggle="modal" data-bs-target="#detailModal{{ $setor->id }}">
                                     <i class="bi bi-eye" style="font-size: 11px;"></i>
-                                </a>
+                                </button>
+                                
                                 <form action="{{ route('admin.setor.destroy', $setor->id) }}" method="POST" onsubmit="return confirm('Anda yakin ingin menghapus data setoran ini? Tindakan ini tidak dapat diurungkan.');">
                                     @csrf
                                     @method('DELETE')
@@ -125,6 +131,88 @@
                             </div>
                         </td>
                     </tr>
+
+                    {{-- MODAL POP-UP DETAIL TRANSAKSI --}}
+                    <div class="modal fade" id="detailModal{{ $setor->id }}" tabindex="-1" aria-labelledby="detailModalLabel{{ $setor->id }}" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content" style="border-radius: 12px; border: none; overflow: hidden;">
+                                <div class="modal-header text-white px-3 py-3" style="background-color: #1E521E;">
+                                    <h5 class="modal-title h6 mb-0 font-weight-bold" id="detailModalLabel{{ $setor->id }}"><i class="bi bi-receipt me-2"></i>Detail Transaksi Setor Sampah</h5>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dash-dismiss="modal" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body p-3" style="font-size: 13px;">
+                                    <div class="mb-3 pb-2 border-bottom">
+                                        <div class="row g-2">
+                                            <div class="col-6">
+                                                <span class="text-muted d-block" style="font-size: 11px;">Tanggal & Waktu</span>
+                                                <strong style="color: #0f172a;">{{ \Carbon\Carbon::parse($setor->created_at)->format('d F Y, H:i') }} WIB</strong>
+                                            </div>
+                                            <div class="col-6 text-end">
+                                                <span class="text-muted d-block" style="font-size: 11px;">Status</span>
+                                                <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1" style="font-size: 10px; font-weight: 600;">Selesai</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <div class="p-2 bg-light rounded-3 mb-2">
+                                            <span class="text-muted d-block" style="font-size: 11px;">Nama Nasabah</span>
+                                            <strong style="color: #0f172a; font-size: 13px;">{{ $setor->nasabah->name ?? 'Nasabah ASRI' }}</strong>
+                                        </div>
+                                        <div class="p-2 bg-light rounded-3">
+                                            <span class="text-muted d-block" style="font-size: 11px;">Nama Kurir</span>
+                                            <strong style="color: #1E521E; font-size: 13px;">{{ $setor->kurir->name ?? 'Kurir Lapangan' }}</strong>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <span class="text-muted d-block mb-1" style="font-size: 11px; font-weight: 600; text-transform: uppercase;">Rincian Item Sampah</span>
+                                        <div class="border rounded-3 p-2 bg-white">
+                                            @if($setor->details && $setor->details->count() > 0)
+                                                @foreach($setor->details as $detail)
+                                                    <div class="d-flex justify-content-between align-items-center py-1 {{ !$loop->last ? 'border-bottom' : '' }}">
+                                                        <div>
+                                                            <span style="font-weight: 600; color: #334155;">{{ $detail->jenisSampah->nama ?? 'Jenis Sampah' }}</span>
+                                                            <span class="text-muted ms-1">({{ $detail->berat }} Kg)</span>
+                                                        </div>
+                                                        <span class="text-muted" style="font-family: monospace;">@Rp{{ number_format($detail->harga_per_kg, 0, ',', '.') }}</span>
+                                                    </div>
+                                                @endforeach
+                                            @elseif($setor->berat)
+                                                <div class="d-flex justify-content-between align-items-center py-1">
+                                                    <div>
+                                                        <span style="font-weight: 600; color: #b45309;">{{ $setor->jenis_sampah->nama ?? 'Sampah' }}</span>
+                                                        <span class="ms-1">({{ $setor->berat }} Kg)</span>
+                                                    </div>
+                                                    <span style="font-family: monospace;">@Rp{{ number_format($setor->harga_per_kg, 0, ',', '.') }}</span>
+                                                </div>
+                                            @else
+                                                <span class="text-muted font-italic">Tidak ada rincian item.</span>
+                                            @endif
+                                        </div>
+                                    </div>
+
+                                    @if($setor->foto)
+                                    <div class="mb-3">
+                                        <span class="text-muted d-block mb-1" style="font-size: 11px; font-weight: 600; text-transform: uppercase;">Foto Bukti Setor</span>
+                                        <div class="text-center bg-light border rounded-3 p-2">
+                                            <img src="{{ asset('storage/' . $setor->foto) }}" alt="Foto Bukti" class="img-fluid rounded-2 shadow-sm" style="max-height: 180px; object-fit: contain;">
+                                        </div>
+                                    </div>
+                                    @endif
+
+                                    <div class="p-3 bg-success-subtle rounded-3 border border-success d-flex justify-content-between align-items-center">
+                                        <span style="font-weight: 600; color: #1E521E;">Total Diterima Nasabah:</span>
+                                        <span class="h5 mb-0 text-success" style="font-weight: 800;">Rp {{ number_format($setor->total, 0, ',', '.') }}</span>
+                                    </div>
+                                </div>
+                                <div class="modal-footer bg-light px-3 py-2 border-top">
+                                    <button type="button" class="btn btn-sm btn-secondary px-3" data-bs-dismiss="modal" style="border-radius: 6px;">Tutup</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     @empty
                     <tr>
                         <td colspan="9" class="text-center py-4 text-muted" style="font-size: 13px;">
@@ -149,8 +237,8 @@
 </div>
 
 <style>
-    /* CSS Tambahan Kecil untuk merampingkan pagination bawaan Bootstrap agar tidak kebesaran */
-    .sm-pagination .pagination { mb-0; gap: 2px; }
+    .sm-pagination .pagination { margin-bottom: 0; gap: 2px; }
     .sm-pagination .page-link { padding: 4px 10px; font-size: 12px; border-radius: 4px; }
+    .bg-success-subtle { background-color: #dcfce7 !important; }
 </style>
 @endsection
