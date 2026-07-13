@@ -1,0 +1,392 @@
+[03-Jul-2026 12:26:36 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 12:26:36 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 12:26:36 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Failed opening required '/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/onebabel/Simpasda/public/index.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 12:26:40 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 12:26:40 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 12:26:40 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Failed opening required '/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/onebabel/Simpasda/public/index.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 12:28:32 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 12:28:32 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 12:28:32 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Failed opening required '/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/onebabel/Simpasda/public/index.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 12:39:11 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 12:39:11 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 12:39:11 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Failed opening required '/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/onebabel/Simpasda/public/index.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 12:39:30 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 12:39:30 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 12:39:30 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Failed opening required '/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/onebabel/Simpasda/public/index.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 12:40:35 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 12:40:35 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 12:40:35 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Failed opening required '/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/onebabel/Simpasda/public/index.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 12:54:16 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 12:54:16 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 12:54:16 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Failed opening required '/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/onebabel/Simpasda/public/index.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 12:59:07 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 12:59:07 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 12:59:07 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Failed opening required '/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/onebabel/Simpasda/public/index.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 13:21:18 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 13:21:18 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 13:21:18 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Failed opening required '/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/onebabel/Simpasda/public/index.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 13:24:01 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 13:24:01 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 13:24:01 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Failed opening required '/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/onebabel/Simpasda/public/index.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 13:44:25 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 13:44:25 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 13:44:25 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Failed opening required '/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/onebabel/Simpasda/public/index.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 14:12:37 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 14:12:37 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 14:12:37 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Failed opening required '/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/onebabel/Simpasda/public/index.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 14:12:37 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 14:12:37 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 14:12:37 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Failed opening required '/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/onebabel/Simpasda/public/index.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 14:12:37 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 14:12:37 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 14:12:37 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Failed opening required '/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/onebabel/Simpasda/public/index.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 14:12:38 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 14:12:38 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 14:12:38 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Failed opening required '/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/onebabel/Simpasda/public/index.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 14:12:38 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 14:12:38 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 14:12:38 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Failed opening required '/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/onebabel/Simpasda/public/index.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 14:29:45 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 14:29:45 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 14:29:45 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Failed opening required '/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/onebabel/Simpasda/public/index.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 14:41:09 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 14:41:09 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 14:41:09 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Failed opening required '/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/onebabel/Simpasda/public/index.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 14:41:13 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 14:41:13 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 14:41:13 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Failed opening required '/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/onebabel/Simpasda/public/index.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 14:41:20 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 14:41:20 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 14:41:20 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Failed opening required '/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/onebabel/Simpasda/public/index.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 14:41:25 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 14:41:25 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 14:41:25 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Failed opening required '/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/onebabel/Simpasda/public/index.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 15:33:33 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 15:33:33 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 15:33:33 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Failed opening required '/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/onebabel/Simpasda/public/index.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 15:34:47 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 15:34:47 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 15:34:47 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Failed opening required '/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/onebabel/Simpasda/public/index.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 15:37:56 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 15:37:56 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 15:37:56 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Failed opening required '/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/onebabel/Simpasda/public/index.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 15:48:00 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 15:48:00 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 15:48:00 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Failed opening required '/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/onebabel/Simpasda/public/index.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 17:23:22 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 17:23:22 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 17:23:22 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Failed opening required '/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/onebabel/Simpasda/public/index.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 20:10:39 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 20:10:39 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 20:10:39 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Failed opening required '/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/onebabel/Simpasda/public/index.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 20:12:29 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 20:12:29 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 20:12:29 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Failed opening required '/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/onebabel/Simpasda/public/index.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 21:39:26 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 21:39:26 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 21:39:26 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Failed opening required '/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/onebabel/Simpasda/public/index.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 21:41:29 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 21:41:29 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 21:41:29 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Failed opening required '/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/onebabel/Simpasda/public/index.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 21:41:33 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 21:41:33 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 21:41:33 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Failed opening required '/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/onebabel/Simpasda/public/index.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 21:41:38 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 21:41:38 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 21:41:38 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Failed opening required '/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/onebabel/Simpasda/public/index.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 21:47:22 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 21:47:22 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 21:47:22 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Failed opening required '/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/onebabel/Simpasda/public/index.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 21:48:55 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 21:48:55 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 21:48:55 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Failed opening required '/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/onebabel/Simpasda/public/index.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 22:01:30 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 22:01:30 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 22:01:30 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Failed opening required '/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/onebabel/Simpasda/public/index.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 22:02:44 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 22:02:44 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 22:02:44 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Failed opening required '/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/onebabel/Simpasda/public/index.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 22:02:46 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 22:02:46 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 22:02:46 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Failed opening required '/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/onebabel/Simpasda/public/index.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 22:02:46 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 22:02:46 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 22:02:46 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Failed opening required '/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/onebabel/Simpasda/public/index.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 22:02:46 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 22:02:46 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 22:02:46 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Failed opening required '/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/onebabel/Simpasda/public/index.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 22:02:47 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 22:02:47 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 22:02:47 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Failed opening required '/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/onebabel/Simpasda/public/index.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 22:02:53 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 22:02:53 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 22:02:53 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Failed opening required '/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/onebabel/Simpasda/public/index.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 22:02:53 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 22:02:53 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 22:02:53 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Failed opening required '/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/onebabel/Simpasda/public/index.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 22:04:39 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 22:04:39 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 22:04:39 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Failed opening required '/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/onebabel/Simpasda/public/index.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 22:04:40 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 22:04:40 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 22:04:40 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Failed opening required '/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/onebabel/Simpasda/public/index.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 22:07:16 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 22:07:16 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 22:07:16 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Failed opening required '/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/onebabel/Simpasda/public/index.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 22:07:16 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 22:07:16 Asia/Jakarta] PHP Warning:  require(/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php): Failed to open stream: No such file or directory in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 22:07:16 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Failed opening required '/home/onebabel/Simpasda/public/../Simpasda/vendor/autoload.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/onebabel/Simpasda/public/index.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/onebabel/Simpasda/public/index.php on line 14
+[03-Jul-2026 22:26:44 Asia/Jakarta] PHP Deprecated:  SimpleSoftwareIO\QrCode\Generator::generate(): Implicitly marking parameter $filename as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/simplesoftwareio/simple-qrcode/src/Generator.php on line 169
+[03-Jul-2026 22:26:44 Asia/Jakarta] PHP Deprecated:  BaconQrCode\Encoder\Encoder::chooseMode(): Implicitly marking parameter $encoding as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/bacon/bacon-qr-code/src/Encoder/Encoder.php on line 158
+[03-Jul-2026 22:26:44 Asia/Jakarta] PHP Deprecated:  BaconQrCode\Common\ReedSolomonCodec::decode(): Implicitly marking parameter $erasures as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/bacon/bacon-qr-code/src/Common/ReedSolomonCodec.php on line 225
+[04-Jul-2026 09:17:57 Asia/Jakarta] PHP Deprecated:  SimpleSoftwareIO\QrCode\Generator::generate(): Implicitly marking parameter $filename as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/simplesoftwareio/simple-qrcode/src/Generator.php on line 169
+[04-Jul-2026 09:17:57 Asia/Jakarta] PHP Deprecated:  BaconQrCode\Encoder\Encoder::chooseMode(): Implicitly marking parameter $encoding as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/bacon/bacon-qr-code/src/Encoder/Encoder.php on line 158
+[04-Jul-2026 09:17:57 Asia/Jakarta] PHP Deprecated:  BaconQrCode\Common\ReedSolomonCodec::decode(): Implicitly marking parameter $erasures as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/bacon/bacon-qr-code/src/Common/ReedSolomonCodec.php on line 225
+[04-Jul-2026 13:16:24 Asia/Jakarta] PHP Deprecated:  SimpleSoftwareIO\QrCode\Generator::generate(): Implicitly marking parameter $filename as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/simplesoftwareio/simple-qrcode/src/Generator.php on line 169
+[04-Jul-2026 13:16:24 Asia/Jakarta] PHP Deprecated:  BaconQrCode\Encoder\Encoder::chooseMode(): Implicitly marking parameter $encoding as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/bacon/bacon-qr-code/src/Encoder/Encoder.php on line 158
+[04-Jul-2026 13:16:24 Asia/Jakarta] PHP Deprecated:  BaconQrCode\Common\ReedSolomonCodec::decode(): Implicitly marking parameter $erasures as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/bacon/bacon-qr-code/src/Common/ReedSolomonCodec.php on line 225
+[06-Jul-2026 10:43:55 Asia/Jakarta] PHP Deprecated:  SimpleSoftwareIO\QrCode\Generator::generate(): Implicitly marking parameter $filename as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/simplesoftwareio/simple-qrcode/src/Generator.php on line 169
+[06-Jul-2026 10:43:55 Asia/Jakarta] PHP Deprecated:  BaconQrCode\Encoder\Encoder::chooseMode(): Implicitly marking parameter $encoding as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/bacon/bacon-qr-code/src/Encoder/Encoder.php on line 158
+[06-Jul-2026 10:43:55 Asia/Jakarta] PHP Deprecated:  BaconQrCode\Common\ReedSolomonCodec::decode(): Implicitly marking parameter $erasures as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/bacon/bacon-qr-code/src/Common/ReedSolomonCodec.php on line 225
+[06-Jul-2026 11:42:20 Asia/Jakarta] PHP Parse error:  syntax error, unexpected token "<", expecting ")" in /home/onebabel/Simpasda/bootstrap/app.php on line 13
+[06-Jul-2026 11:42:37 Asia/Jakarta] PHP Parse error:  syntax error, unexpected token "<", expecting ")" in /home/onebabel/Simpasda/bootstrap/app.php on line 13
+[06-Jul-2026 11:44:47 Asia/Jakarta] PHP Parse error:  syntax error, unexpected token "<", expecting ")" in /home/onebabel/Simpasda/bootstrap/app.php on line 13
+[06-Jul-2026 11:44:51 Asia/Jakarta] PHP Parse error:  syntax error, unexpected token "<", expecting ")" in /home/onebabel/Simpasda/bootstrap/app.php on line 13
+[06-Jul-2026 11:44:55 Asia/Jakarta] PHP Parse error:  syntax error, unexpected token "<", expecting ")" in /home/onebabel/Simpasda/bootstrap/app.php on line 13
+[06-Jul-2026 11:45:46 Asia/Jakarta] PHP Parse error:  syntax error, unexpected token "<", expecting ")" in /home/onebabel/Simpasda/bootstrap/app.php on line 13
+[06-Jul-2026 11:45:47 Asia/Jakarta] PHP Parse error:  syntax error, unexpected token "<", expecting ")" in /home/onebabel/Simpasda/bootstrap/app.php on line 13
+[06-Jul-2026 11:45:49 Asia/Jakarta] PHP Parse error:  syntax error, unexpected token "<", expecting ")" in /home/onebabel/Simpasda/bootstrap/app.php on line 13
+[06-Jul-2026 11:45:50 Asia/Jakarta] PHP Parse error:  syntax error, unexpected token "<", expecting ")" in /home/onebabel/Simpasda/bootstrap/app.php on line 13
+[06-Jul-2026 11:45:50 Asia/Jakarta] PHP Parse error:  syntax error, unexpected token "<", expecting ")" in /home/onebabel/Simpasda/bootstrap/app.php on line 13
+[06-Jul-2026 11:45:51 Asia/Jakarta] PHP Parse error:  syntax error, unexpected token "<", expecting ")" in /home/onebabel/Simpasda/bootstrap/app.php on line 13
+[06-Jul-2026 11:45:53 Asia/Jakarta] PHP Parse error:  syntax error, unexpected token "<", expecting ")" in /home/onebabel/Simpasda/bootstrap/app.php on line 13
+[06-Jul-2026 11:45:54 Asia/Jakarta] PHP Parse error:  syntax error, unexpected token "<", expecting ")" in /home/onebabel/Simpasda/bootstrap/app.php on line 13
+[06-Jul-2026 11:45:55 Asia/Jakarta] PHP Parse error:  syntax error, unexpected token "<", expecting ")" in /home/onebabel/Simpasda/bootstrap/app.php on line 13
+[06-Jul-2026 11:45:55 Asia/Jakarta] PHP Parse error:  syntax error, unexpected token "<", expecting ")" in /home/onebabel/Simpasda/bootstrap/app.php on line 13
+[06-Jul-2026 11:49:04 Asia/Jakarta] PHP Parse error:  syntax error, unexpected token "<", expecting ")" in /home/onebabel/Simpasda/bootstrap/app.php on line 13
+[06-Jul-2026 11:54:53 Asia/Jakarta] PHP Parse error:  syntax error, unexpected token "<", expecting ")" in /home/onebabel/Simpasda/bootstrap/app.php on line 13
+[06-Jul-2026 11:54:56 Asia/Jakarta] PHP Parse error:  syntax error, unexpected token "<", expecting ")" in /home/onebabel/Simpasda/bootstrap/app.php on line 13
+[06-Jul-2026 11:54:58 Asia/Jakarta] PHP Parse error:  syntax error, unexpected token "<", expecting ")" in /home/onebabel/Simpasda/bootstrap/app.php on line 13
+[06-Jul-2026 11:54:58 Asia/Jakarta] PHP Parse error:  syntax error, unexpected token "<", expecting ")" in /home/onebabel/Simpasda/bootstrap/app.php on line 13
+[06-Jul-2026 11:55:00 Asia/Jakarta] PHP Parse error:  syntax error, unexpected token "<", expecting ")" in /home/onebabel/Simpasda/bootstrap/app.php on line 13
+[06-Jul-2026 11:55:02 Asia/Jakarta] PHP Parse error:  syntax error, unexpected token "<", expecting ")" in /home/onebabel/Simpasda/bootstrap/app.php on line 13
+[06-Jul-2026 11:55:04 Asia/Jakarta] PHP Parse error:  syntax error, unexpected token "<", expecting ")" in /home/onebabel/Simpasda/bootstrap/app.php on line 13
+[06-Jul-2026 11:55:07 Asia/Jakarta] PHP Parse error:  syntax error, unexpected token "<", expecting ")" in /home/onebabel/Simpasda/bootstrap/app.php on line 13
+[06-Jul-2026 11:55:11 Asia/Jakarta] PHP Parse error:  syntax error, unexpected token "<", expecting ")" in /home/onebabel/Simpasda/bootstrap/app.php on line 13
+[06-Jul-2026 11:55:12 Asia/Jakarta] PHP Parse error:  syntax error, unexpected token "<", expecting ")" in /home/onebabel/Simpasda/bootstrap/app.php on line 13
+[06-Jul-2026 11:55:14 Asia/Jakarta] PHP Parse error:  syntax error, unexpected token "<", expecting ")" in /home/onebabel/Simpasda/bootstrap/app.php on line 13
+[06-Jul-2026 11:55:15 Asia/Jakarta] PHP Parse error:  syntax error, unexpected token "<", expecting ")" in /home/onebabel/Simpasda/bootstrap/app.php on line 13
+[06-Jul-2026 11:55:15 Asia/Jakarta] PHP Parse error:  syntax error, unexpected token "<", expecting ")" in /home/onebabel/Simpasda/bootstrap/app.php on line 13
+[06-Jul-2026 11:55:16 Asia/Jakarta] PHP Parse error:  syntax error, unexpected token "<", expecting ")" in /home/onebabel/Simpasda/bootstrap/app.php on line 13
+[06-Jul-2026 11:55:17 Asia/Jakarta] PHP Parse error:  syntax error, unexpected token "<", expecting ")" in /home/onebabel/Simpasda/bootstrap/app.php on line 13
+[06-Jul-2026 12:00:32 Asia/Jakarta] PHP Parse error:  syntax error, unexpected token "<", expecting ")" in /home/onebabel/Simpasda/bootstrap/app.php on line 13
+[06-Jul-2026 12:00:47 Asia/Jakarta] PHP Parse error:  syntax error, unexpected token "<", expecting ")" in /home/onebabel/Simpasda/bootstrap/app.php on line 13
+[06-Jul-2026 12:12:54 Asia/Jakarta] PHP Parse error:  syntax error, unexpected token "<", expecting ")" in /home/onebabel/Simpasda/bootstrap/app.php on line 13
+[06-Jul-2026 14:00:13 Asia/Jakarta] PHP Deprecated:  SimpleSoftwareIO\QrCode\Generator::generate(): Implicitly marking parameter $filename as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/simplesoftwareio/simple-qrcode/src/Generator.php on line 169
+[06-Jul-2026 14:00:13 Asia/Jakarta] PHP Deprecated:  BaconQrCode\Encoder\Encoder::chooseMode(): Implicitly marking parameter $encoding as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/bacon/bacon-qr-code/src/Encoder/Encoder.php on line 158
+[06-Jul-2026 14:00:13 Asia/Jakarta] PHP Deprecated:  BaconQrCode\Common\ReedSolomonCodec::decode(): Implicitly marking parameter $erasures as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/bacon/bacon-qr-code/src/Common/ReedSolomonCodec.php on line 225
+[07-Jul-2026 10:33:42 Asia/Jakarta] PHP Deprecated:  SimpleSoftwareIO\QrCode\Generator::generate(): Implicitly marking parameter $filename as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/simplesoftwareio/simple-qrcode/src/Generator.php on line 169
+[07-Jul-2026 10:33:42 Asia/Jakarta] PHP Deprecated:  BaconQrCode\Encoder\Encoder::chooseMode(): Implicitly marking parameter $encoding as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/bacon/bacon-qr-code/src/Encoder/Encoder.php on line 158
+[07-Jul-2026 10:33:42 Asia/Jakarta] PHP Deprecated:  BaconQrCode\Common\ReedSolomonCodec::decode(): Implicitly marking parameter $erasures as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/bacon/bacon-qr-code/src/Common/ReedSolomonCodec.php on line 225
+[08-Jul-2026 10:49:54 Asia/Jakarta] PHP Deprecated:  SimpleSoftwareIO\QrCode\Generator::generate(): Implicitly marking parameter $filename as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/simplesoftwareio/simple-qrcode/src/Generator.php on line 169
+[08-Jul-2026 10:49:54 Asia/Jakarta] PHP Deprecated:  BaconQrCode\Encoder\Encoder::chooseMode(): Implicitly marking parameter $encoding as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/bacon/bacon-qr-code/src/Encoder/Encoder.php on line 158
+[08-Jul-2026 10:49:54 Asia/Jakarta] PHP Deprecated:  BaconQrCode\Common\ReedSolomonCodec::decode(): Implicitly marking parameter $erasures as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/bacon/bacon-qr-code/src/Common/ReedSolomonCodec.php on line 225
+[08-Jul-2026 13:45:45 Asia/Jakarta] PHP Deprecated:  SimpleSoftwareIO\QrCode\Generator::generate(): Implicitly marking parameter $filename as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/simplesoftwareio/simple-qrcode/src/Generator.php on line 169
+[08-Jul-2026 13:45:45 Asia/Jakarta] PHP Deprecated:  BaconQrCode\Encoder\Encoder::chooseMode(): Implicitly marking parameter $encoding as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/bacon/bacon-qr-code/src/Encoder/Encoder.php on line 158
+[08-Jul-2026 13:45:45 Asia/Jakarta] PHP Deprecated:  BaconQrCode\Common\ReedSolomonCodec::decode(): Implicitly marking parameter $erasures as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/bacon/bacon-qr-code/src/Common/ReedSolomonCodec.php on line 225
+[08-Jul-2026 14:10:47 Asia/Jakarta] PHP Deprecated:  SimpleSoftwareIO\QrCode\Generator::generate(): Implicitly marking parameter $filename as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/simplesoftwareio/simple-qrcode/src/Generator.php on line 169
+[08-Jul-2026 14:10:47 Asia/Jakarta] PHP Deprecated:  BaconQrCode\Encoder\Encoder::chooseMode(): Implicitly marking parameter $encoding as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/bacon/bacon-qr-code/src/Encoder/Encoder.php on line 158
+[08-Jul-2026 14:10:47 Asia/Jakarta] PHP Deprecated:  BaconQrCode\Common\ReedSolomonCodec::decode(): Implicitly marking parameter $erasures as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/bacon/bacon-qr-code/src/Common/ReedSolomonCodec.php on line 225
+[08-Jul-2026 15:20:47 Asia/Jakarta] PHP Deprecated:  SimpleSoftwareIO\QrCode\Generator::generate(): Implicitly marking parameter $filename as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/simplesoftwareio/simple-qrcode/src/Generator.php on line 169
+[08-Jul-2026 15:20:47 Asia/Jakarta] PHP Deprecated:  BaconQrCode\Encoder\Encoder::chooseMode(): Implicitly marking parameter $encoding as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/bacon/bacon-qr-code/src/Encoder/Encoder.php on line 158
+[08-Jul-2026 15:20:47 Asia/Jakarta] PHP Deprecated:  BaconQrCode\Common\ReedSolomonCodec::decode(): Implicitly marking parameter $erasures as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/bacon/bacon-qr-code/src/Common/ReedSolomonCodec.php on line 225
+[08-Jul-2026 20:57:47 Asia/Jakarta] PHP Deprecated:  SimpleSoftwareIO\QrCode\Generator::generate(): Implicitly marking parameter $filename as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/simplesoftwareio/simple-qrcode/src/Generator.php on line 169
+[08-Jul-2026 20:57:47 Asia/Jakarta] PHP Deprecated:  BaconQrCode\Encoder\Encoder::chooseMode(): Implicitly marking parameter $encoding as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/bacon/bacon-qr-code/src/Encoder/Encoder.php on line 158
+[08-Jul-2026 20:57:47 Asia/Jakarta] PHP Deprecated:  BaconQrCode\Common\ReedSolomonCodec::decode(): Implicitly marking parameter $erasures as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/bacon/bacon-qr-code/src/Common/ReedSolomonCodec.php on line 225
+[09-Jul-2026 01:48:39 Asia/Jakarta] PHP Deprecated:  SimpleSoftwareIO\QrCode\Generator::generate(): Implicitly marking parameter $filename as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/simplesoftwareio/simple-qrcode/src/Generator.php on line 169
+[09-Jul-2026 01:48:39 Asia/Jakarta] PHP Deprecated:  BaconQrCode\Encoder\Encoder::chooseMode(): Implicitly marking parameter $encoding as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/bacon/bacon-qr-code/src/Encoder/Encoder.php on line 158
+[09-Jul-2026 01:48:39 Asia/Jakarta] PHP Deprecated:  BaconQrCode\Common\ReedSolomonCodec::decode(): Implicitly marking parameter $erasures as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/bacon/bacon-qr-code/src/Common/ReedSolomonCodec.php on line 225
+[09-Jul-2026 02:37:53 Asia/Jakarta] PHP Deprecated:  SimpleSoftwareIO\QrCode\Generator::generate(): Implicitly marking parameter $filename as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/simplesoftwareio/simple-qrcode/src/Generator.php on line 169
+[09-Jul-2026 02:37:53 Asia/Jakarta] PHP Deprecated:  BaconQrCode\Encoder\Encoder::chooseMode(): Implicitly marking parameter $encoding as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/bacon/bacon-qr-code/src/Encoder/Encoder.php on line 158
+[09-Jul-2026 02:37:53 Asia/Jakarta] PHP Deprecated:  BaconQrCode\Common\ReedSolomonCodec::decode(): Implicitly marking parameter $erasures as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/bacon/bacon-qr-code/src/Common/ReedSolomonCodec.php on line 225
+[09-Jul-2026 04:24:13 Asia/Jakarta] PHP Deprecated:  SimpleSoftwareIO\QrCode\Generator::generate(): Implicitly marking parameter $filename as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/simplesoftwareio/simple-qrcode/src/Generator.php on line 169
+[09-Jul-2026 04:24:13 Asia/Jakarta] PHP Deprecated:  BaconQrCode\Encoder\Encoder::chooseMode(): Implicitly marking parameter $encoding as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/bacon/bacon-qr-code/src/Encoder/Encoder.php on line 158
+[09-Jul-2026 04:24:13 Asia/Jakarta] PHP Deprecated:  BaconQrCode\Common\ReedSolomonCodec::decode(): Implicitly marking parameter $erasures as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/bacon/bacon-qr-code/src/Common/ReedSolomonCodec.php on line 225
+[09-Jul-2026 08:45:52 Asia/Jakarta] PHP Deprecated:  SimpleSoftwareIO\QrCode\Generator::generate(): Implicitly marking parameter $filename as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/simplesoftwareio/simple-qrcode/src/Generator.php on line 169
+[09-Jul-2026 08:45:52 Asia/Jakarta] PHP Deprecated:  BaconQrCode\Encoder\Encoder::chooseMode(): Implicitly marking parameter $encoding as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/bacon/bacon-qr-code/src/Encoder/Encoder.php on line 158
+[09-Jul-2026 08:45:52 Asia/Jakarta] PHP Deprecated:  BaconQrCode\Common\ReedSolomonCodec::decode(): Implicitly marking parameter $erasures as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/bacon/bacon-qr-code/src/Common/ReedSolomonCodec.php on line 225
+[09-Jul-2026 14:19:19 Asia/Jakarta] PHP Deprecated:  SimpleSoftwareIO\QrCode\Generator::generate(): Implicitly marking parameter $filename as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/simplesoftwareio/simple-qrcode/src/Generator.php on line 169
+[09-Jul-2026 14:19:19 Asia/Jakarta] PHP Deprecated:  BaconQrCode\Encoder\Encoder::chooseMode(): Implicitly marking parameter $encoding as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/bacon/bacon-qr-code/src/Encoder/Encoder.php on line 158
+[09-Jul-2026 14:19:19 Asia/Jakarta] PHP Deprecated:  BaconQrCode\Common\ReedSolomonCodec::decode(): Implicitly marking parameter $erasures as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/bacon/bacon-qr-code/src/Common/ReedSolomonCodec.php on line 225
+[10-Jul-2026 15:37:07 Asia/Jakarta] PHP Deprecated:  SimpleSoftwareIO\QrCode\Generator::generate(): Implicitly marking parameter $filename as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/simplesoftwareio/simple-qrcode/src/Generator.php on line 169
+[10-Jul-2026 15:37:07 Asia/Jakarta] PHP Deprecated:  BaconQrCode\Encoder\Encoder::chooseMode(): Implicitly marking parameter $encoding as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/bacon/bacon-qr-code/src/Encoder/Encoder.php on line 158
+[10-Jul-2026 15:37:07 Asia/Jakarta] PHP Deprecated:  BaconQrCode\Common\ReedSolomonCodec::decode(): Implicitly marking parameter $erasures as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/bacon/bacon-qr-code/src/Common/ReedSolomonCodec.php on line 225
+[10-Jul-2026 16:11:08 Asia/Jakarta] PHP Deprecated:  SimpleSoftwareIO\QrCode\Generator::generate(): Implicitly marking parameter $filename as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/simplesoftwareio/simple-qrcode/src/Generator.php on line 169
+[10-Jul-2026 16:11:08 Asia/Jakarta] PHP Deprecated:  BaconQrCode\Encoder\Encoder::chooseMode(): Implicitly marking parameter $encoding as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/bacon/bacon-qr-code/src/Encoder/Encoder.php on line 158
+[10-Jul-2026 16:11:08 Asia/Jakarta] PHP Deprecated:  BaconQrCode\Common\ReedSolomonCodec::decode(): Implicitly marking parameter $erasures as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/bacon/bacon-qr-code/src/Common/ReedSolomonCodec.php on line 225
+[10-Jul-2026 16:15:20 Asia/Jakarta] PHP Deprecated:  SimpleSoftwareIO\QrCode\Generator::generate(): Implicitly marking parameter $filename as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/simplesoftwareio/simple-qrcode/src/Generator.php on line 169
+[10-Jul-2026 16:15:20 Asia/Jakarta] PHP Deprecated:  BaconQrCode\Encoder\Encoder::chooseMode(): Implicitly marking parameter $encoding as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/bacon/bacon-qr-code/src/Encoder/Encoder.php on line 158
+[10-Jul-2026 16:15:20 Asia/Jakarta] PHP Deprecated:  BaconQrCode\Common\ReedSolomonCodec::decode(): Implicitly marking parameter $erasures as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/bacon/bacon-qr-code/src/Common/ReedSolomonCodec.php on line 225
+[11-Jul-2026 22:44:11 Asia/Jakarta] PHP Deprecated:  SimpleSoftwareIO\QrCode\Generator::generate(): Implicitly marking parameter $filename as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/simplesoftwareio/simple-qrcode/src/Generator.php on line 169
+[11-Jul-2026 22:44:11 Asia/Jakarta] PHP Deprecated:  BaconQrCode\Encoder\Encoder::chooseMode(): Implicitly marking parameter $encoding as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/bacon/bacon-qr-code/src/Encoder/Encoder.php on line 158
+[11-Jul-2026 22:44:11 Asia/Jakarta] PHP Deprecated:  BaconQrCode\Common\ReedSolomonCodec::decode(): Implicitly marking parameter $erasures as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/bacon/bacon-qr-code/src/Common/ReedSolomonCodec.php on line 225
+[13-Jul-2026 09:52:26 Asia/Jakarta] PHP Deprecated:  SimpleSoftwareIO\QrCode\Generator::generate(): Implicitly marking parameter $filename as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/simplesoftwareio/simple-qrcode/src/Generator.php on line 169
+[13-Jul-2026 09:52:26 Asia/Jakarta] PHP Deprecated:  BaconQrCode\Encoder\Encoder::chooseMode(): Implicitly marking parameter $encoding as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/bacon/bacon-qr-code/src/Encoder/Encoder.php on line 158
+[13-Jul-2026 09:52:26 Asia/Jakarta] PHP Deprecated:  BaconQrCode\Common\ReedSolomonCodec::decode(): Implicitly marking parameter $erasures as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/bacon/bacon-qr-code/src/Common/ReedSolomonCodec.php on line 225
+[13-Jul-2026 09:53:25 Asia/Jakarta] PHP Deprecated:  SimpleSoftwareIO\QrCode\Generator::generate(): Implicitly marking parameter $filename as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/simplesoftwareio/simple-qrcode/src/Generator.php on line 169
+[13-Jul-2026 09:53:25 Asia/Jakarta] PHP Deprecated:  BaconQrCode\Encoder\Encoder::chooseMode(): Implicitly marking parameter $encoding as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/bacon/bacon-qr-code/src/Encoder/Encoder.php on line 158
+[13-Jul-2026 09:53:25 Asia/Jakarta] PHP Deprecated:  BaconQrCode\Common\ReedSolomonCodec::decode(): Implicitly marking parameter $erasures as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/bacon/bacon-qr-code/src/Common/ReedSolomonCodec.php on line 225
+[13-Jul-2026 10:00:49 Asia/Jakarta] PHP Deprecated:  SimpleSoftwareIO\QrCode\Generator::generate(): Implicitly marking parameter $filename as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/simplesoftwareio/simple-qrcode/src/Generator.php on line 169
+[13-Jul-2026 10:00:49 Asia/Jakarta] PHP Deprecated:  BaconQrCode\Encoder\Encoder::chooseMode(): Implicitly marking parameter $encoding as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/bacon/bacon-qr-code/src/Encoder/Encoder.php on line 158
+[13-Jul-2026 10:00:49 Asia/Jakarta] PHP Deprecated:  BaconQrCode\Common\ReedSolomonCodec::decode(): Implicitly marking parameter $erasures as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/bacon/bacon-qr-code/src/Common/ReedSolomonCodec.php on line 225
+[13-Jul-2026 10:03:21 Asia/Jakarta] PHP Deprecated:  SimpleSoftwareIO\QrCode\Generator::generate(): Implicitly marking parameter $filename as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/simplesoftwareio/simple-qrcode/src/Generator.php on line 169
+[13-Jul-2026 10:03:21 Asia/Jakarta] PHP Deprecated:  BaconQrCode\Encoder\Encoder::chooseMode(): Implicitly marking parameter $encoding as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/bacon/bacon-qr-code/src/Encoder/Encoder.php on line 158
+[13-Jul-2026 10:03:21 Asia/Jakarta] PHP Deprecated:  BaconQrCode\Common\ReedSolomonCodec::decode(): Implicitly marking parameter $erasures as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/bacon/bacon-qr-code/src/Common/ReedSolomonCodec.php on line 225
+[13-Jul-2026 10:38:49 Asia/Jakarta] PHP Deprecated:  SimpleSoftwareIO\QrCode\Generator::generate(): Implicitly marking parameter $filename as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/simplesoftwareio/simple-qrcode/src/Generator.php on line 169
+[13-Jul-2026 10:38:49 Asia/Jakarta] PHP Deprecated:  BaconQrCode\Encoder\Encoder::chooseMode(): Implicitly marking parameter $encoding as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/bacon/bacon-qr-code/src/Encoder/Encoder.php on line 158
+[13-Jul-2026 10:41:31 Asia/Jakarta] PHP Deprecated:  SimpleSoftwareIO\QrCode\Generator::generate(): Implicitly marking parameter $filename as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/simplesoftwareio/simple-qrcode/src/Generator.php on line 169
+[13-Jul-2026 10:41:31 Asia/Jakarta] PHP Deprecated:  BaconQrCode\Encoder\Encoder::chooseMode(): Implicitly marking parameter $encoding as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/bacon/bacon-qr-code/src/Encoder/Encoder.php on line 158
+[13-Jul-2026 10:46:21 Asia/Jakarta] PHP Deprecated:  SimpleSoftwareIO\QrCode\Generator::generate(): Implicitly marking parameter $filename as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/simplesoftwareio/simple-qrcode/src/Generator.php on line 169
+[13-Jul-2026 10:46:21 Asia/Jakarta] PHP Deprecated:  BaconQrCode\Encoder\Encoder::chooseMode(): Implicitly marking parameter $encoding as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/bacon/bacon-qr-code/src/Encoder/Encoder.php on line 158
+[13-Jul-2026 10:46:21 Asia/Jakarta] PHP Deprecated:  BaconQrCode\Common\ReedSolomonCodec::decode(): Implicitly marking parameter $erasures as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/bacon/bacon-qr-code/src/Common/ReedSolomonCodec.php on line 225
+[13-Jul-2026 11:00:19 Asia/Jakarta] PHP Deprecated:  SimpleSoftwareIO\QrCode\Generator::generate(): Implicitly marking parameter $filename as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/simplesoftwareio/simple-qrcode/src/Generator.php on line 169
+[13-Jul-2026 11:00:19 Asia/Jakarta] PHP Deprecated:  BaconQrCode\Encoder\Encoder::chooseMode(): Implicitly marking parameter $encoding as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/bacon/bacon-qr-code/src/Encoder/Encoder.php on line 158
+[13-Jul-2026 11:00:19 Asia/Jakarta] PHP Deprecated:  BaconQrCode\Common\ReedSolomonCodec::decode(): Implicitly marking parameter $erasures as nullable is deprecated, the explicit nullable type must be used instead in /home/onebabel/Simpasda/vendor/bacon/bacon-qr-code/src/Common/ReedSolomonCodec.php on line 225
