@@ -153,8 +153,9 @@ class UserController extends Controller
                 ->where('user_id', $user_id)
                 ->orderBy('id', 'desc')
                 ->get()
-                ->map(function($item) {
+                ->map(function($item) use ($nasabah) {
                     Carbon::setLocale('id');
+                    $item->user_name = $nasabah ? $nasabah->name : 'Nasabah';
                     $item->tanggal_formatted = Carbon::parse($item->created_at)->translatedFormat('d F Y, H:i') . ' WIB';
                     $isMasuk = strtolower($item->jenis_transaksi) === 'masuk';
                     

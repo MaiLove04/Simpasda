@@ -149,6 +149,7 @@ class OperasionalController extends Controller
             'total' => $request->harga * $request->jumlah,
             'keterangan' => $request->keterangan,
             'sumber' => 'Manual',
+            'kode_referensi' => 'OP-' . date('Ymd') . '-' . strtoupper(\Illuminate\Support\Str::random(6)),
             'tanggal' => $request->tanggal
         ]);
 

@@ -21,10 +21,10 @@ class JadwalPenjemputanController extends Controller
     }
 
     // AMBIL JADWAL KURIR
-    public function jadwalKurir()
+    public function jadwalKurir($id)
     {
         try {
-            $kurirId = auth()->id();
+            $kurirId = $id;
             $kurir = User::find($kurirId);
             $bankSampahId = $kurir?->bank_sampah_id;
 
@@ -100,7 +100,7 @@ class JadwalPenjemputanController extends Controller
     // MULAI JEMPUT
     public function mulaiJemput($id)
     {
-        $jadwal = JadwalPenjemputan::where('id', $id)->where('kurir_id', auth()->id())->first();
+        $jadwal = JadwalPenjemputan::find($id);
         if (!$jadwal) return response()->json(['success' => false, 'message' => 'Tugas tidak ditemukan.'], 403);
 
         $jadwal->update(['status' => 'proses']);
@@ -119,7 +119,7 @@ class JadwalPenjemputanController extends Controller
     // BATAL JEMPUT
     public function batalJemput($id)
     {
-        $jadwal = JadwalPenjemputan::where('id', $id)->where('kurir_id', auth()->id())->first();
+        $jadwal = JadwalPenjemputan::find($id);
         if (!$jadwal) return response()->json(['success' => false, 'message' => 'Tugas tidak ditemukan.'], 403);
 
         $jadwal->update(['status' => 'dibatalkan']);
