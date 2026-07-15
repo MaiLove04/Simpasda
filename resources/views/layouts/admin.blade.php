@@ -236,7 +236,8 @@
                     'admin/pengurus*',
                     'admin/mitra*',
                     'admin/pengiriman-mitra*',
-                    'admin/jenis-sampah*'
+                    'admin/jenis-sampah*',
+                    'admin/kelola-admin*'
                 ) ? 'show' : '' }}"
                 id="dropMaster">
 
