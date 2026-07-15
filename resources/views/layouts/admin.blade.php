@@ -260,7 +260,7 @@
 
                         </a>
                         <a href="{{ route('kelola-admin.index') }}"
-                        class="{{ Request::is('kelola/admin*') ? 'active-sub' : '' }}">
+                        class="{{ Request::is('admin/kelola-admin*') ? 'active-sub' : '' }}">
 
                             Kelola Admin
 
