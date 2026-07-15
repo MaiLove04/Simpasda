@@ -12,12 +12,12 @@ class MasterJadwalRutin extends Model
     protected $fillable = [
         'nasabah_id',
         'kurir_id',
-        'tipe_jadwal',
         'hari_penjemputan',
+        'jam_estimasi',
+        'is_aktif',
+        'tipe_jadwal',
         'interval_hari',
         'tanggal_mulai',
-        'jam_estimasi',
-        'is_aktif'
     ];
 
     protected $casts = [
@@ -25,11 +25,13 @@ class MasterJadwalRutin extends Model
         'is_aktif' => 'boolean',
     ];
 
+    // Relasi ke data Nasabah
     public function nasabah()
     {
         return $this->belongsTo(User::class, 'nasabah_id');
     }
 
+    // Relasi ke data Kurir
     public function kurir()
     {
         return $this->belongsTo(User::class, 'kurir_id');

@@ -12,7 +12,7 @@ class JenisSampahController extends Controller
     public function index()
     {
         return response()->json(
-            JenisSampah::where('status', 'aktif')->get()
+            JenisSampah::all()
         );
     }
 
@@ -81,16 +81,15 @@ class JenisSampahController extends Controller
     }
 
 
-    // nonaktif sampah
+    // hapus
     public function destroy($id)
     {
         $jenis = JenisSampah::findOrFail($id);
 
-        $jenis->update([
-            'status' => 'nonaktif'
-        ]);
+        $jenis->delete();
 
-        return redirect()->back()
-            ->with('success', 'Jenis sampah berhasil dinonaktifkan.');
+        return response()->json([
+            'message' => 'Berhasil hapus'
+        ]);
     }
 }

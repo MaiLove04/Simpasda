@@ -19,5 +19,9 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
-    })
-    ->create();
+    })->withCommands([
+        \App\Console\Commands\SetupProject::class, // Tambahkan baris in
+    ])
+    ->withExceptions(function (Exceptions $exceptions): void {
+        //
+    })->create();

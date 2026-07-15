@@ -11,12 +11,11 @@ class IotTimbanganController extends Controller
 {
     /**
      * 1. ENDPOINT UNTUK IOT (HTTP POST)
-     * IoT mengirim data, sistem akan meng-update record yang ada 
-     * atau membuat baru jika belum ada.
+     * IoT akan mengirim data ke sini
      */
     public function updateBerat(Request $request)
     {
-        // Validasi data
+        // Validasi data yang masuk dari IoT
         $validator = Validator::make($request->all(), [
             'berat' => 'required|numeric',
             'device_id' => 'nullable|string'
@@ -29,36 +28,35 @@ class IotTimbanganController extends Controller
             ], 400);
         }
 
-        // Tentukan ID perangkat, default ke 'Alat-IoT-01'
-        $deviceId = $request->device_id ?? 'Alat-IoT-01';
-
-        // Menggunakan updateOrCreate agar data tidak menumpuk
-        $timbangan = BeratTimbangan::updateOrCreate(
-            ['device_id' => $deviceId], // Mencari berdasarkan device_id
-            ['berat' => $request->berat] // Update kolom berat
-        );
+        // Simpan data berat baru ke database
+        $timbangan = BeratTimbangan::create([
+            'berat' => $request->berat,
+            'device_id' => $request->device_id ?? 'Alat-IoT-01'
+        ]);
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Berat berhasil diperbarui!',
+            'message' => 'Berat berhasil diperbarui oleh IoT!',
             'data' => $timbangan
         ], 200);
     }
 
     /**
      * 2. ENDPOINT UNTUK FLUTTER (HTTP GET)
+     * Aplikasi kurir Flutter mengambil data terbaru dari sini
      */
     public function getBeratTerakhir()
     {
-        // Ambil data terbaru berdasarkan update terakhir
-        $timbanganTerakhir = BeratTimbangan::latest('updated_at')->first();
+        // Ambil data timbangan yang paling terakhir dimasukkan
+        $timbanganTerakhir = BeratTimbangan::latest()->first();
 
+        // Jika tabel masih kosong, kembalikan nilai 0
         $berat = $timbanganTerakhir ? $timbanganTerakhir->berat : 0.0;
 
         return response()->json([
             'status' => 'success',
             'berat_iot' => $berat,
-            'updated_at' => $timbanganTerakhir ? $timbanganTerakhir->updated_at->toIso8601String() : now()->toIso8601String()
+            'updated_at' => $timbanganTerakhir ? $timbanganTerakhir->created_at->toIso8601String() : now()->toIso8601String()
         ], 200);
     }
 }

@@ -24,7 +24,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->enum('jenis_transaksi', ['masuk', 'keluar']); // masuk = Kredit, keluar = Debit
             $table->enum('sumber', ['setor_sampah', 'tarik_tunai']); 
-            $table->unsignedBigInteger('referensi_id')->nullable(); // ID dari transaksi setor_sampahs atau Midtrans
+            $table->String('referensi_id')->nullable(); // ID dari transaksi setor_sampahs atau Midtrans
             $table->bigInteger('nominal');
             $table->enum('status', ['pending', 'success', 'failed'])->default('success'); // tarik_tunai bisa pending dulu
             $table->text('keterangan')->nullable();

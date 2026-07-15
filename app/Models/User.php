@@ -25,7 +25,7 @@ class User extends Authenticatable
         'status',
         'bank_sampah_id',
         'kode_nasabah',
-        'mitra_id',
+        'mitra_id'
     ];
 
     protected $hidden = [

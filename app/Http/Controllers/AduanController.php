@@ -34,9 +34,14 @@ class AduanController extends Controller
             if ($request->hasFile('foto_bukti')) {
                 $file = $request->file('foto_bukti');
                 $namaFile = time() . '_' . $file->getClientOriginalName();
-                
-                // Menyimpan foto bukti di dalam direktori public/uploads/aduan
-                $file->move(public_path('uploads/aduan'), $namaFile);
+
+                // Pastikan direktori tujuan ada
+                $tujuan = public_path('uploads/aduan');
+                if (!file_exists($tujuan)) {
+                    mkdir($tujuan, 0777, true);
+                }
+
+                $file->move($tujuan, $namaFile);
                 $pathFoto = 'uploads/aduan/' . $namaFile;
             }
 
@@ -46,7 +51,7 @@ class AduanController extends Controller
                 'kategori_aduan' => $request->kategori_aduan,
                 'isi_aduan' => $request->isi_aduan,
                 'foto_bukti' => $pathFoto,
-                'status' => 'menunggu', // Status default ketika baru dikirim
+                'status' => 'menunggu',
             ]);
 
             return response()->json([
@@ -66,11 +71,9 @@ class AduanController extends Controller
     /**
      * Mengambil riwayat aduan berdasarkan user_id
      */
-    public function riwayat(Request $request)
+    public function riwayat($user_id)
     {
-        $user = $request->user();
-
-        $riwayat = Aduan::where('user_id', $user->id)
+        $riwayat = Aduan::where('user_id', $user_id)
             ->latest() // Mengurutkan dari yang terbaru
             ->get();
 
