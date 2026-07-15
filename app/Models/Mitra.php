@@ -9,23 +9,15 @@ class Mitra extends Model
     protected $table = 'mitras';
 
     protected $fillable = [
-
+        'user_id',
         'nama_mitra',
-
         'jenis_mitra',
-
         'penanggung_jawab',
-
         'no_hp',
-
         'email',
-
         'alamat',
-
         'status',
-
         'keterangan'
-
     ];
 
     public function pengiriman()
@@ -35,6 +27,6 @@ class Mitra extends Model
 
     public function user()
     {
-        return $this->hasOne(User::class,'mitra_id');
+        return $this->belongsTo(User::class, 'user_id');
     }
 }

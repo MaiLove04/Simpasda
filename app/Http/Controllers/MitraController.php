@@ -208,24 +208,23 @@ class MitraController extends Controller
         $mitra = Mitra::findOrFail($id);
 
         // Cek apakah mitra sudah punya akun
-        if (User::where('mitra_id', $mitra->id)->exists()) {
-            return back()->with('error', 'Mitra sudah memiliki akun.');
+        if ($mitra->user_id !== null || User::where('email', $mitra->email)->exists()) {
+            return back()->with('error', 'Mitra sudah memiliki akun atau email sudah terdaftar.');
         }
 
-        User::create([
+        $user = User::create([
             'name'            => $mitra->nama_mitra,
             'email'           => $mitra->email,
             'password'        => Hash::make('12345678'), // password awal
             'role'            => 'mitra',
             'status'          => 'aktif',
-
-            // INI YANG PENTING
-            'mitra_id'        => $mitra->id,
-
-            // optional
             'no_hp'           => $mitra->no_hp,
             'alamat'          => $mitra->alamat,
-            'bank_sampah_id'  => auth()->user()->bank_sampah_id,
+            'bank_sampah_id'  => auth()->user() ? auth()->user()->bank_sampah_id : null,
+        ]);
+
+        $mitra->update([
+            'user_id' => $user->id,
         ]);
 
         return back()->with(
@@ -239,7 +238,9 @@ class MitraController extends Controller
         $mitra = Mitra::findOrFail($id);
 
         // hapus akun login mitra jika ada
-        User::where('mitra_id', $mitra->id)->delete();
+        if ($mitra->user_id) {
+            User::where('id', $mitra->user_id)->delete();
+        }
 
         // hapus data mitra
         $mitra->delete();
@@ -268,7 +269,7 @@ class MitraController extends Controller
 
         $mitra = Mitra::findOrFail($id);
 
-        $user = User::where('mitra_id', $mitra->id)->first();
+        $user = User::where('id', $mitra->user_id)->first();
 
         if (!$user) {
             return back()->with(

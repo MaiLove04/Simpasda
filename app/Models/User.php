@@ -70,6 +70,6 @@ class User extends Authenticatable
     
     public function mitra()
     {
-        return $this->belongsTo(Mitra::class,'mitra_id');
+        return $this->hasOne(Mitra::class, 'user_id');
     }
 }

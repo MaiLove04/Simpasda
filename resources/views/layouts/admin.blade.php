@@ -249,7 +249,7 @@
 
                         </a>
 
-                        <a href="{{ route('kurir.index') }}"
+                        <a href="{{ route('kurir-admin.index') }}"
                         class="{{ Request::is('admin/kurir*') ? 'active-sub' : '' }}">
 
                             Data Kurir

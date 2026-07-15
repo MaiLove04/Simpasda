@@ -64,7 +64,7 @@ Route::prefix('admin')->middleware('auth')->group(function () {
     Route::get('/dashboard', [AdminWebController::class, 'dashboard'])->name('admin.dashboard');
 
     // Master Data Manajemen Operasional (Otomatis dapat named routes dari Laravel)
-    Route::resource('kurir', KurirWebController::class);
+    Route::resource('kurir', KurirWebController::class)->names("kurir-admin");
     Route::resource('jenis-sampah', JenisSampahWebController::class)->names("jenis-sampah-admin");
     Route::put('jenis-sampah/{id}/toggle-status', [JenisSampahWebController::class, 'toggleStatus'])->name('jenis-sampah.toggle-status');
     Route::resource('jadwal', JadwalWebController::class);

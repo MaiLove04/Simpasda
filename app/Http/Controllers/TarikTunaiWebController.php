@@ -155,8 +155,6 @@ class TarikTunaiWebController extends Controller
 
         $riwayat = TarikTunai::with('user')
             ->whereHas('user', function ($query) use ($bankSampahId) {
-                // Jika ingin mematikan filter bank sampah seperti halaman index, 
-                // kamu bisa mengomentari baris di bawah ini dengan (//)
                 $query->where('bank_sampah_id', $bankSampahId);
             })
             // 🔥 PERUBAHAN UTAMA: Izinkan status 'pending' ikut masuk ke dalam list riwayat

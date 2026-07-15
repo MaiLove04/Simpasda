@@ -12,31 +12,38 @@ class NotifikasiController extends Controller
      * Mengambil notifikasi untuk user yang sedang login (Kurir).
      * Endpoint ini dipanggil dari rute /notifikasi-kurir.
      */
-    public function getNotifikasiKurir($id)
+    public function getNotifikasiKurir()
     {
-        return $this->getNotifikasi($id);
+        return $this->getNotifikasi();
     }
 
     /**
      * Mengambil notifikasi untuk user yang sedang login (Nasabah).
      * Endpoint ini dipanggil dari rute /notifikasi-nasabah.
      */
-    public function getNotifikasiNasabah($id)
+    public function getNotifikasiNasabah()
     {
-        return $this->getNotifikasi($id);
+        return $this->getNotifikasi();
     }
 
     /**
      * Logic utama untuk mengambil notifikasi berdasarkan user yang sedang login.
      * Metode ini bersifat private dan digunakan oleh dua metode publik di atas.
      */
-    private function getNotifikasi($id = null)
+    private function getNotifikasi()
     {
         try {
-            $user = Auth::user();
+            $userId = Auth::id();
+
+            if (!$userId) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized. Silakan login terlebih dahulu.'
+                ], 401);
+            }
 
             // Mengambil semua notifikasi untuk user tersebut, diurutkan dari yang terbaru.
-            $notifikasi = Notifikasi::where('user_id', $id )
+            $notifikasi = Notifikasi::where('user_id', $userId)
                                     ->latest()
                                     ->get();
 
@@ -75,9 +82,9 @@ class NotifikasiController extends Controller
                 return response()->json(['success' => false, 'message' => 'Notifikasi tidak ditemukan atau Anda tidak memiliki akses.'], 404);
             }
 
-            // Jika notifikasi belum dibaca (read_at masih null), update dengan waktu sekarang.
             if (is_null($notifikasi->read_at)) {
                 $notifikasi->read_at = now();
+                $notifikasi->is_read = true; // 🔥 PERBAIKAN: Ubah status is_read menjadi true (1)
                 $notifikasi->save();
             }
 
