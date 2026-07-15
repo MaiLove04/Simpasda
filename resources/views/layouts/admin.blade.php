@@ -211,7 +211,8 @@
                 <button class="nav-link-btn {{ Request::is(
                     'admin/nasabah*',
                     'admin/kurir*',
-                    'admin/jenis-sampah*'
+                    'admin/jenis-sampah*',
+                    'admin/kelola-admin*'
                 ) ? 'active-parent' : '' }}"
                         type="button"
                         data-bs-toggle="collapse"
@@ -219,7 +220,9 @@
                         aria-expanded="{{ Request::is(
                             'admin/nasabah*',
                             'admin/kurir*',
-                            'admin/jenis-sampah*'
+                            'admin/jenis-sampah*',
+                            'admin/kelola-admin*'
+
                         ) ? 'true' : 'false' }}">
 
                     <i class="bi bi-folder-fill"></i>
