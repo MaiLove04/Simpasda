@@ -24,9 +24,9 @@ use App\Http\Controllers\Partner\PengirimanController;
 use App\Http\Controllers\Partner\ProfilController;
 use App\Http\Controllers\Partner\PembayaranController;
 
-// Otomatis mengarahkan rute utama '/' langsung ke halaman Login
+/// Otomatis mengarahkan rute utama '/' langsung ke halaman Login
 Route::get('/', function () {
-    return redirect()->route('login');
+     return view('landing');
 });
 
 
@@ -128,6 +128,45 @@ Route::prefix('admin')->middleware('auth')->group(function () {
     // Fitur Operasional Pegawai & Penggajian
     Route::resource('Operasional', OperasionalController::class);
 
+        Route::get(
+            'Operasional/export/pdf',
+            [OperasionalController::class,'exportPdf']
+        )->name('Operasional.exportPdf');
+
+        Route::get(
+            'Operasional/import',
+            [OperasionalController::class,'importForm']
+        )->name('Operasional.importForm');
+
+        Route::post(
+            'Operasional/import',
+            [OperasionalController::class,'importExcel']
+        )->name('Operasional.importExcel');
+        Route::prefix('kelola-admin')->group(function () {
+
+        Route::get('/', [App\Http\Controllers\AdminManagementController::class, 'index'])
+            ->name('kelola-admin.index');
+
+        Route::get('/create', [App\Http\Controllers\AdminManagementController::class, 'create'])
+            ->name('kelola-admin.create');
+
+        Route::post('/store', [App\Http\Controllers\AdminManagementController::class, 'store'])
+            ->name('kelola-admin.store');
+
+        Route::get('/edit/{id}', [App\Http\Controllers\AdminManagementController::class, 'edit'])
+            ->name('kelola-admin.edit');
+
+        Route::put('/update/{id}', [App\Http\Controllers\AdminManagementController::class, 'update'])
+            ->name('kelola-admin.update');
+
+        Route::patch('/status/{id}', [App\Http\Controllers\AdminManagementController::class, 'toggleStatus'])
+            ->name('kelola-admin.status');
+
+        Route::get('/detail/{id}', [App\Http\Controllers\AdminManagementController::class, 'show'])
+        ->name('kelola-admin.show');
+        
+
+    });
 
     // ========================================================
     // FITUR MITRA BANK SAMPAH

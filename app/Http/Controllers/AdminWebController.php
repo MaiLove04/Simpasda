@@ -18,6 +18,15 @@ class AdminWebController extends Controller
     {
         if (Auth::check()) {
 
+            // Kalau akun sudah nonaktif
+            if (Auth::user()->status == 'nonaktif') {
+
+                Auth::logout();
+
+                return view('admin.login')
+                    ->with('error','Akun Anda telah dinonaktifkan.');
+            }
+
             if (Auth::user()->role == 'admin_dlh') {
                 return redirect()->route('dlh.dashboard');
             }
@@ -50,6 +59,18 @@ class AdminWebController extends Controller
 
         $user = Auth::user();
 
+        // Cek status dulu
+        if ($user->status == 'nonaktif') {
+
+            Auth::logout();
+
+            return back()->with(
+                'error',
+                'Akun Anda telah dinonaktifkan.'
+            );
+        }
+
+        // Baru cek role
         if ($user->role == 'admin_dlh') {
             return redirect()->route('dlh.dashboard');
         }
@@ -58,7 +79,7 @@ class AdminWebController extends Controller
             return redirect()->route('admin.dashboard');
         }
 
-
+        // Selain role di atas
         Auth::logout();
 
         return back()->with(
@@ -68,7 +89,6 @@ class AdminWebController extends Controller
     }
 
     return back()->with('error', 'Email atau password salah');
-
     }
 
     // ========================================================
@@ -108,8 +128,7 @@ class AdminWebController extends Controller
         $tahunIni = 2026;
         // Jadwal Hari Ini
         $jadwalHariIni = JadwalPenjemputan::whereDate(
-            'tanggal_penjemputan',
-            Carbon::today()
+            'tanggal_penjemputan', Carbon::today()
         )->where('bank_sampah_id', $adminBankId)
         ->count();
 

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Operasional;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class OperasionalController extends Controller
 {
@@ -36,7 +37,7 @@ class OperasionalController extends Controller
 
         $operasional = $query
             ->latest('tanggal')
-            ->paginate(10);
+            ->paginate(5);
 
         // Total pemasukan dan pengeluaran 
         $pemasukanQuery = clone $query;
@@ -149,7 +150,6 @@ class OperasionalController extends Controller
             'total' => $request->harga * $request->jumlah,
             'keterangan' => $request->keterangan,
             'sumber' => 'Manual',
-            'kode_referensi' => 'OP-' . date('Ymd') . '-' . strtoupper(\Illuminate\Support\Str::random(6)),
             'tanggal' => $request->tanggal
         ]);
 
@@ -203,5 +203,34 @@ class OperasionalController extends Controller
         return redirect()
             ->back()
             ->with('success', 'Data operasional berhasil dihapus.');
+    }
+
+    public function exportPdf()
+    {
+        $operasional = \App\Models\Operasional::orderBy('tanggal', 'desc')->get();
+
+        $totalPemasukan = $operasional
+            ->where('jenis_transaksi', 'Pemasukan')
+            ->sum('total');
+
+        $totalPengeluaran = $operasional
+            ->where('jenis_transaksi', 'Pengeluaran')
+            ->sum('total');
+
+        $saldo = $totalPemasukan - $totalPengeluaran;
+
+        $pdf = Pdf::loadView(
+            'admin.Operasional.pdf',
+            compact(
+                'operasional',
+                'totalPemasukan',
+                'totalPengeluaran',
+                'saldo'
+            )
+        );
+
+        $pdf->setPaper('A4', 'landscape');
+
+        return $pdf->download('Laporan_Operasional_Bank_Sampah.pdf');
     }
 }

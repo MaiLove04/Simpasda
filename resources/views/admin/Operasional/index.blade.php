@@ -37,14 +37,25 @@
 
             </div>
 
+            <div class="d-flex gap-2">
+
+            <a href="{{ route('Operasional.exportPdf') }}"
+            class="btn btn-danger">
+
+                <i class="fas fa-file-pdf me-1"></i>
+                Export PDF
+
+            </a>
+
             <a href="{{ route('Operasional.create') }}"
-            class="btn btn-success">
+            class="btn btn-primary">
 
                 <i class="fas fa-plus-circle me-1"></i>
-
                 Tambah Operasional
 
             </a>
+
+        </div>
 
         </div>
 
@@ -521,16 +532,12 @@
 
             </table>
 
-            <div class="mt-3">
-
                 {{ $operasional->links('pagination::bootstrap-5') }}
-
-            </div>
 
         </div>
 
     </div>
 
-    </div>
+</div>
 
-    @endsection
+ @endsection

@@ -255,7 +255,12 @@
                             Data Kurir
 
                         </a>
+                        <a href="{{ route('kelola-admin.index') }}"
+                        class="{{ Request::is('kelola/admin*') ? 'active-sub' : '' }}">
 
+                            Kelola Admin
+
+                        </a>
                         <a href="{{ route('jenis-sampah-admin.index') }}"
                         class="{{ Request::is('admin/jenis-sampah*') ? 'active-sub' : '' }}">
 
