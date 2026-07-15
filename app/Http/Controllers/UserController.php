@@ -162,6 +162,20 @@ class UserController extends Controller
                     if ($isMasuk) {
                         $item->judul_dinamis = 'Setor Sampah Nasabah';
                         $item->total_berat = 'Lihat Detail';
+                        
+                        // Load setor_sampah details and courier info
+                        if ($item->sumber === 'setor_sampah' && !empty($item->referensi_id)) {
+                            $setor = \App\Models\SetorSampah::with(['kurir', 'details.jenisSampah'])->find($item->referensi_id);
+                            if ($setor) {
+                                $item->kurir = $setor->kurir;
+                                $item->nama_kurir = $setor->kurir ? $setor->kurir->name : null;
+                                $item->details = $setor->details;
+                                $item->jenis_sampah = $setor->jenis_sampah;
+                                
+                                $totalBerat = $setor->details->sum('berat');
+                                $item->total_berat = $totalBerat;
+                            }
+                        }
                     } else {
                         // Jika transaksi keluar (Tarik Tunai), cek statusnya
                         $status = strtolower($item->status ?? 'pending');
