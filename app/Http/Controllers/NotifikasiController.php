@@ -12,31 +12,31 @@ class NotifikasiController extends Controller
      * Mengambil notifikasi untuk user yang sedang login (Kurir).
      * Endpoint ini dipanggil dari rute /notifikasi-kurir.
      */
-    public function getNotifikasiKurir()
+    public function getNotifikasiKurir($id)
     {
-        return $this->getNotifikasi();
+        return $this->getNotifikasi($id);
     }
 
     /**
      * Mengambil notifikasi untuk user yang sedang login (Nasabah).
      * Endpoint ini dipanggil dari rute /notifikasi-nasabah.
      */
-    public function getNotifikasiNasabah()
+    public function getNotifikasiNasabah($id)
     {
-        return $this->getNotifikasi();
+        return $this->getNotifikasi($id);
     }
 
     /**
      * Logic utama untuk mengambil notifikasi berdasarkan user yang sedang login.
      * Metode ini bersifat private dan digunakan oleh dua metode publik di atas.
      */
-    private function getNotifikasi()
+    private function getNotifikasi($id = null)
     {
         try {
             $user = Auth::user();
 
             // Mengambil semua notifikasi untuk user tersebut, diurutkan dari yang terbaru.
-            $notifikasi = Notifikasi::where('user_id', $user->id)
+            $notifikasi = Notifikasi::where('user_id', $id )
                                     ->latest()
                                     ->get();
 

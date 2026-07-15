@@ -256,7 +256,7 @@
 
                         </a>
 
-                        <a href="{{ route('jenis-sampah.index') }}"
+                        <a href="{{ route('jenis-sampah-admin.index') }}"
                         class="{{ Request::is('admin/jenis-sampah*') ? 'active-sub' : '' }}">
 
                             Jenis Sampah

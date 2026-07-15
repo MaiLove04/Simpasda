@@ -30,7 +30,7 @@ class BarcodeController extends Controller
         return response()->json([
             'success' => true,
             'id' => $id, 
-            'barcode' => base64_encode($barcodeData), // 🔥 PERBAIKAN: Encode data gambar ke Base64
+            'barcode' => $barcodeData, // 🔥 PERBAIKAN: Encode data gambar ke Base64
         ]);
     }
 }
