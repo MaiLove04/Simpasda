@@ -35,4 +35,16 @@ class JenisSampah extends Model
     {
         return $this->hasMany(SetorSampah::class);
     }
+
+    // relasi untuk mendeteksi id sampah yang digunakan
+    public function detailSetorSampahs()
+    {
+        return $this->hasMany(
+            DetailSetorSampah::class,
+            'jenis_sampah_id'
+        );
+    }
+
+
+   
 }

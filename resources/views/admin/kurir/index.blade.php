@@ -224,9 +224,29 @@
 
 
     </table>
+    
+    </tbody>
+</table>
 
-
+    <div class="d-flex justify-content-between align-items-center px-3 py-2 border-top bg-light"
+         style="border-bottom-left-radius: 12px; border-bottom-right-radius: 12px;">
+    
+        <div class="text-muted" style="font-size: 12px;">
+            Menampilkan {{ $kurirs->firstItem() ?? 0 }}-{{ $kurirs->lastItem() ?? 0 }}
+            dari {{ $kurirs->total() }} data kurir
+        </div>
+    
+        <div class="sm-pagination">
+            {{ $kurirs->appends(request()->input())->links('pagination::bootstrap-5') }}
+        </div>
+    
+    </div>
+    
+    </div>
 </div>
-
+<style>
+    .sm-pagination .pagination { margin-bottom: 0; gap: 2px; }
+    .sm-pagination .page-link { padding: 4px 10px; font-size: 12px; border-radius: 4px; }
+</style>
 
 @endsection

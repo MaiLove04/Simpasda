@@ -73,9 +73,6 @@ Route::post('/request-penjemputan', [SetorSampahController::class, 'requestPenje
 Route::get('/request-detail/{nasabah_id}', [SetorSampahController::class, 'showRequestDetail']);
 
 // Notifikasi
-Route::get('/notifikasi-kurir/{userId}', [NotifikasiController::class, 'getNotifikasiKurir']);
-Route::get('/notifikasi-nasabah/{userId}', [NotifikasiController::class, 'getNotifikasiNasabah']);
-Route::post('/notifikasi/{id}/read', [NotifikasiController::class, 'markAsRead']);
 
 // Aduan
 Route::post('/aduan', [AduanController::class, 'store']);
@@ -88,11 +85,11 @@ Route::apiResource('jenis-sampah', JenisSampahController::class);
 Route::post('/update-berat-iot', [IotTimbanganController::class, 'updateBerat']);
 Route::get('/berat-timbangan-iot', [IotTimbanganController::class, 'getBeratTerakhir']);
 
-
-// ------------------------------------------
-// PROTECTED ROUTES (Butuh Otentikasi Sanctum)
-// ------------------------------------------
 Route::middleware('auth:sanctum')->group(function () {
+    
+    Route::get('/notifikasi-kurir', [NotifikasiController::class, 'getNotifikasiKurir']);
+    Route::get('/notifikasi-nasabah', [NotifikasiController::class, 'getNotifikasiNasabah']);
+    Route::post('/notifikasi/{id}/read', [NotifikasiController::class, 'markAsRead']);
 
     Route::get('/barcode/nasabah/{id}', [BarcodeController::class, 'barcodeNasabah']);
     Route::get('/nasabah', [UserController::class, 'index']);
@@ -104,6 +101,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Fitur Tarik Tunai
     Route::get('/tarik-tunai', [TarikTunaiController::class, 'index']);
+    Route::get('/tarik-tunai/riwayat-lengkap', [TarikTunaiController::class, 'index']);
     Route::post('/tarik-tunai', [UserController::class, 'tarikTunai']);
     // Route::post('/tarik-tunai', [UserContr::class, 'store']);
     Route::patch('/tarik-tunai/{id}/approve', [TarikTunaiController::class, 'approve']);

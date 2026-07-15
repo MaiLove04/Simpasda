@@ -12,7 +12,7 @@ class BarcodeController extends Controller
     public function barcodeNasabah($id)
     {
         // 1. Cari nasabah berdasarkan ID untuk mendapatkan kode nasabahnya
-        $nasabah = User::find($id);
+        $nasabah = User::findOrFail($id);
 
         if (!$nasabah || !$nasabah->kode_nasabah) {
             return response()->json([
@@ -28,8 +28,9 @@ class BarcodeController extends Controller
         );
 
         return response()->json([
-            'id' => $id, // ID tetap dikirim untuk referensi
-            'barcode' => $barcode,
+            'success' => true,
+            'id' => $id, 
+            'barcode' => $barcode, // 🔥 PERBAIKAN: DNS2DFacade::getBarcodePNG sudah mengembalikan string Base64
         ]);
     }
 }

@@ -3,26 +3,69 @@
 @section('content')
 <div class="container-fluid px-3 py-3">
     
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3 pb-3 border-bottom">
-        <div>
-            <h1 class="h3 mb-1" style="color: #0f172a; font-weight: bold;">Data Setor Sampah</h1>
-            <p class="text-muted mb-0" style="font-size: 13px;">Pantau log penyetoran multi-sampah secara real-time.</p>
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-4 mb-3 pb-3 border-bottom">
+
+    <!-- Judul -->
+    <div>
+        <h1 class="h3 mb-1 fw-bold" style="color:#0f172a;">
+            Data Setor Sampah
+        </h1>
+
+        <p class="text-muted mb-0" style="font-size:13px;">
+            Pantau log penyetoran multi-sampah secara real-time.
+        </p>
+    </div>
+
+    <!-- Bagian Kanan -->
+    <div class="d-flex align-items-start gap-3">
+
+        <!-- Card Statistik -->
+        <div class="d-flex gap-2">
+
+            <div class="bg-white border rounded-3 px-3 py-2 text-center shadow-sm" style="min-width:130px;">
+                <span class="text-muted d-block"
+                      style="font-size:11px;font-weight:600;text-transform:uppercase;">
+                    Total Transaksi
+                </span>
+
+                <span class="h5 mb-0 fw-bold" style="color:#0f172a;">
+                    {{ $dataSetor->total() }}
+                </span>
+            </div>
+
+            <div class="bg-white border rounded-3 px-3 py-2 text-center shadow-sm" style="min-width:180px;">
+                <span class="text-muted d-block"
+                      style="font-size:11px;font-weight:600;text-transform:uppercase;">
+                    Perputaran Uang
+                </span>
+
+                <span class="h5 mb-0 fw-bold" style="color:#1E521E;">
+                    Rp {{ number_format($dataSetor->sum('total'),0,',','.') }}
+                </span>
+            </div>
+
         </div>
-        
-        <div class="d-flex flex-wrap gap-2 align-items-center mt-2 mt-md-0">
-            <div class="bg-white border rounded-3 px-3 py-2 text-center shadow-sm" style="min-width: 130px;">
-                <span class="text-muted d-block" style="font-size: 11px; font-weight: 600; text-transform: uppercase;">Total Transaksi</span>
-                <span class="h5 mb-0" style="font-weight: bold; color: #0f172a;">{{ $dataSetor->total() }}</span>
-            </div>
-            <div class="bg-white border rounded-3 px-3 py-2 text-center shadow-sm" style="min-width: 180px;">
-                <span class="text-muted d-block" style="font-size: 11px; font-weight: 600; text-transform: uppercase;">Perputaran Uang</span>
-                <span class="h5 mb-0" style="font-weight: bold; color: #1E521E;">Rp {{ number_format($dataSetor->sum('total'), 0, ',', '.') }}</span>
-            </div>
-            <button class="btn btn-sm btn-light border ms-2" style="height: 38px; font-weight: 600;" onclick="window.location.reload();">
+
+        <!-- Tombol -->
+        <div class="d-flex flex-column align-items-center">
+
+            <a href="{{ route('admin.setor.manual') }}"
+               class="btn btn-success px-4 py-3 fw-bold">
+                <i class="bi bi-box-seam me-2"></i>
+                Loket Setor Manual
+            </a>
+
+            <button class="btn btn-sm btn-light border mt-2"
+                    style="height:38px;"
+                    onclick="window.location.reload();">
                 <i class="bi bi-arrow-clockwise text-success"></i>
             </button>
+
         </div>
+
     </div>
+
+</div>
 
     <div class="card shadow-sm border-0" style="border-radius: 12px; background: white;">
         
@@ -223,22 +266,44 @@
                 </tbody>
             </table>
         </div>
-
-        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-2 px-3 py-2 border-top bg-light" style="border-bottom-left-radius: 12px; border-bottom-right-radius: 12px;">
-            <div class="text-muted" style="font-size: 12px;">
-                Menampilkan {{ $dataSetor->firstItem() ?? 0 }}-{{ $dataSetor->lastItem() ?? 0 }} dari {{ $dataSetor->total() }} data
-            </div>
-            <div class="sm-pagination">
-                {{ $dataSetor->appends(request()->input())->links('pagination::bootstrap-5') }}
-            </div>
-        </div>
-
-    </div>
+               </tbody>
+    </table>
 </div>
 
+{{-- Pagination --}}
+<div class="d-flex justify-content-between align-items-center px-3 py-2 border-top bg-light"
+     style="border-bottom-left-radius:12px; border-bottom-right-radius:12px;">
+
+    <div class="text-muted" style="font-size:12px;">
+        Menampilkan
+        {{ $dataSetor->firstItem() ?? 0 }}
+        -
+        {{ $dataSetor->lastItem() ?? 0 }}
+        dari
+        {{ $dataSetor->total() }}
+        data setor sampah
+    </div>
+
+    <div class="sm-pagination">
+        {{ $dataSetor->appends(request()->query())->links('pagination::bootstrap-5') }}
+    </div>
+
+</div>
+
+</div> {{-- card --}}
+</div> {{-- container --}}
+
 <style>
-    .sm-pagination .pagination { margin-bottom: 0; gap: 2px; }
-    .sm-pagination .page-link { padding: 4px 10px; font-size: 12px; border-radius: 4px; }
-    .bg-success-subtle { background-color: #dcfce7 !important; }
+    .sm-pagination .pagination{
+        margin-bottom: 0;
+        gap: 2px;
+    }
+
+    .sm-pagination .page-link{
+        padding: 4px 10px;
+        font-size: 12px;
+        border-radius: 4px;
+    }
 </style>
+
 @endsection

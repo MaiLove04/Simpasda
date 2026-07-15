@@ -30,16 +30,64 @@
                         @csrf
 
                         <!-- Profil Singkat Nasabah -->
-                        <div class="p-3 mb-4 bg-light d-flex justify-content-between align-items-center" style="border-radius: 12px; border-left: 4px solid #16a34a;">
-                            <div>
-                                <span class="text-muted small d-block">Nama Nasabah</span>
-                                <strong class="text-dark fs-5">{{ $nasabah->name }}</strong>
-                                <span class="text-secondary small d-block">ID: {{ $nasabah->kode_nasabah ?? '-' }}</span>
+                        <div class="row">
+
+                            <div class="col-md-6 mb-3">
+                        
+                                <label class="form-label fw-bold">
+                        
+                                    Pilih Nasabah
+                        
+                                </label>
+                        
+                                <select class="form-select"
+                                        name="user_id"
+                                        required>
+                        
+                                    <option value="">-- Pilih Nasabah --</option>
+                        
+                                    @foreach($nasabah as $item)
+                        
+                                        <option value="{{ $item->id }}">
+                        
+                                            {{ $item->name }}
+                        
+                                        </option>
+                        
+                                    @endforeach
+                        
+                                </select>
+                        
                             </div>
-                            <div class="text-end">
-                                <span class="text-muted small d-block">Saldo Saat Ini</span>
-                                <strong class="text-success fs-5">Beta Rp {{ number_format($nasabah->saldo, 0, ',', '.') }}</strong>
+                        
+                            <div class="col-md-6 mb-3">
+                        
+                                <label class="form-label fw-bold">
+                        
+                                    Pilih Kurir
+                        
+                                </label>
+                        
+                                <select class="form-select"
+                                        name="kurir_id"
+                                        required>
+                        
+                                    <option value="">-- Pilih Kurir --</option>
+                        
+                                    @foreach($kurir as $item)
+                        
+                                        <option value="{{ $item->id }}">
+                        
+                                            {{ $item->name }}
+                        
+                                        </option>
+                        
+                                    @endforeach
+                        
+                                </select>
+                        
                             </div>
+                        
                         </div>
 
                         <!-- Pilih Jenis Sampah -->

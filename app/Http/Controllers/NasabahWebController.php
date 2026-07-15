@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Notifikasi;
 use App\Models\User;
 use App\Models\MutasiSaldo;
 use Illuminate\Support\Facades\Auth;
@@ -52,6 +53,14 @@ class NasabahWebController extends Controller
         $nasabah = User::findOrFail($id);
         $nasabah->update([
             'status' => 'aktif'
+        ]);
+
+        // Kirim notifikasi ke nasabah bahwa akunnya sudah aktif
+        Notifikasi::create([
+            'user_id' => $nasabah->id,
+            'judul' => 'Akun Anda Telah Aktif!',
+            'pesan' => 'Selamat! Akun Anda telah disetujui. Kini Anda dapat mulai menabung sampah dan menikmati layanan kami.',
+            'type' => 'akun'
         ]);
 
         return redirect('/admin/nasabah')->with('success', 'Akun nasabah berhasil disetujui dan diaktifkan!');

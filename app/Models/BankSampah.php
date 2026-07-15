@@ -11,4 +11,12 @@ class BankSampah extends Model
         'alamat',
         'status'
     ];
+
+    public function users()
+    {
+        return $this->hasMany(
+            User::class,
+            'bank_sampah_id'
+        );
+    }
 }

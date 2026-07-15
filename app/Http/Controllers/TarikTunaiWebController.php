@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Notifikasi;
 use App\Models\TarikTunai;
 use App\Models\MutasiSaldo;
 use App\Models\User;
@@ -76,6 +77,14 @@ class TarikTunaiWebController extends Controller
                 ]);
             }
 
+            // Kirim notifikasi ke nasabah
+            Notifikasi::create([
+                'user_id' => $nasabah->id,
+                'judul' => 'Penarikan Dana Disetujui',
+                'pesan' => 'Pengajuan penarikan dana Anda sebesar Rp ' . number_format($tarikTunai->jumlah_nominal, 0, ',', '.') . ' telah disetujui.',
+                'type' => 'transaksi'
+            ]);
+
             DB::commit();
             return back()->with('success', 'Request penarikan tunai berhasil disetujui, saldo nasabah telah dipotong.');
         } catch (\Exception $e) {
@@ -117,6 +126,14 @@ class TarikTunaiWebController extends Controller
                 ]);
             }
 
+            // Kirim notifikasi ke nasabah
+            Notifikasi::create([
+                'user_id' => $tarikTunai->user_id,
+                'judul' => 'Penarikan Dana Ditolak',
+                'pesan' => 'Mohon maaf, pengajuan penarikan dana Anda ditolak oleh admin.',
+                'type' => 'transaksi'
+            ]);
+
             DB::commit();
             return back()->with('success', 'Request penarikan tunai berhasil ditolak.');
         } catch (\Exception $e) {
@@ -138,8 +155,6 @@ class TarikTunaiWebController extends Controller
 
         $riwayat = TarikTunai::with('user')
             ->whereHas('user', function ($query) use ($bankSampahId) {
-                // Jika ingin mematikan filter bank sampah seperti halaman index, 
-                // kamu bisa mengomentari baris di bawah ini dengan (//)
                 $query->where('bank_sampah_id', $bankSampahId);
             })
             // 🔥 PERUBAHAN UTAMA: Izinkan status 'pending' ikut masuk ke dalam list riwayat

@@ -8,6 +8,7 @@ use App\Models\DetailSetorSampah;
 use App\Models\User;
 use App\Models\MutasiSaldo;
 use App\Models\JadwalPenjemputan;
+use App\Models\MasterJadwalRutin;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
@@ -560,5 +561,30 @@ class SetorSampahController extends Controller
         $mutasi->status          = 'success';
         $mutasi->keterangan      = 'Uang masuk dari penimbangan sampah lapangan';
         $mutasi->save();
+    }
+
+    public function index()
+    {
+        try {
+            $data = SetorSampah::with(['nasabah', 'kurir', 'details.jenisSampah'])->latest()->get();
+            return response()->json([
+                'success' => true,
+                'message' => 'Data setor sampah berhasil dimuat.',
+                'data' => $data
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function store(Request $request)
+    {
+        return response()->json([
+            'success' => false,
+            'message' => 'Gunakan endpoint /api/request-penjemputan atau fitur Setor Jadwal.'
+        ], 400);
     }
 }

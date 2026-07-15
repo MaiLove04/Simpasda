@@ -5,6 +5,7 @@
 @section('content')
 <div class="max-w-7xl mx-auto px-6 py-8">
     
+    {{-- Header Ringkasan --}}
     <div class="mb-8 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 border-b border-slate-200 pb-6">
         <div>
             <div class="flex items-center gap-2 text-xs font-bold text-emerald-700 uppercase tracking-wider bg-emerald-50 w-fit px-2.5 py-1 rounded-md mb-2">
@@ -30,6 +31,7 @@
         </div>
     </div>
 
+    {{-- Kartu Atas - Statistik Utama --}}
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-200">
             <div class="flex items-center justify-between mb-4">
@@ -63,15 +65,20 @@
             <h3 class="text-slate-600 font-medium text-sm">Aduan Menunggu Tindakan</h3>
             <div class="flex items-baseline gap-2 mt-1">
                 <span class="text-3xl font-extrabold text-rose-600 tracking-tight">{{ $aduanBaru }}</span>
-                <span class="text-xs font-bold text-rose-700 bg-rose-100/60 px-2 py-0.5 rounded animate-pulse">Butuh Respon</span>
+                <span class="text-xs font-bold text-rose-700 bg-rose-100/60 px-2 py-0.5 rounded {{ $aduanBaru > 0 ? 'animate-pulse' : '' }}">
+                    {{ $aduanBaru > 0 ? 'Butuh Respon' : 'Bersih' }}
+                </span>
             </div>
         </div>
     </div>
 
+    {{-- Main Layout Grid --}}
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
         
+        {{-- Kolom Kiri: Tabel Registrasi & Tiket Aduan --}}
         <div class="lg:col-span-2 space-y-8">
             
+            {{-- Tabel Validasi Bank Sampah Pending --}}
             <div class="bg-white border border-slate-200 shadow-sm rounded-2xl overflow-hidden">
                 <div class="px-6 py-5 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center sm:justify-between bg-slate-50/50 gap-3">
                     <div>
@@ -117,6 +124,7 @@
                 </div>
             </div>
 
+            {{-- Komponen Aduan Masuk Real-Time --}}
             <div class="bg-white border border-slate-200 shadow-sm rounded-2xl overflow-hidden">
                 <div class="px-6 py-5 border-b border-slate-200 flex items-center justify-between bg-slate-50/50">
                     <div>
@@ -127,53 +135,86 @@
                         Lihat Semua Tiket →
                     </a>
                 </div>
-                <div class="px-6 py-2 text-center text-xs text-slate-400 border-b border-slate-100 bg-slate-50/20 italic">
+                <div class="px-6 py-2 text-center text-[11px] text-slate-400 border-b border-slate-100 bg-slate-50/20 italic">
                     Gunakan Menu "Kelola Aduan" di navbar atas untuk memperbarui status tindakan aduan.
                 </div>
-                <div class="p-6 text-center text-slate-400 text-sm">
-                    <p class="italic text-xs">Modul ringkasan aduan terintegrasi siap dikoneksikan.</p>
+
+                <div class="divide-y divide-slate-100">
+                    @forelse($daftarAduanTerbaru as $aduan)
+                        <div class="p-5 flex justify-between items-start hover:bg-slate-50/50 transition-colors gap-4">
+                            <div class="space-y-1">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-[9px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-600 uppercase tracking-wide border border-slate-200">
+                                        {{ $aduan->kategori ?? 'Aduan Umum' }}
+                                    </span>
+                                    <span class="text-[10px] text-slate-400">
+                                        {{ $aduan->created_at ? $aduan->created_at->diffForHumans() : '' }}
+                                    </span>
+                                </div>
+                                <h4 class="text-sm font-semibold text-slate-900 mt-1">{{ $aduan->judul }}</h4>
+                                <p class="text-xs text-slate-500 line-clamp-2">{{ $aduan->deskripsi }}</p>
+                                <p class="text-[10px] text-slate-400 pt-1">Pelapor: <span class="font-medium text-slate-600">{{ $aduan->pelapor ?? 'Anonim' }}</span></p>
+                            </div>
+                            
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold {{ $aduan->status == 'menunggu' ? 'bg-amber-50 text-amber-700 border border-amber-100' : 'bg-blue-50 text-blue-700 border border-blue-100' }}">
+                                {{ strtoupper($aduan->status) }}
+                            </span>
+                        </div>
+                    @empty
+                        <div class="p-8 text-center text-slate-400 text-sm italic">
+                            👍 Bagus! Tidak ada tiket aduan aktif yang tertunda saat ini.
+                        </div>
+                    @endforelse
                 </div>
             </div>
 
         </div>
 
+        {{-- Kolom Kanan: Sidebar Komoditas --}}
         <div class="space-y-6">
             
+            {{-- Komoditas Wilayah Dinamis --}}
             <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
                 <h3 class="text-sm font-bold text-slate-900 mb-4 flex items-center gap-2">
-                    <span>📊</span> Komoditas Wilayah (Mekanis)
+                    <span>📊</span> Komoditas Wilayah (Database)
                 </h3>
                 <div class="space-y-4">
+                    {{-- Kategori Organik --}}
                     <div>
                         <div class="flex justify-between text-xs font-semibold text-slate-600 mb-1">
                             <span>Organik / Kompos</span>
-                            <span class="text-slate-400">45%</span>
+                            <span class="text-slate-400">{{ $persenOrganik }}%</span>
                         </div>
                         <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                            <div class="bg-emerald-600 h-full rounded-full" style="width: 45%"></div>
+                            <div class="bg-emerald-600 h-full rounded-full transition-all duration-500" style="width: {{ $persenOrganik }}%"></div>
                         </div>
                     </div>
+                    
+                    {{-- Kategori Anorganik --}}
                     <div>
                         <div class="flex justify-between text-xs font-semibold text-slate-600 mb-1">
                             <span>Anorganik (Plastik/Logam)</span>
-                            <span class="text-slate-400">35%</span>
+                            <span class="text-slate-400">{{ $persenAnorganik }}%</span>
                         </div>
                         <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                            <div class="bg-teal-600 h-full rounded-full" style="width: 35%"></div>
+                            <div class="bg-teal-600 h-full rounded-full transition-all duration-500" style="width: {{ $persenAnorganik }}%"></div>
                         </div>
                     </div>
+                    
+                    {{-- Kategori Kertas --}}
                     <div>
                         <div class="flex justify-between text-xs font-semibold text-slate-600 mb-1">
                             <span>Kertas & Karton</span>
-                            <span class="text-slate-400">20%</span>
+                            <span class="text-slate-400">{{ $persenKertas }}%</span>
                         </div>
                         <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                            <div class="bg-amber-500 h-full rounded-full" style="width: 20%"></div>
+                            <div class="bg-amber-500 h-full rounded-full transition-all duration-500" style="width: {{ $persenKertas }}%"></div>
                         </div>
                     </div>
                 </div>
             </div>
 
+            {{-- Versi Aplikasi --}}
             <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm text-[11px] text-slate-400 flex justify-between items-center bg-slate-50/50">
                 <span>Versi Aplikasi Simpasda</span>
                 <span class="font-mono text-slate-600 bg-slate-200/60 px-2 py-0.5 rounded">v2.1-Stable</span>

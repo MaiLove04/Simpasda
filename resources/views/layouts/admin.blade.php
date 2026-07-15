@@ -32,7 +32,7 @@
         .sidebar {
             width: 270px;
             height: 100vh;
-            max-height: 100vh;
+            max-height: 100vh; 
             background: var(--sidebar-bg);
             position: fixed;
             left: 0;
@@ -46,12 +46,12 @@
         .sidebar-header {
             padding: 28px 24px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-            flex-shrink: 0;
+            flex-shrink: 0; 
         }
 
         .sidebar-menu {
             padding: 20px 0;
-            overflow-y: auto;
+            overflow-y: auto; 
             flex-grow: 1;
         }
 
@@ -102,13 +102,13 @@
         }
 
         .sidebar a:hover, .sidebar .nav-link-btn:hover {
-            color: #ffffff;
+            color: #ffffff; 
             background: var(--sidebar-hover);
         }
 
         /* Menu Utama Aktif */
         .sidebar a.active-menu, .sidebar .nav-link-btn.active-parent {
-            color: #ffffff;
+            color: #ffffff; 
             background: var(--active-green);
             font-weight: 600;
             box-shadow: 0 4px 12px rgba(22, 163, 74, 0.25);
@@ -157,14 +157,34 @@
             margin-left: 270px;
             width: calc(100% - 270px);
             min-height: 100vh;
+            overflow-x: auto;
             display: flex;
             flex-direction: column;
         }
 
         .content {
-            padding: 40px 48px;
-            flex-grow: 1;
+            width: 100%;
+            padding: 35px;
+            box-sizing: border-box;
         }
+
+        .container-fluid{
+            max-width:100%;
+        }
+
+        .card{
+            overflow:hidden;
+        }
+
+        .table-responsive{
+            overflow-x:auto;
+        }
+
+        h1,h2,h3,h4,h5{
+            word-break:break-word;
+        }
+
+        
     </style>
 </head>
 <body>
@@ -173,7 +193,7 @@
 
     <!-- ================= SIDEBAR COMPONENT ================= -->
     <div class="sidebar">
-
+        
         <div class="sidebar-header">
             <h4 class="text-white mb-1 fw-bold d-flex align-items-center" style="letter-spacing: -0.5px;">
                 <i class="bi bi-recycle text-success me-2.5 fs-3"></i> SIMPASDA
@@ -187,24 +207,107 @@
                 <i class="bi bi-grid-1x2-fill"></i> Dashboard
             </a>
 
-            <div class="menu-divider">Menu Aplikasi</div>
+                <!-- 1. DROPDOWN: DATA MASTER -->
+                <button class="nav-link-btn {{ Request::is(
+                    'admin/nasabah*',
+                    'admin/kurir*',
+                    'admin/jenis-sampah*'
+                ) ? 'active-parent' : '' }}"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#dropMaster"
+                        aria-expanded="{{ Request::is(
+                            'admin/nasabah*',
+                            'admin/kurir*',
+                            'admin/jenis-sampah*'
+                        ) ? 'true' : 'false' }}">
 
-            <!-- 1. DROPDOWN: DATA MASTER -->
-            <button class="nav-link-btn {{ Request::is('admin/nasabah*', 'admin/kurir*', 'admin/jenis-sampah*') ? 'active-parent' : '' }}"
-                    type="button" data-bs-toggle="collapse" data-bs-target="#dropMaster" aria-expanded="{{ Request::is('admin/nasabah*', 'admin/kurir*', 'admin/jenis-sampah*') ? 'true' : 'false' }}">
-                <i class="bi bi-folder-fill"></i> Data Master
-                <i class="bi bi-chevron-right arrow-icon"></i>
-            </button>
-            <div class="collapse {{ Request::is('admin/nasabah*', 'admin/kurir*', 'admin/jenis-sampah*') ? 'show' : '' }}" id="dropMaster">
-                <div class="submenu-container">
-                    <a href="/admin/nasabah" class="{{ Request::is('admin/nasabah*') ? 'active-sub' : '' }}">Data Nasabah</a>
-                    <a href="/admin/kurir" class="{{ Request::is('admin/kurir*') ? 'active-sub' : '' }}">Data Kurir</a>
-                    <a href="/admin/jenis-sampah" class="{{ Request::is('admin/jenis-sampah*') ? 'active-sub' : '' }}">Jenis Sampah</a>
+                    <i class="bi bi-folder-fill"></i>
+
+                    Data Master
+
+                    <i class="bi bi-chevron-right arrow-icon"></i>
+
+                </button>
+
+                <div class="collapse {{ Request::is(
+                    'admin/nasabah*',
+                    'admin/kurir*',
+                    'admin/pengurus*',
+                    'admin/mitra*',
+                    'admin/pengiriman-mitra*',
+                    'admin/jenis-sampah*'
+                ) ? 'show' : '' }}"
+                id="dropMaster">
+
+                    <div class="submenu-container">
+
+                        <a href="{{ route('admin.nasabah.index') }}"
+                        class="{{ Request::is('admin/nasabah*') ? 'active-sub' : '' }}">
+
+                            Data Nasabah
+
+                        </a>
+
+                        <a href="{{ route('kurir-admin.index') }}"
+                        class="{{ Request::is('admin/kurir*') ? 'active-sub' : '' }}">
+
+                            Data Kurir
+
+                        </a>
+
+                        <a href="{{ route('jenis-sampah-admin.index') }}"
+                        class="{{ Request::is('admin/jenis-sampah*') ? 'active-sub' : '' }}">
+
+                            Jenis Sampah
+
+                        </a>
+
+                    </div>
+
                 </div>
+
+                <!-- 2. DROPDOWN: MITRA -->
+
+            <button class="nav-link-btn {{ Request::is('admin/Mitra*','admin/pengiriman-mitra*') ? 'active-parent' : '' }}"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#dropMitra"
+                    aria-expanded="{{ Request::is('admin/Mitra*','admin/pengiriman-mitra*') ? 'true':'false' }}">
+
+                <i class="bi bi-people-fill"></i>
+
+                Mitra
+
+                <i class="bi bi-chevron-right arrow-icon"></i>
+
+            </button>
+
+            <div class="collapse {{ Request::is('admin/Mitra*','admin/pengiriman-mitra*') ? 'show':'' }}"
+                id="dropMitra">
+
+                <div class="submenu-container">
+
+                    <a href="{{ route('Mitra.index') }}"
+                    class="{{ Request::is('admin/Mitra*') ? 'active-sub':'' }}">
+
+                        Data Mitra
+
+                    </a>
+
+                    <a href="{{ route('pengiriman-mitra.index') }}"
+                    class="{{ Request::is('admin/pengiriman-mitra*') ? 'active-sub':'' }}">
+
+                        Pengiriman Mitra
+
+                    </a>
+
+                </div>
+
             </div>
 
             <!-- 2. DROPDOWN: LOGISTIK -->
-            <button class="nav-link-btn {{ Request::is('admin/master-jadwal*', 'admin/jadwal*') ? 'active-parent' : '' }}"
+            <button class="nav-link-btn {{ Request::is('admin/master-jadwal*', 'admin/jadwal*') ? 'active-parent' : '' }}" 
                     type="button" data-bs-toggle="collapse" data-bs-target="#dropLogistik" aria-expanded="{{ Request::is('admin/master-jadwal*', 'admin/jadwal*') ? 'true' : 'false' }}">
                 <i class="bi bi-calendar-range-fill"></i> Logistik & Jadwal
                 <i class="bi bi-chevron-right arrow-icon"></i>
@@ -216,22 +319,53 @@
                 </div>
             </div>
 
-            <!-- 3. DROPDOWN: KEUANGAN -->
-            <button class="nav-link-btn {{ Request::is('admin/setor-sampah*', 'admin/tarik-tunai*', 'admin/riwayat-penarikan*') ? 'active-parent' : '' }}"
+            <!-- 3. DROPDOWN: Transaksi -->
+            <button class="nav-link-btn {{ Request::is('admin/setor-sampah*', 'admin/tarik-tunai*', 'admin/riwayat-penarikan*') ? 'active-parent' : '' }}" 
                     type="button" data-bs-toggle="collapse" data-bs-target="#dropKeuangan" aria-expanded="{{ Request::is('admin/setor-sampah*', 'admin/tarik-tunai*', 'admin/riwayat-penarikan*') ? 'true' : 'false' }}">
-                <i class="bi bi-cash-stack"></i> Transaksi Keuangan
+                <i class="bi bi-cash-stack"></i> Transaksi 
                 <i class="bi bi-chevron-right arrow-icon"></i>
             </button>
             <div class="collapse {{ Request::is('admin/setor-sampah*', 'admin/tarik-tunai*', 'admin/riwayat-penarikan*') ? 'show' : '' }}" id="dropKeuangan">
                 <div class="submenu-container">
                     <a href="/admin/setor-sampah" class="{{ Request::is('admin/setor-sampah*') ? 'active-sub' : '' }}">Setor Sampah</a>
-                    <a href="{{ route('admin.tarik-tunai.index') }}" class="{{ Request::is('admin/tarik-tunai*') ? 'active-sub' : '' }}">Request Tarik Tunai</a>
+                    <a href="{{ route('admin.tarik-tunai.index') }}" class="{{ Request::is('admin/tarik-tunai*') ? 'active-sub' : '' }}">Tarik Tunai Manual</a>
                     <a href="{{ route('admin.tarik-tunai.riwayat') }}" class="{{ Request::is('admin/riwayat-penarikan*') ? 'active-sub' : '' }}">Riwayat Penarikan</a>
                 </div>
             </div>
 
-        </div>
-    </div>
+
+            <!-- 4. DROPDOWN: OPERASIONAL -->
+            <button class="nav-link-btn {{ Request::is('admin/Operasional*','admin/Gaji*') ? 'active-parent' : '' }}"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#dropOperasional"
+                    aria-expanded="{{ Request::is('admin/Operasional*','admin/Gaji*') ? 'true' : 'false' }}"
+                    aria-controls="dropOperasional">
+
+                <i class="bi bi-building-gear"></i>
+
+                Keuangan
+
+                <i class="bi bi-chevron-right arrow-icon"></i>
+
+            </button>
+
+            <div class="collapse {{ Request::is('admin/Operasional*','admin/Gaji*') ? 'show' : '' }}"
+                id="dropOperasional">
+
+                <div class="submenu-container">
+
+                    <a href="{{ route('Operasional.index') }}"
+                    class="{{ Request::is('admin/Operasional*') ? 'active-sub' : '' }}">
+                        Data Operasional
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div> 
+    </div> 
 
     <!-- ================= MAIN WRAPPER CONTENT ================= -->
     <div class="main-wrapper">

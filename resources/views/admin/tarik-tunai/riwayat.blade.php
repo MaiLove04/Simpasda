@@ -104,13 +104,6 @@
                 </table>
             </div>
         </div>
-        
-        <div class="card-footer bg-white border-0 py-3 px-4 d-flex justify-content-between align-items-center" style="border-radius: 0 0 12px 12px;">
-            <span class="text-muted small">Menampilkan data halaman ini</span>
-            <div>
-                {{ $riwayat->appends(request()->query())->links() }}
-            </div>
-        </div>
     </div>
 </div>
 @endsection

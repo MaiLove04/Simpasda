@@ -16,15 +16,13 @@ class JadwalWebController extends Controller
 
     public function index()
     {
-        // Mengambil jadwal yang hanya dimiliki oleh bank sampah milik admin yang login
         $jadwals = JadwalPenjemputan::with(['nasabah', 'kurir'])
-            ->where('bank_sampah_id', Auth::user()->bank_sampah_id)
             ->latest()
-            ->get();
-
+            ->paginate(10)
+            ->withQueryString();
+    
         return view('admin.jadwal.index', compact('jadwals'));
     }
-
     public function create()
     {
         // Mengambil nasabah & kurir yang satu bank sampah dengan admin

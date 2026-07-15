@@ -15,7 +15,11 @@ class MasterJadwalRutinController extends Controller
      */
     public function index()
     {
-        $masterJadwals = MasterJadwalRutin::with(['nasabah', 'kurir'])->latest()->get();
+        $masterJadwals = MasterJadwalRutin::with(['nasabah', 'kurir'])
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
+    
         return view('admin.master-jadwal.index', compact('masterJadwals'));
     }
 

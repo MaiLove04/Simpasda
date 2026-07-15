@@ -72,6 +72,47 @@ class UserController extends Controller
         }
     }
 
+    /**
+     * Menghasilkan QR Code untuk nasabah yang sedang login.
+     * Endpoint ini dipanggil dari mobile app di rute /barcode/nasabah.
+     */
+    public function getQrCode(Request $request)
+    {
+        try {
+            $user = $request->user();
+
+            if (!$user || $user->role !== 'nasabah' || !$user->kode_nasabah) {
+                return response()->json(['success' => false, 'message' => 'Data nasabah tidak valid untuk membuat QR Code.'], 404);
+            }
+
+            // Inisialisasi renderer untuk format PNG dengan ukuran 400px
+            $renderer = new ImageRenderer(
+                new RendererStyle(400),
+                new Png()
+            );
+
+            // Inisialisasi writer dengan renderer yang sudah dibuat
+            $writer = new Writer($renderer);
+
+            // Generate data gambar QR code dari kode nasabah
+            $qrCodeImage = $writer->writeString($user->kode_nasabah);
+
+            // Encode gambar ke base64 untuk dikirim via JSON
+            $base64QrCode = base64_encode($qrCodeImage);
+
+            return response()->json([
+                'success' => true,
+                'barcode' => $base64QrCode
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal membuat QR Code: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
     public function scanQr($kode)
     {
         $nasabah = User::where('kode_nasabah', $kode)
@@ -150,11 +191,13 @@ class UserController extends Controller
                     'name' => $nasabah->name,
                     'email' => $nasabah->email,
                     'alamat' => $nasabah->alamat,
+                    'kode_nasabah' => $nasabah->kode_nasabah, // ➕ TAMBAHAN: Kirim kode nasabah untuk QR Code
                     'saldo_aktif' => (int) ($nasabah->saldo ?? 0),
                     'saldo_pending' => (int) $saldoPending,
                     'saldo' => (int) ($nasabah->saldo ?? 0),
                     'total_berat_kg' => round((double)$totalBeratSampah, 1),
                     'has_pin' => !empty($nasabah->pin_hash),
+                    'foto' => $nasabah->foto ? url($nasabah->foto) : null, // 🎨 PERBAIKAN: Kirim URL lengkap untuk foto
                 ],
                 'riwayat_mutasi' => $mutasi
             ], 200);
@@ -317,6 +360,27 @@ class UserController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json(['success' => false, 'message' => $e->getMessage()], 403);
+        }
+    }
+
+    /**
+     * 🔒 Endpoint untuk proses logout yang aman dari aplikasi mobile.
+     * Mencabut (revoke) token yang sedang digunakan.
+     */
+    public function logout(Request $request)
+    {
+        try {
+            // Menghapus token yang digunakan untuk request ini
+            $request->user()->currentAccessToken()->delete();
+
+            return response()->json([
+                'success' => true, 
+                'message' => 'Logout berhasil.'
+            ]);
+
+        } catch (\Exception $e) {
+            // Jika terjadi error (misalnya user tidak terotentikasi), kirim response error
+            return response()->json(['success' => false, 'message' => 'Gagal melakukan logout di server.'], 500);
         }
     }
 }

@@ -15,6 +15,16 @@ class SetorSampah extends Model
 
     protected $keyType = 'string';
 
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            if (empty($model->id)) {
+                $model->id = (string) Str::uuid();
+            }
+        });
+    }
     protected $table = 'setor_sampahs';
 
     // Mass assignment guard (mengizinkan pengisian data masal dari controller)

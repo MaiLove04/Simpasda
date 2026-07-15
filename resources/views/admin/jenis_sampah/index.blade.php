@@ -39,8 +39,92 @@
 
     @endif
 
+
+    {{-- STATUS --}}
+    <form method="GET" class="row mb-3">
+
+        <div class="col-md-3">
+
+            <select
+                name="status"
+                class="form-select"
+                onchange="this.form.submit()"
+            >
+
+                <option value="semua"
+                    {{ request('status') == 'semua' ? 'selected' : '' }}>
+                    Semua Status
+                </option>
+
+                <option value="aktif"
+                    {{ request('status') == 'aktif' ? 'selected' : '' }}>
+                    Aktif
+                </option>
+
+                <option value="nonaktif"
+                    {{ request('status') == 'nonaktif' ? 'selected' : '' }}>
+                    Nonaktif
+                </option>
+
+            </select>
+
+        </div>
+
+    </form>
    
     <div class="table-responsive">
+
+        <div class="row mb-4">
+
+            <div class="col-md-4">
+
+                <div class="card border-success">
+
+                    <div class="card-body text-center">
+
+                        <h5>{{ $total }}</h5>
+
+                        <small>Total Jenis Sampah</small>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="col-md-4">
+
+                <div class="card border-primary">
+
+                    <div class="card-body text-center">
+
+                        <h5>{{ $aktif }}</h5>
+
+                        <small>Aktif</small>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="col-md-4">
+
+                <div class="card border-secondary">
+
+                    <div class="card-body text-center">
+
+                        <h5>{{ $nonaktif }}</h5>
+
+                        <small>Nonaktif</small>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
 
         <table class="table table-hover align-middle text-center">
 
@@ -108,19 +192,15 @@
 
                             @if($item->status == 'aktif')
 
-                                <span class="badge bg-success">
-
-                                    Aktif
-
-                                </span>
+                            <span class="badge rounded-pill bg-success px-3">
+                                🟢 Aktif
+                            </span>
 
                             @else
 
-                                <span class="badge bg-danger">
-
-                                    Nonaktif
-
-                                </span>
+                            <span class="badge rounded-pill bg-secondary px-3">
+                                🔴 Nonaktif
+                            </span>
 
                             @endif
 
@@ -130,28 +210,44 @@
 
                             <div class="d-flex justify-content-center gap-2">
 
-                                <a
-                                    href="/admin/jenis-sampah/{{ $item->id }}/edit"
-                                    class="btn btn-warning btn-sm"
-                                >
-                                    Edit
-                                </a>
+                                @if($item->status == 'aktif')
+
+                                    <a
+                                        href="/admin/jenis-sampah/{{ $item->id }}/edit"
+                                        class="btn btn-warning btn-sm"
+                                    >
+                                        ✏️ Edit
+                                    </a>
+
+                                @endif
 
                                 <form
-                                    action="/admin/jenis-sampah/{{ $item->id }}"
+                                    action="{{ route('jenis-sampah.toggle-status', $item->id) }}"
                                     method="POST"
                                 >
 
                                     @csrf
-                                    @method('DELETE')
+                                    @method('PUT')
 
-                                    <button
-                                        type="submit"
-                                        class="btn btn-danger btn-sm"
-                                        onclick="return confirm('Yakin ingin menghapus data ini?')"
-                                    >
-                                        Hapus
-                                    </button>
+                                    @if($item->status == 'aktif')
+
+                                        <button
+                                            class="btn btn-outline-danger btn-sm"
+                                            onclick="return confirm('Nonaktifkan jenis sampah ini?')"
+                                        >
+                                            🚫 Nonaktifkan
+                                        </button>
+
+                                    @else
+
+                                        <button
+                                            class="btn btn-outline-success btn-sm"
+                                            onclick="return confirm('Aktifkan kembali jenis sampah ini?')"
+                                        >
+                                            ✅ Aktifkan
+                                        </button>
+
+                                    @endif
 
                                 </form>
 

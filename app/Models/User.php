@@ -5,13 +5,14 @@ namespace App\Models;
 // use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Models\JadwalPenjemputan;
 
 
 class User extends Authenticatable
 {
-    use HasApiTokens;
+    use HasApiTokens, Notifiable;
 
     protected $fillable = [
         'name',
@@ -24,9 +25,7 @@ class User extends Authenticatable
         'status',
         'bank_sampah_id',
         'kode_nasabah',
-        'pin_hash',
-        'pin_attempts',
-        'pin_locked_until',
+        'mitra_id'
     ];
 
     protected $hidden = [
@@ -62,5 +61,15 @@ class User extends Authenticatable
             JadwalPenjemputan::class,
             'kurir_id'
         );
+    }
+
+    public function tarikTunais()
+    {
+        return $this->hasMany(TarikTunai::class);
+    }
+    
+    public function mitra()
+    {
+        return $this->hasOne(Mitra::class, 'user_id');
     }
 }

@@ -17,16 +17,18 @@ class KurirController extends Controller
     public function index()
     {
         $kurirs = User::where('role', 'kurir')->get();
-
-        return response()->json([
-            'status' => 'success',
-            'data' => $kurirs
-        ], 200);
+        return response()->json(['status' => 'success', 'data' => $kurirs], 200);
     }
 
-    /**
-     * API: TAMBAH KURIR BARU
-     */
+    public function show($id)
+    {
+        $kurir = User::where('role', 'kurir')->find($id);
+        if (!$kurir) {
+            return response()->json(['status' => 'error', 'message' => 'Kurir tidak ditemukan'], 404);
+        }
+        return response()->json(['status' => 'success', 'data' => $kurir], 200);
+    }
+
     public function store(Request $request)
     {
         $request->validate([

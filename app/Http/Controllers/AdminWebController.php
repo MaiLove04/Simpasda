@@ -5,24 +5,27 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
-use App\Models\JadwalPenjemputan;
-use App\Models\SetorSampah;
-use App\Models\TarikTunai;
+use App\Models\JadwalPenjemputan; 
+use App\Models\SetorSampah;       
 use Carbon\Carbon;
+use App\Models\BankSampah;
+use App\Models\PengirimanMitra;
+use Illuminate\Support\Facades\DB;
 
 class AdminWebController extends Controller
 {
     public function showLogin()
     {
         if (Auth::check()) {
-            $role = Auth::user()->role;
-            if ($role === 'admin_dlh') {
+
+            if (Auth::user()->role == 'admin_dlh') {
                 return redirect()->route('dlh.dashboard');
-            } elseif ($role === 'admin_bank' || $role === 'admin_bank_sampah') {
-                return redirect('/admin/dashboard');
             }
 
-            // Kick user yang mencoba akses via URL login namun dia bukan admin
+            if (Auth::user()->role == 'admin_bank') {
+                return redirect()->route('admin.dashboard');
+            }
+
             Auth::logout();
         }
 
@@ -42,22 +45,30 @@ class AdminWebController extends Controller
         ];
 
         if (Auth::attempt($credentials)) {
-            $user = Auth::user();
 
-            // Cek role untuk memisahkan pintu masuk admin_dlh dan admin_bank
-            if ($user->role === 'admin_dlh') {
-                $request->session()->regenerate();
-                return redirect()->route('dlh.dashboard');
-            } elseif ($user->role === 'admin_bank' || $user->role === 'admin_bank_sampah') {
-                $request->session()->regenerate();
-                return redirect('/admin/dashboard');
-            } else {
-                Auth::logout();
-                return back()->with('error', 'Akun ini khusus untuk pengguna aplikasi mobile. Silakan gunakan aplikasi mobile untuk login.');
-            }
+        $request->session()->regenerate();
+
+        $user = Auth::user();
+
+        if ($user->role == 'admin_dlh') {
+            return redirect()->route('dlh.dashboard');
         }
 
-        return back()->with('error', 'Email atau password salah');
+        if ($user->role == 'admin_bank') {
+            return redirect()->route('admin.dashboard');
+        }
+
+
+        Auth::logout();
+
+        return back()->with(
+            'error',
+            'Akun ini khusus untuk pengguna aplikasi mobile.'
+        );
+    }
+
+    return back()->with('error', 'Email atau password salah');
+
     }
 
     // ========================================================
@@ -78,26 +89,83 @@ class AdminWebController extends Controller
         // 3. Hitung jumlah antrean rute penjemputan harian yang belum selesai (terjadwal atau proses)
         // Jika nama model harianmu adalah 'Jadwal', gantry bagian ini menjadi Jadwal::...
         $jadwalPending = JadwalPenjemputan::whereDate('tanggal_penjemputan', Carbon::today())
-            ->where('bank_sampah_id', $adminBankId)            ->whereIn('status', ['terjadwal', 'proses'])
+            ->where('bank_sampah_id', $adminBankId)
+            ->whereIn('status', ['terjadwal', 'proses'])
             ->count();
 
-        // 4. [FIXED] Hitung akumulasi berat (Kg) dari tabel detail yang benar
-        $beratHariIni = \App\Models\DetailSetorSampah::whereHas('setorSampah', function ($query) use ($adminBankId) {
-            $query->whereDate('created_at', Carbon::today())
-                  ->whereHas('nasabah', function ($subQuery) use ($adminBankId) {
-                      $subQuery->where('bank_sampah_id', $adminBankId);
-                  });
-        })->sum('berat');
-
-
-        // 5. Hitung jumlah request tarik tunai yang sedang pending
-        $tarikPending = TarikTunai::whereHas('user', function ($query) use ($adminBankId) {
+        // 4. Hitung akumulasi berat (Kg) sampah yang berhasil disetor khusus HARI INI
+        $beratHariIni = SetorSampah::whereHas('nasabah', function ($query) use ($adminBankId) {
                 $query->where('bank_sampah_id', $adminBankId);
-            })->where('status', 'pending')
-            ->count();
+            })->whereDate('created_at', Carbon::today())->sum('berat');
+
+
+        //Total Sampah
+        $totalSampah = SetorSampah::where('status', 'selesai')->sum('berat');
+
+        // Total Partner
+        $totalPartner = User::where('role', 'mitra')->count();
+
+        $tahunIni = 2026;
+        // Jadwal Hari Ini
+        $jadwalHariIni = JadwalPenjemputan::whereDate(
+            'tanggal_penjemputan',
+            Carbon::today()
+        )->where('bank_sampah_id', $adminBankId)
+        ->count();
+
+        // Pengiriman Menunggu
+        $pengirimanMenunggu = PengirimanMitra::where(
+            'status_pengiriman',
+            'Menunggu Mitra'
+        )->count();
+
+        // Pembayaran Menunggu Verifikasi
+        $verifikasiPembayaran = PengirimanMitra::where(
+            'status_pembayaran',
+            'Menunggu Verifikasi'
+        )->count();
+
+        // Pembayaran Lunas
+        $pembayaranLunas = PengirimanMitra::where(
+            'status_pembayaran',
+            'Lunas'
+        )->count();
+
+        $setoranPerBulan = SetorSampah::select(
+            DB::raw('MONTH(created_at) as bulan'),
+            DB::raw('SUM(berat) as total_berat')
+        )
+        ->where('status', 'selesai')
+        ->whereYear('created_at', $tahunIni)
+        ->groupBy(DB::raw('MONTH(created_at)'))
+        ->pluck('total_berat', 'bulan') // Hasilnya: [5 => 9.8] (Bulan Mei saja yang terisi dari gambar)
+        ->toArray();
+
+        $namaBulan = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+        $bulanData = [];
+        $jumlahSetoranData = [];
+
+        for ($i = 1; $i <= 12; $i++) {
+            $bulanData[] = $namaBulan[$i - 1];
+            // Jika bulan tersebut tidak ada datanya di DB, set otomatis ke 0
+            $jumlahSetoranData[] = isset($setoranPerBulan[$i]) ? (float)$setoranPerBulan[$i] : 0;
+        }
 
         // Balikkan ke view dashboard dengan membawa data ringkasan di atas
-        return view('admin.dashboard', compact('totalNasabah', 'totalKurir', 'jadwalPending', 'beratHariIni', 'tarikPending'));
+        return view('admin.dashboard', compact(
+            'totalNasabah',
+            'totalKurir',
+            'jadwalPending',
+            'beratHariIni',
+            'totalSampah',
+            'totalPartner',
+            'jadwalHariIni',
+            'pengirimanMenunggu',
+            'verifikasiPembayaran',
+            'pembayaranLunas',
+            'bulanData',        
+            'jumlahSetoranData'
+        ));
     }
 
         public function logout(Request $request)
@@ -108,6 +176,6 @@ class AdminWebController extends Controller
         $request->session()->regenerateToken();
 
         // UBAH BAGIAN INI: gunakan route() bukan URL string
-        return redirect()->route('login');
+        return redirect()->route('login'); 
     }
 }

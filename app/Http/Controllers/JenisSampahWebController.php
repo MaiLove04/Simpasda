@@ -8,16 +8,34 @@ use Illuminate\Http\Request;
 class JenisSampahWebController extends Controller
 {
     // ================= INDEX =================
-    public function index()
+    public function index(Request $request)
     {
-        $jenisSampahs = JenisSampah::all();
+        $query = JenisSampah::query();
+
+        if ($request->status && $request->status != 'semua') {
+            $query->where('status', $request->status);
+        }
+
+        $jenisSampahs = $query->orderBy('nama')->get();
+        $total = JenisSampah::count();
+        $aktif = JenisSampah::where('status','aktif')->count();
+        $nonaktif = JenisSampah::where('status','nonaktif')->count();
+
+        return view(
+            'admin.jenis_sampah.index',
+            compact(
+                'jenisSampahs',
+                'total',
+                'aktif',
+                'nonaktif'
+            )
+        );
 
         return view(
             'admin.jenis_sampah.index',
             compact('jenisSampahs')
         );
     }
-
     // ================= CREATE =================
     public function create()
     {
@@ -95,14 +113,29 @@ class JenisSampahWebController extends Controller
             ->with('success', 'Jenis sampah berhasil diupdate');
     }
 
-    // ================= DELETE =================
     public function destroy($id)
     {
         $item = JenisSampah::findOrFail($id);
 
-        $item->delete();
+        $item->update([
+            'status' => 'nonaktif'
+        ]);
 
         return redirect('/admin/jenis-sampah')
-            ->with('success', 'Jenis sampah berhasil dihapus');
+            ->with('success', 'Jenis sampah berhasil dinonaktifkan');
+    }
+
+    public function toggleStatus($id)
+    {
+        $item = JenisSampah::findOrFail($id);
+
+        $item->status = $item->status == 'aktif'
+            ? 'nonaktif'
+            : 'aktif';
+
+        $item->save();
+
+        return redirect('/admin/jenis-sampah')
+            ->with('success', 'Status jenis sampah berhasil diperbarui.');
     }
 }

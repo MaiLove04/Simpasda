@@ -64,7 +64,7 @@ class SetupProject extends Command
             [
                 'name' => 'Admin Bank Sampah',
                 'password' => Hash::make('password123'),
-                'role' => 'admin_bank_sampah',
+                'role' => 'admin_bank',
                 'status' => 'aktif',
                 'alamat' => 'Kantor Bank Sampah',
                 'no_hp' => '081122334455',
