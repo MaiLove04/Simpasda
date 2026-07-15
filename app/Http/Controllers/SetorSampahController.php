@@ -84,7 +84,6 @@ class SetorSampahController extends Controller
             $this->catatMutasi($request->user_id, $setor->id, $request->grand_total);
 
             // 🔍 AMBIL DATA JADWAL HARIAN UNTUK ESTIMASI TANGGAL KELUARAN
-            // 🔍 AMBIL DATA JADWAL HARIAN UNTUK ESTIMASI TANGGAL KELUARAN
             $jadwalHarian = JadwalPenjemputan::where('id', $cleanId)->first();
             if ($jadwalHarian) {
                 $jadwalHarian->update(['status' => 'selesai']);
@@ -116,6 +115,7 @@ class SetorSampahController extends Controller
             foreach ($sampahList as $item) {
                 $totalBerat += $item['berat'] ?? 0;
             }
+            $nasabah = User::find($request->user_id);
             DB::table('notifikasis')->insert([
                 'user_id' => $request->user_id,
                 'judul' => 'Sampah Selesai Ditimbang',
