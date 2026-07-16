@@ -18,6 +18,7 @@ class AuthController extends Controller
     {
         $request->validate([
             'name'           => 'required|string|max:255',
+            'email'          => 'required|email|unique:users,email',
             'password'       => 'required|min:6|confirmed',
             'alamat'         => 'required|string',
             'no_hp'          => 'required|string|unique:users,no_hp',
@@ -42,7 +43,7 @@ class AuthController extends Controller
 
             $user = User::create([
                 'name'           => $request->name,
-                'email'          => $request->no_hp . '@asri.com', // Dummy email untuk validasi DB
+                'email'          => $request->email,
                 'password'       => bcrypt($request->password),
                 'alamat'         => $request->alamat,
                 'no_hp'          => $request->no_hp,
