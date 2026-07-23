@@ -30,7 +30,7 @@ class BarcodeController extends Controller
         return response()->json([
             'success' => true,
             'id' => $id, 
-            'barcode' => $barcode, // 🔥 PERBAIKAN: DNS2DFacade::getBarcodePNG sudah mengembalikan string Base64
+            'barcode' => $barcode, 
         ]);
     }
 }
